@@ -1,0 +1,37 @@
+the methodDetail function, or (4) xcNetworkDetail parameter in the 
+xcNetworkDetail function in d4d/exporters.php. 
+or HTML via the (1) customername parameter to central/orders/searchcriteria.action; 
+customername parameter to central/orders/searchcriteria.action; (2) productname, (3) availability, or 
+to central/orders/searchcriteria.action; (2) productname, (3) availability, or (4) status 
+productname, (3) availability, or (4) status parameter to central/catalog/productlist.action; 
+or unspecified vectors in (5) WebContent/orders/orderlist.jsp. 
+users for requests that (1) modify customer settings or 
+for requests that change (2) customer passwords, (3) shop 
+change (2) customer passwords, (3) shop configuration, or (4) 
+(3) shop configuration, or (4) product details, as demonstrated 
+details, as demonstrated by (5) modify a product's price 
+request to central/catalog/saveproduct.action or (6) creating a product review 
+data-structure differences between an l2tp socket and an inet 
+a request for a (1) blame, (2) file, or 
+for a (1) blame, (2) file, or (3) stats 
+blame, (2) file, or (3) stats page, as demonstrated 
+a crafted event in (1) zabbix.rb or (2) nagios_nsca.rb 
+in (1) zabbix.rb or (2) nagios_nsca.rb in outputs/.
+a different vulnerability than CVE-2014-4269. 
+a direct request for basic/tc2wanfun.js.
+parameter, aka Bug IDs CSCuh61711, CSCuh61720, CSCuh61720, CSCuh61723, CSCuh61726, CSCuh61727, CSCuh61731, and CSCuh61733. 
+that allocate memory beyond 0x80000000, does not properly detect 
+when used on certain 32-bit platforms that allocate memory 
+demonstrated by an a3 01 5b ff byte sequence. 
+as demonstrated by number 1000.
+users to create a mode-666 root-owned file, and consequently 
+by VUPEN during a Pwn2Own competition at CanSecWest 2014.
+the June and July 2013 CPU.
+information associated with the 500 HTTP status code. 
+The gnutls_x509_dn_oid_name function in lib/x509/common.c 
+by sending a crafted DNP3 packet over TCP. 
+A public posting on 20130831 referenced this ID for 
+unknown vectors related to 2D. NOTE: the previous information 
+additional text in a 403 (aka Forbidden) response, or 
+with any vulnerability during 2012. Notes: none. 
+SSL-encrypted sessions via PKCS #1. 
