@@ -40,6 +40,7 @@ public class AnalyseCves {
 		if(Testmode) analyseDir = DumpDir;			// checks if test mode is active and sets the current directory 
 		else analyseDir = CveFolder;
 		
+		System.out.println("\nSelected Folder: "+System.getProperty("user.dir")+"\\"+analyseDir+"\n");
 		ana.walk(analyseDir);						// analyzes the structure of the current folder and adds all XML files to the file list
 		System.out.println("\n"+filelist.size()+" analyzable XML files found in "+analyseDir+"\n"); 	// message of XML file number
 		ana.stopfor();								// time of result presentation; default by konfig
@@ -158,11 +159,7 @@ public class AnalyseCves {
 	
 	private void stopfor(){
 		int milliseconds = MessageTime;
-		try {
-		    Thread.sleep(milliseconds);
-		} catch(InterruptedException ex) {
-		    Thread.currentThread().interrupt();
-		}
+		stopfor(milliseconds);
 	}
 
 }

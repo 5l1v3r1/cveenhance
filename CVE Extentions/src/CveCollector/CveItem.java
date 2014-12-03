@@ -7,6 +7,13 @@ package CveCollector;
  * @version 0.1
  */
 
+import java.awt.Cursor;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.lang.Character.Subset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,7 +29,22 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants; 
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 import org.apache.commons.lang3.StringEscapeUtils;
+
+import sun.io.Converters;
 
 
 public class CveItem {
@@ -30,11 +52,34 @@ public class CveItem {
 		XmlCode=XmlInput;
 		successfulData=0;
 		unsuccessfulData=0;
-		//initialise();
-		description = tagSubstr("vuln:summary").firstElement()[1];
+		try {
+			InputSource source = new InputSource(new StringReader(XmlCode));
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			DocumentBuilder db = dbf.newDocumentBuilder();
+			Document XmlDocument = db.parse(source);
+			XPathFactory xpathFactory = XPathFactory.newInstance();
+			xpath = xpathFactory.newXPath();
+			String summary = xpath.evaluate("//entry/summary/text()", XmlDocument);
+
+			// System.out.println(summary);	 // prints the freetext description of a CVE item
+			description=summary;
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		//tagSubstr("vuln:summary").firstElement()[1];
+		initialise();
+		
 	}
 	
+	
 	protected final String XmlCode; 		// plain content of a CVE file
+	
+	protected Document XmlDocument;
+	
+	protected XPath xpath;
 	
 	protected Vector<Snippet> tokenList;	// token list extracted of the CVE file content 
 	
@@ -44,12 +89,45 @@ public class CveItem {
 	
 	protected String description;			// content part of CVE file, which describes the CVE issue (floating text)
 	
+	protected XPath xPath;
+	
 	/**
 	 * initializes a CVE item instance (currently not in use)
 	 */
 	protected void initialise() {			
-		Vector<Snippet> description = getTokens();
+		Vector<Snippet> description = getTokens(); // gets all tokens of the summary tag in the current CVE issue
 		tokenList=description;
+		Iterator<Snippet> tokenIterator=tokenList.iterator();
+		while(tokenIterator.hasNext()) tokenIterator.next().melt();
+		rebuildTokenVector();
+	}
+	
+	protected String xpathRequest(String command){
+		try {
+			return xpath.evaluate(command, XmlDocument);
+		} 
+		catch (XPathExpressionException e) 
+		{
+			e.printStackTrace();
+		}
+		return "";
+	}
+	
+	protected String xpathFromString(String source, String command){
+		try {
+		InputSource inputSource = new InputSource(new StringReader(source));
+		DocumentBuilderFactory docbuildfac = DocumentBuilderFactory.newInstance();
+		DocumentBuilder docbuild;
+		docbuild = docbuildfac.newDocumentBuilder();
+		Document XmlDoc = docbuild.parse(inputSource);
+		XPathFactory xpathFactory = XPathFactory.newInstance();
+		XPath xpa = xpathFactory.newXPath();
+		return xpa.evaluate(command, XmlDoc);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return "";
 	}
 	
 	/**
@@ -64,46 +142,52 @@ public class CveItem {
 	 * @return Tokenlist of XmlCode
 	 */
 	public Vector<Snippet> getTokens(){
-		int charCount = 0;
-		String curToken="";
-		StringTokenizer st = new StringTokenizer(XmlCode);
-		Vector<Snippet> tokens = new Vector<Snippet>();
+		StringTokenizer st = new StringTokenizer(description);
+		Vector<Snippet> tokens = new Vector<Snippet>();	
+		Snippet lastSnip=null;
+		Snippet curSnip=null;
+		
 	    while (st.hasMoreTokens()) {
-	        Snippet snipToken = new Snippet(curToken, charCount);
-	        tokens.add(snipToken);
-	        charCount++;
+	    	lastSnip=curSnip;
+	    	curSnip=new Snippet(st.nextToken());
+	    	if(lastSnip!=null){
+	    		lastSnip.next=curSnip;
+	    		curSnip.prev=lastSnip;
+	    	}
+	        tokens.add(curSnip);
+	        curSnip.init();
 	    }
 	    
 	    return tokens;
 	}
-	
-	/**
-	 * returns the next tokens (currently not in use)
-	 */
-	Snippet getNextToken(int position){
-		return tokenList.get(position++);	
-	}
-	
-	/**
-	 * returns the next tokens (currently not in use)
-	 */
-	Snippet getNextToken(Snippet curSnip){
-		return tokenList.get(curSnip.getStart()+1);		
-	}
-	
-	/**
-	 * returns the last tokens (currently not in use)
-	 */
-	Snippet getBeforeToken(int position){
-		return tokenList.get(position--);	
-	}
-	
-	/**
-	 * returns the last tokens (currently not in use)
-	 */
-	Snippet getBeforeToken(Snippet curSnip){
-		return tokenList.get(curSnip.getStart()-1);		
-	}
+//	
+//	/**
+//	 * returns the next tokens (currently not in use)
+//	 */
+//	Snippet getNextToken(int position){
+//		return tokenList.get(position++);	
+//	}
+//	
+//	/**
+//	 * returns the next tokens (currently not in use)
+//	 */
+//	Snippet getNextToken(Snippet curSnip){
+//		return null; //tokenList.get(curSnip.getStart()+1);		
+//	}
+//	
+//	/**
+//	 * returns the last tokens (currently not in use)
+//	 */
+//	Snippet getBeforeToken(int position){
+//		return tokenList.get(position--);	
+//	}
+//	
+//	/**
+//	 * returns the last tokens (currently not in use)
+//	 */
+//	Snippet getBeforeToken(Snippet curSnip){
+//		return null;// tokenList.get(curSnip.getStart()-1);		
+//	}
 
 	/**
 	 * Returns the number of results fitting to the input regex. 
@@ -153,13 +237,14 @@ public class CveItem {
 		default: ma = Pattern.compile(query).matcher(XmlCode);break;
 		}				
 		while (ma.find()){  											// saving matching positions in Snippets 
-			Snippet wordSnippet = new Snippet(ma.group(), ma.start());
-			result.add(wordSnippet);
+			//Snippet wordSnippet = new Snippet(ma.group(), ma.start());
+			//result.add(wordSnippet);
 		}
 		return result;
 	}
 	
 	/**
+	 * TODO
 	 * Checks weather a String contains numbers and dots => high likelihood for a software version (currently not in use)
 	 * @param checkword Sting which should be checked
 	 * @return Returns weather a Sting is a "numerical word"
@@ -171,48 +256,40 @@ public class CveItem {
 		return false;
 	}
 	
-	/**
-	 * Checks weather a String is part of the keyword list in konfig.java (currently not in use)
-	 * @param checkword String which will be checked
-	 * @return value weather it is part of the keyword list
-	 */
-	public boolean isKeyword(String checkword){
-		if(Arrays.asList(konfig.versionKeywords).contains(checkword.toLowerCase())) return true;
-		return false;
-	}
 	
-	/**
-	 * Searches a Software before a Snippet (currently not in use / not implemented)
-	 * @param versionSnippet
-	 * @return
-	 */
-	public String searchSoftwareNameBefore(Snippet versionSnippet){
-		Matcher ma;
-		String Softwarename="";
-		
-		return Softwarename;
-	}
+//	/**
+//	 * TODO
+//	 * Searches a Software before a Snippet (currently not in use / not implemented)
+//	 * @param versionSnippet
+//	 * @return
+//	 */
+//	public String searchSoftwareNameBefore(Snippet versionSnippet){
+//		Matcher ma;
+//		String Softwarename="";
+//		TODO
+//		return Softwarename;
+//	}
 	
+//	/**
+//	 * Searches for software versions, which are marked as Softwareversion "and earlier". 
+//	 * @return Search results
+//	 */
+//	public String[] getEarlier(){ 
+//		String[] result;
+//		ArrayList<String> searchresult = searchForResult("[\\d\\.]+ and earlier", 3);
+//		ArrayList<String> searchresultTwo = searchForResult("[\\d\\.]+ and before", 3);
+//		result=new String[searchresult.size()+searchresultTwo.size()];
+//		Iterator<String> it=searchresult.iterator();
+//		int i=0;
+//		while(it.hasNext()){result[i]=it.next();i++;}
+//		it=searchresultTwo.iterator();
+//		i=0;
+//		while(it.hasNext()){result[i]=it.next();i++;}
+//		return result;
+//	}
+//	
 	/**
-	 * Searches for software versions, which are marked as Softwareversion "and earlier". 
-	 * @return Search results
-	 */
-	public String[] getEarlier(){ 
-		String[] result;
-		ArrayList<String> searchresult = searchForResult("[\\d\\.]+ and earlier", 3);
-		ArrayList<String> searchresultTwo = searchForResult("[\\d\\.]+ and before", 3);
-		result=new String[searchresult.size()+searchresultTwo.size()];
-		Iterator<String> it=searchresult.iterator();
-		int i=0;
-		while(it.hasNext()){result[i]=it.next();i++;}
-		it=searchresultTwo.iterator();
-		i=0;
-		while(it.hasNext()){result[i]=it.next();i++;}
-		return result;
-	}
-	
-	/**
-	 * Searches for software versions, which are marked as Softwareversion "and before". 
+	 * Searches for software versions, which are marked as Softwareversion "before". 
 	 * @return Search results
 	 */
 	public String[] getBefore(){ 
@@ -223,7 +300,7 @@ public class CveItem {
 			keywordString+=keywords[i]+"|";			
 		}
 		keywordString+=keywords[keywords.length-1]+")";
-		ArrayList<String> searchresult = searchForResult("(before( )?("+keywordString+"?( )?[.-:_+\\w]*[\\d.]+[.-:_+\\w]*)+)+", 6); //alternative: before( \\w\\w\\w+)? [\\d\\.]+\\w?
+		ArrayList<String> searchresult = searchForResult("(before( )?("+keywordString+"?( )?[.-:_+\\w]*[\\d.]+[.-:_+\\w]*"+keywordString+"?)+)+", 6); //alternative: before( \\w\\w\\w+)? [\\d\\.]+\\w?
 		result=new String[searchresult.size()];
 		Iterator<String> it=searchresult.iterator();
 		int i=0;
@@ -264,6 +341,7 @@ public class CveItem {
 	 * @param tagname type of an xml tag
 	 * @return result of content surrounded by tags of tagname type
 	 */
+	
 	public Vector<String[]> tagSubstr(String tagname){ // german: Liefert den Inhalt zwischen einem öffnenden und einem schließenden Tag des Typs tagname
 		Vector<String[]> vec= new Vector<String[]>();
 		String[] partresult = null;
@@ -287,6 +365,51 @@ public class CveItem {
 		return vec;
 	} 
 	
+	public void rebuildTokenVector(){
+		Vector<Snippet> newtokenList = new Vector<Snippet>();
+		Snippet curSnip=tokenList.firstElement();
+		newtokenList.add(curSnip);
+		while(curSnip.hasNext()){
+			curSnip=curSnip.next;
+			newtokenList.add(curSnip);
+		}
+	}
+	
+	Vector<Snippet> getSnippetsWithLogicalUnits(String logicalUnitType){
+		Vector<Snippet> returnVec = new Vector<Snippet>();
+		Snippet curSnip=tokenList.firstElement();
+		if(curSnip.hasLogicalType(logicalUnitType)) returnVec.add(curSnip);
+		while(curSnip.hasNext()){
+			curSnip=curSnip.next;
+			if(curSnip.hasLogicalType(logicalUnitType)) returnVec.add(curSnip);
+		}
+		return returnVec;
+	}
+	
+	/*
+	public Vector<String[]> tagSubstr(String tagname){ // german: Liefert den Inhalt zwischen einem öffnenden und einem schließenden Tag des Typs tagname
+		Vector<String[]> vec= new Vector<String[]>();
+		String[] partresult = null;
+		String innerNoTagText;
+		Matcher ma, mo;
+		ma = Pattern.compile("<"+tagname+">").matcher(XmlCode.toLowerCase());
+		mo = Pattern.compile("</"+tagname+">").matcher(XmlCode.toLowerCase());
+		while (ma.find()){ 
+			if(mo.find(ma.end())){
+				partresult= new String[2];
+				partresult[0]=tagname;				
+				innerNoTagText=StringEscapeUtils.unescapeXml(XmlCode.substring(ma.start(), mo.end())); //.replaceAll("\\<.*?\\>", "")
+				innerNoTagText=innerNoTagText.replaceAll("[\\t\\n\\f\\r]", "");
+				partresult[1]=innerNoTagText;
+				vec.add(partresult);
+			}
+			else{
+				System.out.println("FEHLER: Der Tag </"+tagname+"> konnte nicht gefunden werden!");
+			}
+		}
+		return vec;
+	} 
+	*/
 	/**
 	 * Merges all version extraction procedures.
 	 * @return result of version extractions
@@ -420,12 +543,12 @@ public class CveItem {
 	 * Returns information surrounded by multiple XML tags (currently not in use!)
 	 * @return -
 	 */
-	public Vector<String[]> getTaggedInformation(){
-		Vector<String[]> vec= new Vector<String[]>();
-		/*
-		Beispiel: vec.addAll(tagSubstr("inst"));	
-		*/
-		return vec;
-	}
+//	public Vector<String[]> getTaggedInformation(){
+//		Vector<String[]> vec= new Vector<String[]>();
+//		/*
+//		Beispiel: vec.addAll(tagSubstr("inst"));	
+//		*/
+//		return vec;
+//	}
 	
 }
