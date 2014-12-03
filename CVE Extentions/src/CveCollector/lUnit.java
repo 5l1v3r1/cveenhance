@@ -4,7 +4,7 @@ import java.util.Vector;
 
 public class lUnit {
 	
-	private String[] possibleUnits=konfig.logicalUnits;
+	private String[] possibleUnits=Konfig.logicalUnits;
 	private final String unitType;
 	private boolean valid=false;
 
@@ -18,16 +18,16 @@ public class lUnit {
 	
 	public boolean isValidType(String type){
 		for(int i=0;i<possibleUnits.length;i++){
-			if(type==possibleUnits[i]) return true;
+			if(type.equals(possibleUnits[i])) return true;
 		}
 		return false;
 	}
 	
 	public Vector<String[]> getCorrespondingConditions(){
-		String[][] conditions = konfig.meltingConditions;
+		String[][] conditions = Konfig.meltingConditions;
 		Vector<String[]> resultvector = new Vector<String[]>();
 		for (int i=0; i<conditions.length; i++){
-			if(conditions[i][0].toLowerCase()==type().toLowerCase()) resultvector.add(conditions[i]);
+			if(conditions[i][0].equalsIgnoreCase(type())) resultvector.add(conditions[i]);
 		}
 		return resultvector;
 	}
@@ -39,7 +39,7 @@ public class lUnit {
 	}
 	
 	public boolean isType(String checkType){
-		return checkType==type();
+		return checkType.equals(type());
 	}
 	
 	public String toString(){

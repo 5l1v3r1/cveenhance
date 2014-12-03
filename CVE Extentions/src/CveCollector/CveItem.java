@@ -9,6 +9,7 @@ package CveCollector;
 
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.StringTokenizer;
@@ -38,9 +39,11 @@ public class CveItem {
 			Document XmlDocument = db.parse(source);
 			XPathFactory xpathFactory = XPathFactory.newInstance();
 			xpath = xpathFactory.newXPath();
-			String summary = xpath.evaluate("//entry/summary/text()", XmlDocument);
+			String summary = xpath.evaluate("//entry/summary/text()",
+					XmlDocument);
 
-			// System.out.println(summary); // prints the freetext description of a CVE item
+			// System.out.println(summary); // prints the freetext description
+			// of a CVE item
 			description = summary;
 
 		} catch (Exception e) {
@@ -59,13 +62,17 @@ public class CveItem {
 
 	protected XPath xpath;
 
-	protected Vector<Snippet> tokenList; // token list extracted of the CVE file content
+	protected Vector<Snippet> tokenList; // token list extracted of the CVE file
+											// content
 
-	protected int successfulData; // number of allocatable fixed version numbers to softwarenames
+	protected int successfulData; // number of allocatable fixed version numbers
+									// to softwarenames
 
-	protected int unsuccessfulData; // number of not allocatable fixed version numbers to softwarenames
+	protected int unsuccessfulData; // number of not allocatable fixed version
+									// numbers to softwarenames
 
-	protected String description; // content part of CVE file, which describes the CVE issue (floating text)
+	protected String description; // content part of CVE file, which describes
+									// the CVE issue (floating text)
 
 	protected XPath xPath;
 
@@ -73,7 +80,9 @@ public class CveItem {
 	 * initializes a CVE item instance (currently not in use)
 	 */
 	protected void initialise() {
-		Vector<Snippet> description = getTokens(); // gets all tokens of the summary tag in the current CVE issue
+		Vector<Snippet> description = getTokens(); // gets all tokens of the
+													// summary tag in the
+													// current CVE issue
 		tokenList = description;
 		Iterator<Snippet> tokenIterator = tokenList.iterator();
 		while (tokenIterator.hasNext())
@@ -93,7 +102,8 @@ public class CveItem {
 	protected String xpathFromString(String source, String command) {
 		try {
 			InputSource inputSource = new InputSource(new StringReader(source));
-			DocumentBuilderFactory docbuildfac = DocumentBuilderFactory.newInstance();
+			DocumentBuilderFactory docbuildfac = DocumentBuilderFactory
+					.newInstance();
 			DocumentBuilder docbuild;
 			docbuild = docbuildfac.newDocumentBuilder();
 			Document XmlDoc = docbuild.parse(inputSource);
@@ -111,7 +121,8 @@ public class CveItem {
 	 * extracts CVE ID
 	 */
 	public String getCVEID() {
-		return tagSubstr("vuln:cve-id").firstElement()[1].replaceAll("\\<.*?\\>", "");
+		return tagSubstr("vuln:cve-id").firstElement()[1].replaceAll(
+				"\\<.*?\\>", "");
 	}
 
 	/**
@@ -193,7 +204,8 @@ public class CveItem {
 	 *            searchtype (case sensitiv etc.)
 	 * @return ArrayList with results
 	 */
-	public ArrayList<String> searchForResult(String query, int type) { // Sucht nach einem query und gibt das Ergebnis in einem HashSet zurück
+	public ArrayList<String> searchForResult(String query, int type) {
+		// Sucht nach einem query und gibt das Ergebnis in einem HashSet zurück
 		Matcher ma;
 		ArrayList<String> result = new ArrayList<String>();
 		switch (type) {
@@ -215,7 +227,8 @@ public class CveItem {
 	}
 
 	/**
-	 * Returns a result of a search process fitting the regex query incl. matching positions. (currently not in use)
+	 * Returns a result of a search process fitting the regex query incl.
+	 * matching positions. (currently not in use)
 	 * 
 	 * @param query
 	 *            regex for search process
@@ -242,7 +255,8 @@ public class CveItem {
 	}
 
 	/**
-	 * TODO Checks weather a String contains numbers and dots => high likelihood for a software version (currently not in use)
+	 * TODO Checks weather a String contains numbers and dots => high likelihood
+	 * for a software version (currently not in use)
 	 * 
 	 * @param checkword
 	 *            Sting which should be checked
@@ -255,27 +269,42 @@ public class CveItem {
 		return false;
 	}
 
-	// /**
-	// * TODO
-	// * Searches a Software before a Snippet (currently not in use / not implemented)
-	// * @param versionSnippet
-	// * @return
-	// */
-	// public String searchSoftwareNameBefore(Snippet versionSnippet){
-	// Matcher ma;
-	// String Softwarename="";
-	// TODO
-	// return Softwarename;
-	// }
+	/**
+	 * TODO Searches a Software before a Snippet (currently not in use / not
+	 * implemented)
+	 * 
+	 * @param versionSnippet
+	 * @return
+	 */
+	public String searchSoftwareNameBefore(Snippet versionSnippet) {
+		Snippet curSnip = versionSnippet;
+		String Softwarename = "";
+		int distance = 0;
+		while (distance < Konfig.searchdistance && curSnip.hasPrev()) {
+			curSnip = curSnip.prev;
+			if (curSnip.logicalType()!=null && curSnip.logicalType().equals("softwarename")) {
+				Softwarename = curSnip.getText();
+				break;
+			} else {
+				distance += curSnip.getTokenValue();
+				if (curSnip.logicalType()!=null && curSnip.logicalType().equals("version"))
+					distance = 0;
+			}
+		}
+		return Softwarename;
+	}
 
 	// /**
-	// * Searches for software versions, which are marked as Softwareversion "and earlier".
+	// * Searches for software versions, which are marked as Softwareversion
+	// "and earlier".
 	// * @return Search results
 	// */
 	// public String[] getEarlier(){
 	// String[] result;
-	// ArrayList<String> searchresult = searchForResult("[\\d\\.]+ and earlier", 3);
-	// ArrayList<String> searchresultTwo = searchForResult("[\\d\\.]+ and before", 3);
+	// ArrayList<String> searchresult = searchForResult("[\\d\\.]+ and earlier",
+	// 3);
+	// ArrayList<String> searchresultTwo =
+	// searchForResult("[\\d\\.]+ and before", 3);
 	// result=new String[searchresult.size()+searchresultTwo.size()];
 	// Iterator<String> it=searchresult.iterator();
 	// int i=0;
@@ -287,20 +316,23 @@ public class CveItem {
 	// }
 	//
 	/**
-	 * Searches for software versions, which are marked as Softwareversion "before".
+	 * Searches for software versions, which are marked as Softwareversion
+	 * "before".
 	 * 
 	 * @return Search results
 	 */
 	public String[] getBefore() {
 		String[] result;
-		String[] keywords = konfig.versionKeywords;
+		String[] keywords = Konfig.versionKeywords;
 		String keywordString = "(";
 		for (int i = 0; i < keywords.length - 1; i++) {
 			keywordString += keywords[i] + "|";
 		}
 		keywordString += keywords[keywords.length - 1] + ")";
-		ArrayList<String> searchresult = searchForResult("(before( )?(" + keywordString + "?( )?[.-:_+\\w]*[\\d.]+[.-:_+\\w]*" + keywordString
-				+ "?)+)+", 6); // alternative: before( \\w\\w\\w+)? [\\d\\.]+\\w?
+		ArrayList<String> searchresult = searchForResult("(before( )?("
+				+ keywordString + "?( )?[.-:_+\\w]*[\\d.]+[.-:_+\\w]*"
+				+ keywordString + "?)+)+", 6); // alternative: before(
+												// \\w\\w\\w+)? [\\d\\.]+\\w?
 		result = new String[searchresult.size()];
 		Iterator<String> it = searchresult.iterator();
 		int i = 0;
@@ -312,7 +344,8 @@ public class CveItem {
 	}
 
 	/**
-	 * Simple search method to check if a string is part of the CVE item. (NO Regex possible!)
+	 * Simple search method to check if a string is part of the CVE item. (NO
+	 * Regex possible!)
 	 * 
 	 * @param query
 	 *            search string
@@ -357,24 +390,31 @@ public class CveItem {
 	 * @return result of content surrounded by tags of tagname type
 	 */
 
-	public Vector<String[]> tagSubstr(String tagname) { // german: Liefert den Inhalt zwischen einem öffnenden und einem schließenden Tag des Typs
-														// tagname
+	public Vector<String[]> tagSubstr(String tagname) {
+		// german: Liefert den Inhalt zwischen einem öffnenden und einem
+		// schließenden Tag des Typs tagname
 		Vector<String[]> vec = new Vector<String[]>();
 		String[] partresult = null;
 		String innerNoTagText;
 		Matcher ma, mo;
-		ma = Pattern.compile("<" + tagname + ">").matcher(XmlCode.toLowerCase());
-		mo = Pattern.compile("</" + tagname + ">").matcher(XmlCode.toLowerCase());
+		ma = Pattern.compile("<" + tagname + ">")
+				.matcher(XmlCode.toLowerCase());
+		mo = Pattern.compile("</" + tagname + ">").matcher(
+				XmlCode.toLowerCase());
 		while (ma.find()) {
 			if (mo.find(ma.end())) {
 				partresult = new String[2];
 				partresult[0] = tagname;
-				innerNoTagText = StringEscapeUtils.unescapeXml(XmlCode.substring(ma.start(), mo.end())); // .replaceAll("\\<.*?\\>", "")
-				innerNoTagText = innerNoTagText.replaceAll("[\\t\\n\\f\\r]", "");
+				innerNoTagText = StringEscapeUtils.unescapeXml(XmlCode
+						.substring(ma.start(), mo.end())); // .replaceAll("\\<.*?\\>",
+															// "")
+				innerNoTagText = innerNoTagText
+						.replaceAll("[\\t\\n\\f\\r]", "");
 				partresult[1] = innerNoTagText;
 				vec.add(partresult);
 			} else {
-				System.out.println("FEHLER: Der Tag </" + tagname + "> konnte nicht gefunden werden!");
+				System.out.println("FEHLER: Der Tag </" + tagname
+						+ "> konnte nicht gefunden werden!");
 			}
 		}
 		return vec;
@@ -397,20 +437,30 @@ public class CveItem {
 			returnVec.add(curSnip);
 		while (curSnip.hasNext()) {
 			curSnip = curSnip.next;
-			if (curSnip.hasLogicalType(logicalUnitType))
+			if (curSnip.hasLogicalType(logicalUnitType)){
 				returnVec.add(curSnip);
+				}
 		}
+		
 		return returnVec;
 	}
 
 	/*
-	 * public Vector<String[]> tagSubstr(String tagname){ // german: Liefert den Inhalt zwischen einem öffnenden und einem schließenden Tag des Typs
-	 * tagname Vector<String[]> vec= new Vector<String[]>(); String[] partresult = null; String innerNoTagText; Matcher ma, mo; ma =
-	 * Pattern.compile("<"+tagname+">").matcher(XmlCode.toLowerCase()); mo = Pattern.compile("</"+tagname+">").matcher(XmlCode.toLowerCase()); while
-	 * (ma.find()){ if(mo.find(ma.end())){ partresult= new String[2]; partresult[0]=tagname;
-	 * innerNoTagText=StringEscapeUtils.unescapeXml(XmlCode.substring(ma.start(), mo.end())); //.replaceAll("\\<.*?\\>", "")
-	 * innerNoTagText=innerNoTagText.replaceAll("[\\t\\n\\f\\r]", ""); partresult[1]=innerNoTagText; vec.add(partresult); } else{
-	 * System.out.println("FEHLER: Der Tag </"+tagname+"> konnte nicht gefunden werden!"); } } return vec; }
+	 * public Vector<String[]> tagSubstr(String tagname){ // german: Liefert den
+	 * Inhalt zwischen einem öffnenden und einem schließenden Tag des Typs
+	 * tagname Vector<String[]> vec= new Vector<String[]>(); String[] partresult
+	 * = null; String innerNoTagText; Matcher ma, mo; ma =
+	 * Pattern.compile("<"+tagname+">").matcher(XmlCode.toLowerCase()); mo =
+	 * Pattern.compile("</"+tagname+">").matcher(XmlCode.toLowerCase()); while
+	 * (ma.find()){ if(mo.find(ma.end())){ partresult= new String[2];
+	 * partresult[0]=tagname;
+	 * innerNoTagText=StringEscapeUtils.unescapeXml(XmlCode
+	 * .substring(ma.start(), mo.end())); //.replaceAll("\\<.*?\\>", "")
+	 * innerNoTagText=innerNoTagText.replaceAll("[\\t\\n\\f\\r]", "");
+	 * partresult[1]=innerNoTagText; vec.add(partresult); } else{
+	 * System.out.println
+	 * ("FEHLER: Der Tag </"+tagname+"> konnte nicht gefunden werden!"); } }
+	 * return vec; }
 	 */
 	/**
 	 * Merges all version extraction procedures.
@@ -419,12 +469,14 @@ public class CveItem {
 	 */
 	public String[] getFixedVersion() {
 		String[] before = getBefore();
-		// String[] earlier = getEarlier(); // not suitable for current requirements
+		// String[] earlier = getEarlier(); // not suitable for current
+		// requirements
 		for (int i = 0; i < before.length; i++) {
 			before[i] = releaseNr(before[i]);
 		}
 		return before;
-		// return ArrayUtils.addAll(before, earlier); // not suitable for current requirements
+		// return ArrayUtils.addAll(before, earlier); // not suitable for
+		// current requirements
 	}
 
 	/**
@@ -458,16 +510,19 @@ public class CveItem {
 	 * 
 	 * @param version
 	 *            software version
-	 * @return CPE string with high likelihood of matching with the software version.
+	 * @return CPE string with high likelihood of matching with the software
+	 *         version.
 	 */
 	public String allocateSoftware(String version) {
 
 		if (tagSubstr("vuln:vulnerable-software-list").isEmpty())
 			return "CVE Vulnerability broken!";
-		String software = tagSubstr("vuln:vulnerable-software-list").firstElement()[1];
+		String software = tagSubstr("vuln:vulnerable-software-list")
+				.firstElement()[1];
 		System.out.println("Version: " + version);
 		Matcher ma;
-		ma = Pattern.compile("[ \\p{Alpha}]").matcher(version.toLowerCase().trim());
+		ma = Pattern.compile("[ \\p{Alpha}]").matcher(
+				version.toLowerCase().trim());
 		String versionnew = version;
 		String versionold = version;
 		while (ma.find()) {
@@ -477,7 +532,8 @@ public class CveItem {
 		// System.out.println("Anzahl an versch. Software: "+softwareCounter());
 		if (softwareCounter() == 1) { // searchfor("cpe-lang:fact-ref")
 			// System.out.println("Indexof "+XmlCode.indexOf("cpe-lang:fact-ref"));
-			int startSubStr = XmlCode.indexOf("\"", XmlCode.indexOf("cpe-lang:fact-ref")) + 1;
+			int startSubStr = XmlCode.indexOf("\"",
+					XmlCode.indexOf("cpe-lang:fact-ref")) + 1;
 			// System.out.println("Start "+startSubStr);
 			int endSubStr = XmlCode.indexOf("\"", startSubStr);
 			// System.out.println("Ende "+endSubStr);
@@ -488,15 +544,19 @@ public class CveItem {
 		String search1 = version;
 		while (true) {
 			try {
-				int number = Integer.parseInt(search1.substring(search1.lastIndexOf(".") + 1));
+				int number = Integer.parseInt(search1.substring(search1
+						.lastIndexOf(".") + 1));
 				int checkbig = 0;
 				while (number >= 0 && checkbig < 20) {
-					String search2 = search1.substring(0, search1.lastIndexOf(".") + 1) + number;
+					String search2 = search1.substring(0,
+							search1.lastIndexOf(".") + 1)
+							+ number;
 					if (software.contains(search2)) {
 						int position = software.indexOf(search2);
 						String partresult = software.substring(0, position);
 						successfulData++;
-						return partresult.substring(partresult.lastIndexOf(">") + 1);
+						return partresult
+								.substring(partresult.lastIndexOf(">") + 1);
 					}
 					number--;
 					checkbig++;
@@ -506,8 +566,9 @@ public class CveItem {
 
 			}
 			if (search1.lastIndexOf(".") == -1)
-				break; // TODO: Checken, ob es zu Fehlern bei der Auwertung kommen kann (vor allem: die Einstufung als Successful, anstatt
-						// Unsuccessful)
+				break; // TODO: Checken, ob es zu Fehlern bei der Auwertung
+						// kommen kann (vor allem: die Einstufung als
+						// Successful, anstatt Unsuccessful)
 			search1 = search1.substring(0, search1.lastIndexOf("."));
 		}
 		unsuccessfulData++;
@@ -521,14 +582,16 @@ public class CveItem {
 	 */
 	public int softwareCounter() {
 		Matcher ma;
-		ma = Pattern.compile("<cpe-lang:fact-ref name=(\\S)+>").matcher(XmlCode.toLowerCase());
+		ma = Pattern.compile("<cpe-lang:fact-ref name=(\\S)+>").matcher(
+				XmlCode.toLowerCase());
 		HashSet<String> nameCollector = new HashSet<String>();
 		String matched = "";
 		String softwarename = "";
 		while (ma.find()) {
 			matched = ma.group();
 			// System.out.println(matched);
-			softwarename = matched.substring(matched.indexOf("\""), matched.lastIndexOf(":"));
+			softwarename = matched.substring(matched.indexOf("\""),
+					matched.lastIndexOf(":"));
 			nameCollector.add(softwarename);
 		}
 		return nameCollector.size();
@@ -553,7 +616,8 @@ public class CveItem {
 	}
 
 	/**
-	 * Returns information surrounded by multiple XML tags (currently not in use!)
+	 * Returns information surrounded by multiple XML tags (currently not in
+	 * use!)
 	 * 
 	 * @return -
 	 */

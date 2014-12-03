@@ -14,9 +14,9 @@ import java.util.ArrayList;
 public class CveSample {
 
 	private static ArrayList<String> filelist = new ArrayList<String>(); 	// filelist, where all files paths are saved
-	private static String SourceDir = konfig.CveFolder;	   					// directory, which contains the whole splitted CVE database
-	private static String DumpDir = konfig.CveDump; 						// directory, which is used to copy a subset of the database
-	private static int anzStichprobe=konfig.DumpNumber; 					// number of subset elements
+	private static String SourceDir = Konfig.CveFolder;	   					// directory, which contains the whole splitted CVE database
+	private static String DumpDir = Konfig.CveDump; 						// directory, which is used to copy a subset of the database
+	private static int anzStichprobe=Konfig.DumpNumber; 					// number of subset elements
 	private int anzFiles=0;								   					// number of found CVE entrys
 	
 	public static void main(String[] args) {

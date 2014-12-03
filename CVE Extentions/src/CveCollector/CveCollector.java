@@ -18,7 +18,7 @@ import java.io.Writer;
 public class CveCollector {
 
 	public static void main(String[] args) {
-		openFile(konfig.XmlFile);
+		openFile(Konfig.XmlFile);
 	}
 	public static void openFile(String openfile){    
 
@@ -44,7 +44,7 @@ public class CveCollector {
 				  text+=strLine+"\n";
 				  if(strLine.contains("</entry>"))
 			  		{
-					  fw = new FileWriter( konfig.CveFolder+name+".xml" );
+					  fw = new FileWriter( Konfig.CveFolder+name+".xml" );
 					  bw = new BufferedWriter( fw );
 					  pw = new PrintWriter( bw );
 					  pw.print(text);

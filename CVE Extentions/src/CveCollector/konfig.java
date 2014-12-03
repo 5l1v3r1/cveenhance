@@ -1,6 +1,6 @@
 package CveCollector;
 
-public class konfig {
+public class Konfig {
 	// Path to downloaded CVE XML-Backup
 	public static final String XmlFile = "..\\DatabaseXMLs\\nvdcve-2.0-2014.xml";
 	// Path to splitted CVE item folder
@@ -20,6 +20,8 @@ public class konfig {
 	public static final int MessageTime = 1500;
 	// output file for extraction results
 	public static final String CvePrint = "..\\CveResult.txt";
+	
+	public static final int searchdistance=6;
 	
 
 	
@@ -71,10 +73,7 @@ public class konfig {
 	public static String[] versionTypes = {"fixedversion", "lastunfixedversion"};
 	
 	//TODO: Create Melting Conditions Variable
-	public static String[][] meltingConditions = {
-	{"", "", ""},
-	{},
-	{}
+	public static String[][] meltingConditions = {{"softwarename"}, {"softwarename", "softwarename"}, {"softwarename", "softwarename", "softwarename"}
 	};
 	
 	// general structure for software information: 

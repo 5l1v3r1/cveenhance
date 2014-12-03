@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Vector;
 import java.util.regex.Matcher;
@@ -25,12 +24,12 @@ public class AnalyseCves {
 	
 	private static Vector<String> filelist = new Vector<String>(); 		// list of file directories
 	private static Vector<CveItem> itemList = new Vector<CveItem>(); 	// list of CVE items (abstract representation of an CVE entry)
-	private static String DumpDir = konfig.CveDump; 					// directory, which contains CVE XML files FOR CODE TESTING (recommendation: <= 1000 files)
-	private static String CveFolder = konfig.CveFolder; 				// directory, which contains all CVE XML files for information extraction
-	private static String Datatype = konfig.Datatype; 					// data type of CVE XML files 
-	private static String CvePrint = konfig.CvePrint;					// file which should contain the analysis results
-	private static boolean Testmode = konfig.Testmode; 					// switches the test mode ON/OFF
-	private static int MessageTime = konfig.MessageTime;				// default time for displaying a message
+	private static String DumpDir = Konfig.CveDump; 					// directory, which contains CVE XML files FOR CODE TESTING (recommendation: <= 1000 files)
+	private static String CveFolder = Konfig.CveFolder; 				// directory, which contains all CVE XML files for information extraction
+	private static String Datatype = Konfig.Datatype; 					// data type of CVE XML files 
+	private static String CvePrint = Konfig.CvePrint;					// file which should contain the analysis results
+	private static boolean Testmode = Konfig.Testmode; 					// switches the test mode ON/OFF
+	private static int MessageTime = Konfig.MessageTime;				// default time for displaying a message
 	private int anzFiles=0;	
 	
 	
@@ -112,30 +111,43 @@ public class AnalyseCves {
 		bw = new BufferedWriter( fw );
 		pw = new PrintWriter( bw );
 		int save_Counter=0;							// buffer for current result number
-		for(;it.hasNext();item=it.next()){					// for every CVE item:
-			System.out.println(item.getCVEID()+":");
-			String [] Versions=item.getFixedVersion();		// extraction of fixed versions
-			String [] Software=item.getSoftware();			// allocation of Software
-			save_Counter=0;
-			for(int i=0;i<Versions.length; i++){			// displaying an saving of results
-				System.out.println(Software[i]+" Fixed Version:"+Versions[i]);
-				String concatVersion=Versions[i].trim();
-				if(Versions[i].indexOf(" ")!=-1){
-					concatVersion=Versions[i].replace(" ", ":");
-				}
-				else{
-					Matcher mo;
-					mo=Pattern.compile("\\p{Alpha}\\p{Alpha}+").matcher(Versions[i]);
-					if(mo.find() && mo.start()!=0){
-						concatVersion=Versions[i].substring(0, mo.start())+":"+Versions[i].substring(mo.start());
-					}
-				}				
-				pw.println(item.getCVEID()+"; "+Software[i]+"; "+concatVersion);
-				save_Counter++;
-				if(Software[i]!="Software not allocatable!") validData++;
+		for(;it.hasNext();item=it.next()){// for every CVE item:
+			Vector<Snippet> versions=item.getSnippetsWithLogicalUnits("version");
+			Iterator<Snippet> versionIt = versions.iterator();
+			Snippet curSnip;
+			String softwareName="";
+			while(versionIt.hasNext()){
+				curSnip=versionIt.next();
+				softwareName=item.searchSoftwareNameBefore(curSnip);
+				System.out.println(softwareName+" Fixed Version:"+curSnip.getText());
+				
 			}
-			if(save_Counter>0) successful_item_counter++;
-			resultCouter+=save_Counter;
+			
+			
+			
+//			System.out.println(item.getCVEID()+":");
+////			String [] Versions=item.getFixedVersion();		// extraction of fixed versions
+////			String [] Software=item.getSoftware();			// allocation of Software
+//			save_Counter=0;
+//			for(int i=0;i<Versions.length; i++){			// displaying an saving of results
+//				System.out.println(Software[i]+" Fixed Version:"+Versions[i]);
+//				String concatVersion=Versions[i].trim();
+//				if(Versions[i].indexOf(" ")!=-1){
+//					concatVersion=Versions[i].replace(" ", ":");
+//				}
+//				else{
+//					Matcher mo;
+//					mo=Pattern.compile("\\p{Alpha}\\p{Alpha}+").matcher(Versions[i]);
+//					if(mo.find() && mo.start()!=0){
+//						concatVersion=Versions[i].substring(0, mo.start())+":"+Versions[i].substring(mo.start());
+//					}
+//				}				
+//				pw.println(item.getCVEID()+"; "+Software[i]+"; "+concatVersion);
+//				save_Counter++;
+//				if(Software[i]!="Software not allocatable!") validData++;
+//			}
+//			if(save_Counter>0) successful_item_counter++;
+//			resultCouter+=save_Counter;
 
 		}
 		 pw.close();		// extraction process completed

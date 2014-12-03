@@ -1,11 +1,14 @@
 package CveCollector;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
 /**
- * This class should represent a part of a floating text e.g. a Token / combined Tokens. Furthermore a Snippet should represents a logical unit e.g. a
+ * This class should represent a part of a floating text e.g. a Token / combined
+ * Tokens. Furthermore a Snippet should represents a logical unit e.g. a
  * software name, a version number or a stopword.
  * 
  * @author TU Darmstadt KOM, TU Darmstadt STG
@@ -15,14 +18,19 @@ import java.util.regex.Pattern;
 public class Snippet {
 
 	// features:
-	private static final HashMap<String, Boolean> defaultVector = FeatureVectorBuilder.defaultVector();
+	private static final HashMap<String, Boolean> defaultVector = FeatureVectorBuilder
+			.defaultVector();
 
 	private HashMap<String, Boolean> features;
 	/*
-	 * private boolean comma = false; private boolean word = false; private boolean possibleVersion = false; private boolean bigLetter = false;
-	 * private boolean notToUse = false; private boolean used = false; private boolean version = false; private boolean os = false; private boolean
-	 * osExt = false; private boolean stopword = false; private boolean concatword = false; private boolean seperator = false; private boolean
-	 * nameStart = false; private boolean versionStart = false; private boolean versionEnd = false;
+	 * private boolean comma = false; private boolean word = false; private
+	 * boolean possibleVersion = false; private boolean bigLetter = false;
+	 * private boolean notToUse = false; private boolean used = false; private
+	 * boolean version = false; private boolean os = false; private boolean
+	 * osExt = false; private boolean stopword = false; private boolean
+	 * concatword = false; private boolean seperator = false; private boolean
+	 * nameStart = false; private boolean versionStart = false; private boolean
+	 * versionEnd = false;
 	 */
 
 	// handling vars:
@@ -42,12 +50,18 @@ public class Snippet {
 
 	// Getters:
 	/*
-	 * public boolean hasComma() {return comma;} public boolean isMoreThanTwoChar() {return word;} public boolean isPossibleVersion() {return
-	 * possibleVersion;} public boolean startsWithBigLetter() {return bigLetter;} public boolean isNotUsed() {return notToUse;} public boolean
-	 * isUsed() {return used;} public boolean isVersion() {return version;} public boolean isOs() {return os;} public boolean isOsExt() {return
-	 * osExt;} public boolean isStopword() {return stopword;} public boolean isConcatWord() {return concatword;} public boolean isSeperator() {return
-	 * seperator;} public boolean isNameStartKeyword() {return nameStart;} public boolean getVersionStart() {return versionStart;} public boolean
-	 * getVersionEnd() {return versionEnd;} public boolean isSingleToken() {return singleToken;} public boolean isPartOfName() {return name;}
+	 * public boolean hasComma() {return comma;} public boolean
+	 * isMoreThanTwoChar() {return word;} public boolean isPossibleVersion()
+	 * {return possibleVersion;} public boolean startsWithBigLetter() {return
+	 * bigLetter;} public boolean isNotUsed() {return notToUse;} public boolean
+	 * isUsed() {return used;} public boolean isVersion() {return version;}
+	 * public boolean isOs() {return os;} public boolean isOsExt() {return
+	 * osExt;} public boolean isStopword() {return stopword;} public boolean
+	 * isConcatWord() {return concatword;} public boolean isSeperator() {return
+	 * seperator;} public boolean isNameStartKeyword() {return nameStart;}
+	 * public boolean getVersionStart() {return versionStart;} public boolean
+	 * getVersionEnd() {return versionEnd;} public boolean isSingleToken()
+	 * {return singleToken;} public boolean isPartOfName() {return name;}
 	 */
 
 	public int getTokenValue() {
@@ -80,20 +94,37 @@ public class Snippet {
 			setFeature("possibleversion", lcheck(".*\\d.*"));
 			setFeature("word", (text.length() >= 3));
 			setFeature("bigletter", check("[A-Z]+.*"));
-			setFeature("version", keywordCheck(lowerCaseText, konfig.versionKeywords) || (lcheck("[\\d]+[\\p{Punct}\\w]*") && !(lcheck(""))));
-			setFeature("os", keywordCheck(lowerCaseText, konfig.osKeywords));
-			setFeature("osext", keywordCheck(lowerCaseText, konfig.osExctentions));
-			setFeature("stopword", keywordCheck(lowerCaseText, konfig.stopWords));
-			setFeature("cancatword", keywordCheck(lowerCaseText, konfig.concatWords));
-			setFeature("seperator", keywordCheck(lowerCaseText, konfig.seperatingWord));
-			setFeature("namestart", keywordCheck(lowerCaseText, konfig.softwareNameStartWords));
-			setFeature("versionstart", keywordCheck(lowerCaseText, konfig.softwareNameStopWords));
-			setFeature("versionend", keywordCheck(lowerCaseText, konfig.softwareVersionEnd));
-			setFeature("logicalend", (getFeatureValue("comma") | lcheck(".+[" + createRegexpFromStrings(konfig.seperatingChar, "") + "]")));
-			if (prev != null && lcheck("[" + createRegexpFromStrings(konfig.seperatingChar) + "]"))
+			setFeature(
+					"version",
+					keywordCheck(lowerCaseText, Konfig.versionKeywords)
+							|| (lcheck("[\\d]+[\\p{Punct}\\w]*") && !(lcheck(""))));
+			setFeature("os", keywordCheck(lowerCaseText, Konfig.osKeywords));
+			setFeature("osext",
+					keywordCheck(lowerCaseText, Konfig.osExctentions));
+			setFeature("stopword",
+					keywordCheck(lowerCaseText, Konfig.stopWords));
+			setFeature("cancatword",
+					keywordCheck(lowerCaseText, Konfig.concatWords));
+			setFeature("seperator",
+					keywordCheck(lowerCaseText, Konfig.seperatingWord));
+			setFeature("namestart",
+					keywordCheck(lowerCaseText, Konfig.softwareNameStartWords));
+			setFeature("versionstart",
+					keywordCheck(lowerCaseText, Konfig.softwareNameStopWords));
+			setFeature("versionend",
+					keywordCheck(lowerCaseText, Konfig.softwareVersionEnd));
+			setFeature(
+					"logicalend",
+					(getFeatureValue("comma") | lcheck(".+["
+							+ createRegexpFromStrings(Konfig.seperatingChar, "")
+							+ "]")));
+			if (prev != null
+					&& lcheck("["
+							+ createRegexpFromStrings(Konfig.seperatingChar)
+							+ "]"))
 				prev.setFeature("logicalend", true);
-			if (getFeatureValue("version"))
-				System.out.println(getText());
+
+			// if(getFeatureValue("version")) System.out.println(getText());
 
 			if (hasPrev() == false)
 				setFeature("logicalstart", true);
@@ -104,34 +135,54 @@ public class Snippet {
 					setFeature("logicalstart", false);
 			}
 
+			if (getFeatureValue("version"))
+				setLogicalUnit("version");
+			if (getFeatureValue("bigletter"))
+				setLogicalUnit("softwarename");
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		/*
-		 * // TODO: Check the efficiency of all regex comma= lcheck(".*,"); if(comma){ setText(text.substring(0, text.length()-1)); } // also Point
-		 * chars possibleVersion=lcheck(".*\\d.*"); word= (text.length()>=3); bigLetter= check("[A-Z]+.*"); version= keywordCheck(lowerCaseText,
-		 * konfig.versionKeywords)||(lcheck("[\\d]+[\\p{Punct}\\w]*")&&!(lcheck("")));
+		 * // TODO: Check the efficiency of all regex comma= lcheck(".*,");
+		 * if(comma){ setText(text.substring(0, text.length()-1)); } // also
+		 * Point chars possibleVersion=lcheck(".*\\d.*"); word=
+		 * (text.length()>=3); bigLetter= check("[A-Z]+.*"); version=
+		 * keywordCheck(lowerCaseText,
+		 * konfig.versionKeywords)||(lcheck("[\\d]+[\\p{Punct}\\w]*"
+		 * )&&!(lcheck("")));
 		 * 
-		 * //TODO: Insert Regex for Dates os= keywordCheck(lowerCaseText, konfig.osKeywords); osExt= keywordCheck(lowerCaseText,
-		 * konfig.osExctentions); stopword= keywordCheck(lowerCaseText, konfig.stopWords); concatword= keywordCheck(lowerCaseText,
-		 * konfig.concatWords); seperator= keywordCheck(lowerCaseText, konfig.seperatingWord); nameStart= keywordCheck(lowerCaseText,
-		 * konfig.softwareNameStartWords); versionStart= keywordCheck(lowerCaseText, konfig.softwareNameStopWords); versionEnd=
-		 * keywordCheck(lowerCaseText, konfig.softwareVersionEnd); if(comma)setLogicalEnd(true); // Point Chars also have to be mentioned
-		 * if(lcheck(".+["+createRegexpFromStrings(konfig.seperatingChar)+"]")) setLogicalEnd(true); else if (prev!=null &&
-		 * lcheck("["+createRegexpFromStrings(konfig.seperatingChar )+"]")) prev.setLogicalEnd(true);
+		 * //TODO: Insert Regex for Dates os= keywordCheck(lowerCaseText,
+		 * konfig.osKeywords); osExt= keywordCheck(lowerCaseText,
+		 * konfig.osExctentions); stopword= keywordCheck(lowerCaseText,
+		 * konfig.stopWords); concatword= keywordCheck(lowerCaseText,
+		 * konfig.concatWords); seperator= keywordCheck(lowerCaseText,
+		 * konfig.seperatingWord); nameStart= keywordCheck(lowerCaseText,
+		 * konfig.softwareNameStartWords); versionStart=
+		 * keywordCheck(lowerCaseText, konfig.softwareNameStopWords);
+		 * versionEnd= keywordCheck(lowerCaseText, konfig.softwareVersionEnd);
+		 * if(comma)setLogicalEnd(true); // Point Chars also have to be
+		 * mentioned
+		 * if(lcheck(".+["+createRegexpFromStrings(konfig.seperatingChar)+"]"))
+		 * setLogicalEnd(true); else if (prev!=null &&
+		 * lcheck("["+createRegexpFromStrings(konfig.seperatingChar )+"]"))
+		 * prev.setLogicalEnd(true);
 		 * 
 		 * if(version) System.out.println(getText());
 		 * 
-		 * if(hasPrev()==false) logicalStart=true; else{ if(prev.islogicalEnd())logicalStart=true; else logicalStart=false; }
+		 * if(hasPrev()==false) logicalStart=true; else{
+		 * if(prev.islogicalEnd())logicalStart=true; else logicalStart=false; }
 		 */
 	}
 
 	// Methods:
 
-	private void setFeature(String featureName, boolean newValue) throws Exception {
+	private void setFeature(String featureName, boolean newValue)
+			throws Exception {
 		features.put(featureName, newValue);
 		if (features.size() != defaultVector.size())
-			throw new Exception("Feature \"" + featureName + "\" is not defined in konfig!");
+			throw new Exception("Feature \"" + featureName
+					+ "\" is not defined in konfig!");
 	}
 
 	public String createRegexpFromStrings(String[] keywords, String seperator) {
@@ -176,33 +227,44 @@ public class Snippet {
 	}
 
 	public void mergeWithNextSnippet() {
-		// TODO: Update and validate the merging process! (length and new variables)
+		// TODO: Update and validate the merging process! (length and new
+		// variables)
 		if (hasNext()) {
 			singleToken = false;
 
 			HashMap<String, Boolean> mergeFeatures = next.features;
-			java.util.Iterator<String> featuresIterator = features.keySet().iterator();
+			java.util.Iterator<String> featuresIterator = features.keySet()
+					.iterator();
 			String featureName = "";
 			while (featuresIterator.hasNext()) {
 				featureName = featuresIterator.next();
-				features.put(featureName, features.get(featureName) || mergeFeatures.get(featureName));
+				features.put(featureName, features.get(featureName)
+						|| mergeFeatures.get(featureName));
 			}
 			/*
-			 * comma = next.hasComma(); word = word ||next.isMoreThanTwoChar(); possibleVersion = possibleVersion||next.isPossibleVersion(); bigLetter
-			 * = bigLetter||next.startsWithBigLetter(); notToUse = (notToUse && next.isNotUsed()); used = used || next.isUsed(); version = version ||
-			 * next.isVersion(); os = os || next.isOs(); osExt = osExt || next.isOsExt(); stopword = stopword || next.isStopword(); concatword =
-			 * concatword || next.isConcatWord(); seperator = seperator || next.isSeperator(); nameStart = nameStart || next.isNameStartKeyword();
-			 * versionStart = versionStart || next.versionStart; versionEnd = versionEnd || next.getVersionEnd();
+			 * comma = next.hasComma(); word = word ||next.isMoreThanTwoChar();
+			 * possibleVersion = possibleVersion||next.isPossibleVersion();
+			 * bigLetter = bigLetter||next.startsWithBigLetter(); notToUse =
+			 * (notToUse && next.isNotUsed()); used = used || next.isUsed();
+			 * version = version || next.isVersion(); os = os || next.isOs();
+			 * osExt = osExt || next.isOsExt(); stopword = stopword ||
+			 * next.isStopword(); concatword = concatword ||
+			 * next.isConcatWord(); seperator = seperator || next.isSeperator();
+			 * nameStart = nameStart || next.isNameStartKeyword(); versionStart
+			 * = versionStart || next.versionStart; versionEnd = versionEnd ||
+			 * next.getVersionEnd();
 			 */
 
 			tokenValue++;
 
-			setText(text + konfig.seperator + next.getText());
+			setText(text + Konfig.seperator + next.getText());
 			Snippet delSnip = next;
 			delSnip.prev = null;
 			delSnip.next = null;
 			next = next.next;
-			next.prev = this;
+			if (next != null)
+				next.prev = this;
+
 		}
 
 	}
@@ -247,7 +309,7 @@ public class Snippet {
 	public boolean isLogicalType(String type) {
 		if (logicalUnit == null || !logicalUnit.isValid())
 			return false;
-		else if (logicalUnit.type() == type)
+		else if (logicalUnit.type().equals(type))
 			return true;
 		return false;
 	}
@@ -257,7 +319,7 @@ public class Snippet {
 	}
 
 	public boolean hasLogicalType(String checklogicalType) {
-		return checklogicalType == logicalType();
+		return checklogicalType.equals(logicalType());
 	}
 
 	public void addToSection(Section newSection) {
@@ -311,15 +373,15 @@ public class Snippet {
 			return false;
 		for (String condition : conditions) {
 			String indicator = condition.substring(0, 1);
-			if (indicator == "!") {
+			if (indicator.equals("!")) {
 				condition = condition.substring(1);
 				if (!getFeatureValue(condition))
 					return false;
-			} else if (indicator == "-") {
+			} else if (indicator.equals("-")) {
 				condition = condition.substring(1);
 				if (getFeatureValue(condition))
 					return false;
-			} else if (indicator == "/") {
+			} else if (indicator.equals("/")) {
 				String[] orConditions = condition.split("/");
 				boolean returnvalue = false;
 				for (String orCondition : orConditions) {
@@ -329,11 +391,14 @@ public class Snippet {
 				}
 				if (!returnvalue)
 					return false;
-			} else if (logicalUnit.isValidType(condition)) {
+			} else if (logicalUnit == null)
+				return false;
+			else if (logicalUnit.isValidType(condition)) {
 				if (!logicalUnit.isType(condition))
 					return false;
 			} else {
-				throw new Exception("Snippet condition: \"" + requestCondition + "\" NOT VALID!");
+				throw new Exception("Snippet condition: \"" + requestCondition
+						+ "\" NOT VALID!");
 			}
 
 		}
@@ -342,33 +407,45 @@ public class Snippet {
 
 	private boolean getFeatureValue(String featureName) throws Exception {
 		if (!features.containsKey(featureName)) {
-			throw new Exception("Snippet feature value can not be determined: fature name\"" + featureName + "\" NOT VALID");
+			throw new Exception(
+					"Snippet feature value can not be determined: fature name\""
+							+ featureName + "\" NOT VALID");
 		}
 		return features.get(featureName);
 	}
 
 	private int meltable() {
-		// returns the maximal Number of following snippets, which can be melted with the current snippet
-		Vector<String[]> correspondingConditions = logicalUnit.getCorrespondingConditions();
+		// returns the maximal Number of following snippets, which can be melted
+		// with the current snippet
+		if (logicalUnit == null)
+			return 0;
+
+		Vector<String[]> correspondingConditions = logicalUnit
+				.getCorrespondingConditions();
 		int meltingNumber = 0;
 		Snippet curSnip = this;
+		if (curSnip.text.startsWith("Gor"))
+			System.out.println();
 		while (!curSnip.islogicalEnd() && correspondingConditions.size() != 0) {
-
+			List<String[]> removeList = new ArrayList<String[]>();
 			for (String[] condition : correspondingConditions) {
 				try {
-					if (!curSnip.condition(condition[meltingNumber])) {
-						correspondingConditions.remove(condition);
-						continue;
+					if (condition.length < meltingNumber + 1
+							|| !curSnip.condition(condition[meltingNumber])) {
+						removeList.add(condition);
+
 					}
 				} catch (Exception e) {
-					correspondingConditions.remove(condition);
+					removeList.add(condition);
 					e.printStackTrace();
-					continue;
 				}
 			}
+			correspondingConditions.removeAll(removeList);
 			// Check the next Snippet for a specific condition
 			if (correspondingConditions.size() != 0)
 				meltingNumber++;
+			else
+				break;
 			curSnip = curSnip.next;
 		}
 		return meltingNumber;
