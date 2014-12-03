@@ -68,16 +68,16 @@ public class WordAnnotations {
 		String result = this.word;
 		this.setUsed();
 		WordAnnotations curr = this;
-		while (curr.next != null) {
+		while (curr.prev != null) {
 			if (!curr.isComma()
-					&& (curr.next.isBigLetter() || curr.next
+					&& (curr.prev.isBigLetter() || curr.prev
 							.isPossibleVersion())) {
-				result += " " + curr.next.getWord();
-				curr.next.setUsed();
+				result += " " + curr.prev.getWord();
+				curr.prev.setUsed();
 			} else {
 				break;
 			}
-			curr = curr.next;
+			curr = curr.prev;
 		}
 		return result;
 	}
@@ -91,17 +91,24 @@ public class WordAnnotations {
 		String result = "";
 		for (String searchTerm : searchTerms) {
 			String[] subTerms = searchTerm.split(" ");
-			if (word.equalsIgnoreCase(subTerms[0])) {
+			if (word.equalsIgnoreCase(subTerms[0])) { 
 
 				int count = 0;
 
-				for (String subTerm : subTerms) {
+				for (String subTerm : subTerms) { 
 					WordAnnotations curr = this;
-					if (curr.getWord().equalsIgnoreCase(subTerm)) {
-						count++;
-					}
-					if (count != subTerms.length && curr.next != null)
-						curr = curr.next;
+					
+					while(curr!=null){
+						if (curr.getWord().equalsIgnoreCase(subTerm)) {
+							count++;
+						}
+						else break;
+					
+						if (count != subTerms.length)
+							curr = curr.next;
+						else break;
+						}
+					
 				}
 				if (count == subTerms.length) {
 					WordAnnotations curr = this;
@@ -136,4 +143,6 @@ public class WordAnnotations {
 		}
 		return result;
 	}
+	
+
 }

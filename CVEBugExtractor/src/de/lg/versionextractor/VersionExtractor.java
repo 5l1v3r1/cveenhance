@@ -60,17 +60,18 @@ public class VersionExtractor {
 						String product = productNode.getTextContent();
 
 						if (product.contains("struts")) {
-							fw.write(cveid + ";" + product + "\n");
+							fw.write(cveid.getTextContent() + ";" + product + "\n");
 							fw.flush();
+							messageCVE(cveid.getTextContent(), product);
 						}
 
 					}
-				else {
+				    // Else weggelassen
 					List<String> searchTerms = new ArrayList<String>();
 					searchTerms.add("Struts");
 					findVersionsByNames(searchTerms, cveid.getTextContent(),
 							summary.getTextContent(), fw);
-				}
+				
 
 			}
 		}
@@ -98,7 +99,7 @@ public class VersionExtractor {
 				wa.setBigLetter(false);
 			}
 
-			if (token.endsWith(",")) {
+			if (token.endsWith(",")||token.endsWith(".")||token.endsWith(";") || token.endsWith(":")) {
 				wa.setComma(true);
 			}
 
@@ -124,20 +125,23 @@ public class VersionExtractor {
 					lastProduct = currWord.searchBigLetterSuccessors();
 				}
 
-			}
-
+			} 
+			
+			
 			if (!currWord.isUsed() && currWord.prev != null
 					&& !currWord.prev.isNotToUse()) {
-				if (currWord.isPossibleVersion()) {
+				if (currWord.isPossibleVersion()) { 
 					String lastVersion = currWord.searchForVersionDetails();
 
-					if (lastProduct.length() > 0 && lastUsed < 6) {
+					if (lastProduct.length() > 0 && lastUsed < 6) { 
 						fw.write(cveid + ";" + lastProduct + " " + lastVersion
 								+ "\n");
 						fw.flush();
+						messageCVE(cveid, lastProduct+" "+lastVersion);
 					}
 				}
 			}
+		
 			if (currWord.isUsed())
 				lastUsed = 0;
 
@@ -156,5 +160,9 @@ public class VersionExtractor {
 		}
 		return false;
 
+	}
+	
+	public static void messageCVE(String CVEid, String result){
+		System.out.println("Result found in "+CVEid+": "+result);
 	}
 }
