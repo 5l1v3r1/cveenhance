@@ -73,7 +73,7 @@ public class Konfig {
 	public static String[] versionTypes = {"fixedversion", "lastunfixedversion"};
 	
 	//TODO: Create Melting Conditions Variable
-	public static String[][] meltingConditions = {{"softwarename"}, {"softwarename", "softwarename"}, {"softwarename", "softwarename", "softwarename"}
+	public static String[][] meltingConditions = {{"version", "version"}, {"version", "version", "version"}, {"softwarename", "softwarename"}, {"softwarename", "softwarename", "softwarename"}
 	};
 	
 	// general structure for software information: 

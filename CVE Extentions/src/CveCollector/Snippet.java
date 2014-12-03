@@ -3,6 +3,7 @@ package CveCollector;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
@@ -88,7 +89,10 @@ public class Snippet {
 	// Init:
 
 	public void init() {
-		features = defaultVector;
+		features=new HashMap<String,Boolean>();
+		for(Entry<String,Boolean> entry:defaultVector.entrySet()){
+			features.put(entry.getKey(), entry.getValue());
+		}
 		try {
 			setFeature("comma", lcheck(".*,"));
 			setFeature("possibleversion", lcheck(".*\\d.*"));
@@ -103,7 +107,7 @@ public class Snippet {
 					keywordCheck(lowerCaseText, Konfig.osExctentions));
 			setFeature("stopword",
 					keywordCheck(lowerCaseText, Konfig.stopWords));
-			setFeature("cancatword",
+			setFeature("concatword",
 					keywordCheck(lowerCaseText, Konfig.concatWords));
 			setFeature("seperator",
 					keywordCheck(lowerCaseText, Konfig.seperatingWord));
@@ -137,7 +141,7 @@ public class Snippet {
 
 			if (getFeatureValue("version"))
 				setLogicalUnit("version");
-			if (getFeatureValue("bigletter"))
+			else if (getFeatureValue("bigletter"))
 				setLogicalUnit("softwarename");
 
 		} catch (Exception e) {
@@ -258,12 +262,15 @@ public class Snippet {
 			tokenValue++;
 
 			setText(text + Konfig.seperator + next.getText());
+			if(getText().contains("Gor"))
+				System.out.println();
 			Snippet delSnip = next;
-			delSnip.prev = null;
-			delSnip.next = null;
+			
 			next = next.next;
 			if (next != null)
 				next.prev = this;
+			delSnip.prev = null;
+			delSnip.next = null;
 
 		}
 
@@ -424,7 +431,7 @@ public class Snippet {
 				.getCorrespondingConditions();
 		int meltingNumber = 0;
 		Snippet curSnip = this;
-		if (curSnip.text.startsWith("Gor"))
+		if(curSnip.getText().contains("WordPress"))
 			System.out.println();
 		while (!curSnip.islogicalEnd() && correspondingConditions.size() != 0) {
 			List<String[]> removeList = new ArrayList<String[]>();

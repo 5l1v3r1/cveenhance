@@ -143,10 +143,9 @@ public class CveItem {
 				lastSnip.next = curSnip;
 				curSnip.prev = lastSnip;
 			}
-			tokens.add(curSnip);
 			curSnip.init();
+			tokens.add(curSnip);
 		}
-
 		return tokens;
 	}
 
