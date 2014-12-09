@@ -43,8 +43,12 @@ public class Konfig {
 	public static String[] stopWords = {"a", "and", "or", "in", "able", "about", "across", "after", "all", "almost", "also", "am", "among", "an", "any", "are", "as", "at", "be", "because", "been", "but", "by", "can", "cannot", "could", "dear","did","do","does","either","else","ever","every","for","from","get","got","had","has","have","he","her","hers","him","his","how","however","i","if","into","is","it","its","just","least","let","like","likely","may","me","might","most","must","my","neither","no","nor","not","of","off","often","on","only","other","our","own","rather","said","say","says","she","should","since","so","some","than","that","the","their","them","then","there","these","they","this","tis","to","too","twas","us","wants","was","we","were","what","when","where","which","while","who","whom","why","will","with","would","yet","you","your","ain't","aren't","can't","could've","couldn't","didn't","doesn't","don't","hasn't","he'd","he'll","he's","how'd","how'll","how's","i'd","i'll","i'm","i've","isn't","it's","might've","mightn't","must've","mustn't","shan't","she'd","she'll","she's","should've","shouldn't","that'll","that's","there's","they'd","they'll","they're","they've","wasn't","we'd","we'll","we're","weren't","what'd","what's","when'd","when'll","when's","where'd","where'll","where's","who'd","who'll","who's","why'd","why'll","why's","won't","would've","wouldn't","you'd","you'll","you're","you've"};
 	// connecting keywords
 	public static String[] concatWords = {"and", "&"};
+
 	// seperating keywords
 	public static String[] seperatingWord = {"or", "/"};
+	
+	// comparing keywords
+	public static String[] comparingWord = {"than", "as"};
 		
 	public static String[] seperatingChar = {";", ".", "!", "?", ":"};
 	
@@ -58,14 +62,17 @@ public class Konfig {
 	// cue words for software version (fixed indicator) -> indicator must be placed right before a software version
 	public static String[] softwareNameStopWords = {"before"};
 	// cue words for software version (not fixed until indicator) -> indicator must be placed behind a software version (e.g. Java 7 and earlier )
-	public static String[] softwareVersionEnd ={"earlier"};
+	public static String[] softwareVersionEnd ={"earlier", "through", "previous", "lower"};
+	// cue words for software version (not fixed starting version)
+	public static String[] softwareBeginInd = {"from", "later", "after"};
+	// cue words for a software range 
+	public static String[] softwareRangeInd= {"between"};
 	// string which will be inserted by connecting text snippets
 	public static String seperator =" ";
 	
 	// features a snippet may have
 	public static String[] SnippetFeatures = {"comma", "word", "possibleversion", "name", "bigletter", "nottouse", 
-		"used", "version", "os", "osext", "stopword", "concatword", "seperator", "namestart", "versionstart", 
-		"versionend", "logicalend", "logicalstart"};
+		"used", "version", "os", "osext", "stopword", "concatword", "comparingword", "seperator", "namestart", "versionstart", "cuebefore", "cueearlier", "cuebegin", "cuebetween", "logicalend", "logicalstart"};
 	
 	// logical units which may appear in a text
 	public static String[] logicalUnits = {"version", "softwarename", "date", "beforeIndicator", "earlierIndicator", "number"};

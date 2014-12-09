@@ -88,6 +88,49 @@ public class CveItem {
 		while (tokenIterator.hasNext())
 			tokenIterator.next().melt();
 		rebuildTokenVector();
+		searchSnippetcontext();
+	}
+
+	private void searchSnippetcontext() {
+		Iterator<Snippet> tokenIterator = tokenList.iterator();
+		Snippet curSnip;
+		while (tokenIterator.hasNext()){
+			curSnip=tokenIterator.next();
+			try {
+				if (curSnip.hasLogicalType()) {
+					// "cuebefore", "cueearlier", "cuebegin", "cuebetween"
+					if (curSnip.hasPrev()) {
+						if (curSnip.prev.condition("!cuebefore"))  curSnip.setLogicalUnitComment("fixed");
+						if (curSnip.prev.condition("!cuebegin"))  curSnip.setLogicalUnitComment("first detected vulnerability");
+						if (curSnip.prev.condition("!cueearlier"))  curSnip.setLogicalUnitComment("last detected vulnerability");
+						if (curSnip.prev.condition("!cuebetween")){
+							curSnip.setLogicalUnitComment("first detected vulnerability");
+							Snippet scanSnip=curSnip;
+							int distance=0;
+							while(scanSnip.hasNext()&&!scanSnip.islogicalEnd()&& distance < Konfig.searchdistance){
+								scanSnip=scanSnip.next;
+								distance+=scanSnip.value();
+								if(scanSnip.logicalType().equals("version")){
+									scanSnip.setLogicalUnitComment("last detected vulnerability");
+								}
+							}
+						}
+						if(curSnip.prev.condition("!comparingword")&&curSnip.prev.hasPrev()){
+							if(curSnip.prev.prev.condition("!cueearlier"))curSnip.setLogicalUnitComment("last detected vulnerability");
+							if(curSnip.prev.prev.condition("!cuebegin"))curSnip.setLogicalUnitComment("first detected vulnerability");
+						}
+						
+					}
+					if (curSnip.hasNext()&&curSnip.next.hasNext()) {
+						if (curSnip.next.condition("!concatword") && curSnip.next.next.condition("!cueearlier")) curSnip.setLogicalUnitComment("last detected vulnerability");
+					}
+
+			}
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 
 	protected String xpathRequest(String command) {

@@ -35,8 +35,6 @@ public class Snippet {
 	 */
 
 	// handling vars:
-	private boolean logicalEnd = false;
-	private boolean logicalStart = false;
 	private String text; // floating text part
 	private String lowerCaseText;
 	private int length = 0;
@@ -70,11 +68,21 @@ public class Snippet {
 	}
 
 	public boolean islogicalEnd() {
-		return logicalEnd || !hasNext();
+		try {
+			return getFeatureValue("logicalend") || !hasNext();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	public boolean islogicalStart() {
-		return logicalStart;
+		try {
+			return getFeatureValue("logicalstart");
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	public int length() {
@@ -109,19 +117,22 @@ public class Snippet {
 					keywordCheck(lowerCaseText, Konfig.stopWords));
 			setFeature("concatword",
 					keywordCheck(lowerCaseText, Konfig.concatWords));
+			setFeature("comparingword", keywordCheck(lowerCaseText, Konfig.comparingWord));
 			setFeature("seperator",
 					keywordCheck(lowerCaseText, Konfig.seperatingWord));
 			setFeature("namestart",
 					keywordCheck(lowerCaseText, Konfig.softwareNameStartWords));
 			setFeature("versionstart",
 					keywordCheck(lowerCaseText, Konfig.softwareNameStopWords));
-			setFeature("versionend",
-					keywordCheck(lowerCaseText, Konfig.softwareVersionEnd));
-			setFeature(
-					"logicalend",
-					(getFeatureValue("comma") | lcheck(".+["
-							+ createRegexpFromStrings(Konfig.seperatingChar, "")
-							+ "]")));
+			setFeature("cuebefore", keywordCheck(lowerCaseText,Konfig.softwareNameStopWords));
+			setFeature("cueearlier", keywordCheck(lowerCaseText,Konfig.softwareVersionEnd));
+			setFeature("cuebegin", keywordCheck(lowerCaseText,Konfig.softwareBeginInd));
+			setFeature("cuebetween", keywordCheck(lowerCaseText,Konfig.softwareRangeInd));
+			
+			if((getFeatureValue("comma") || lcheck(".+["+ createRegexpFromStrings(Konfig.seperatingChar, "")+"]"))){
+						setFeature("logicalend", true);
+						text=text.substring(0, text.length()-1);
+					}
 			if (prev != null
 					&& lcheck("["
 							+ createRegexpFromStrings(Konfig.seperatingChar)
@@ -328,6 +339,14 @@ public class Snippet {
 	public boolean hasLogicalType(String checklogicalType) {
 		return checklogicalType.equals(logicalType());
 	}
+	
+	public void setLogicalUnitComment(String unitComment){
+		if(hasLogicalType())logicalUnit.comment=unitComment;
+	}
+	
+	public String logicalUnitComment(){
+		return logicalUnit.comment;
+	}
 
 	public void addToSection(Section newSection) {
 		newSection.addSnippet(this);
@@ -411,6 +430,10 @@ public class Snippet {
 		}
 		return true;
 	}
+	
+	public int value(){
+		return tokenValue;
+	}
 
 	private boolean getFeatureValue(String featureName) throws Exception {
 		if (!features.containsKey(featureName)) {
@@ -429,16 +452,14 @@ public class Snippet {
 
 		Vector<String[]> correspondingConditions = logicalUnit
 				.getCorrespondingConditions();
-		int meltingNumber = 0;
+		int meltingNumber = -1;
 		Snippet curSnip = this;
-		if(curSnip.getText().contains("WordPress"))
-			System.out.println();
 		while (!curSnip.islogicalEnd() && correspondingConditions.size() != 0) {
 			List<String[]> removeList = new ArrayList<String[]>();
 			for (String[] condition : correspondingConditions) {
 				try {
-					if (condition.length < meltingNumber + 1
-							|| !curSnip.condition(condition[meltingNumber])) {
+					if (condition.length <= meltingNumber + 1
+							|| !curSnip.condition(condition[meltingNumber+1])) {
 						removeList.add(condition);
 
 					}
@@ -449,8 +470,12 @@ public class Snippet {
 			}
 			correspondingConditions.removeAll(removeList);
 			// Check the next Snippet for a specific condition
-			if (correspondingConditions.size() != 0)
+			if (correspondingConditions.size() != 0){
 				meltingNumber++;
+				if(getText().endsWith(",")){
+					System.out.println("");
+				}
+			}
 			else
 				break;
 			curSnip = curSnip.next;

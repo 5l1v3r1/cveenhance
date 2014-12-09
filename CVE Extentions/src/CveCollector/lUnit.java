@@ -7,7 +7,8 @@ public class lUnit {
 	private String[] possibleUnits=Konfig.logicalUnits;
 	private final String unitType;
 	private boolean valid=false;
-
+	public String comment ="";
+	
 	public lUnit(String newUnitType) {
 		if(isValidType(newUnitType.trim().toLowerCase())) {
 			unitType=newUnitType;
@@ -46,5 +47,6 @@ public class lUnit {
 		if(isValid()) return unitType;
 		else return "";
 	}
+	
 
 }

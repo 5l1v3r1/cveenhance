@@ -116,11 +116,14 @@ public class AnalyseCves {
 			Iterator<Snippet> versionIt = versions.iterator();
 			Snippet curSnip;
 			String softwareName="";
+			if(versionIt.hasNext())successful_item_counter++;
 			while(versionIt.hasNext()){
+				resultCouter++;
+				String Snippetcomment="";
 				curSnip=versionIt.next();
 				softwareName=item.searchSoftwareNameBefore(curSnip);
-				System.out.println(softwareName+" Fixed Version:"+curSnip.getText());
-				
+				if(!curSnip.logicalUnitComment().equals("")) Snippetcomment="    ("+curSnip.logicalUnitComment()+") ";
+				System.out.println(softwareName+"     Version:"+curSnip.getText()+Snippetcomment);	
 			}
 			
 			
@@ -151,7 +154,7 @@ public class AnalyseCves {
 
 		}
 		 pw.close();		// extraction process completed
-		 System.out.println("\n\nIn "+successful_item_counter+" von "+itemList.size()+" CVE Einträgen wurden "+ resultCouter+" gefixte Versionen (davon "+validData+" valide und "+(resultCouter-validData)+" unvalide Datensätze) gefunden!");
+		 System.out.println("\n\nIn "+successful_item_counter+" von "+itemList.size()+" CVE Einträgen wurden "+ resultCouter+"  Versionen gefunden!");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
