@@ -74,7 +74,7 @@ public class CveItem {
 	protected String description; // content part of CVE file, which describes
 									// the CVE issue (floating text)
 
-	protected XPath xPath;
+
 
 	/**
 	 * initializes a CVE item instance (currently not in use)
@@ -140,6 +140,14 @@ public class CveItem {
 			e.printStackTrace();
 		}
 		return "";
+	}
+	
+	public XPath xPath(){
+		return xpath;
+	}
+	
+	public Document XmlDocument(){
+		return XmlDocument;
 	}
 
 	protected String xpathFromString(String source, String command) {
@@ -318,14 +326,14 @@ public class CveItem {
 	 * @param versionSnippet
 	 * @return
 	 */
-	public String searchSoftwareNameBefore(Snippet versionSnippet) {
+	public Snippet searchSoftwareNameBefore(Snippet versionSnippet) {
 		Snippet curSnip = versionSnippet;
-		String Softwarename = "";
+		Snippet Softwarename=null;
 		int distance = 0;
 		while (distance < Konfig.searchdistance && curSnip.hasPrev()) {
 			curSnip = curSnip.prev;
 			if (curSnip.logicalType()!=null && curSnip.logicalType().equals("softwarename")) {
-				Softwarename = curSnip.getText();
+				Softwarename = curSnip;
 				break;
 			} else {
 				distance += curSnip.getTokenValue();
@@ -333,6 +341,7 @@ public class CveItem {
 					distance = 0;
 			}
 		}
+		if(Softwarename==null) Softwarename=new Snippet("");
 		return Softwarename;
 	}
 

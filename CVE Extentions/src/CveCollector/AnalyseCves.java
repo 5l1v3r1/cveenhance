@@ -15,10 +15,21 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import cve.matcher.LuceneIndexCreator;
+import cve.matcher.VersionComparator;
 
 public class AnalyseCves {
 	
@@ -113,9 +124,10 @@ public class AnalyseCves {
 		int save_Counter=0;							// buffer for current result number
 		for(;it.hasNext();item=it.next()){// for every CVE item:
 			Vector<Snippet> versions=item.getSnippetsWithLogicalUnits("version");
+			Vector<NameVersionRelation> relations= new Vector<NameVersionRelation>();
 			Iterator<Snippet> versionIt = versions.iterator();
 			Snippet curSnip;
-			String softwareName="";
+			Snippet softwareName;
 			if(versionIt.hasNext())successful_item_counter++;
 			while(versionIt.hasNext()){
 				resultCouter++;
@@ -123,10 +135,11 @@ public class AnalyseCves {
 				curSnip=versionIt.next();
 				softwareName=item.searchSoftwareNameBefore(curSnip);
 				if(!curSnip.logicalUnitComment().equals("")) Snippetcomment="    ("+curSnip.logicalUnitComment()+") ";
-				System.out.println(softwareName+"     Version:"+curSnip.getText()+Snippetcomment);	
+				relations.add(new NameVersionRelation(softwareName, curSnip));
+				System.out.println(softwareName.getText()+"     Version:"+curSnip.getText()+Snippetcomment);	
 			}
 			
-			
+			createResult(relations, item);
 			
 //			System.out.println(item.getCVEID()+":");
 ////			String [] Versions=item.getFixedVersion();		// extraction of fixed versions
@@ -160,6 +173,75 @@ public class AnalyseCves {
 		}
 	}
 	
+	private Vector<VersionRange> createResult(Vector<NameVersionRelation> relations, CveItem item){
+		Iterator<NameVersionRelation> relationsIterator=relations.iterator();
+		HashSet<NameVersionRelation> shortestRelations = new HashSet<NameVersionRelation>();
+		if (relationsIterator.hasNext()){
+			NameVersionRelation shortestRelation=relationsIterator.next();
+			shortestRelations.add(shortestRelation);
+			while(relationsIterator.hasNext()){
+				NameVersionRelation curRelation=relationsIterator.next();
+				if(trimVersion(shortestRelation.version().getText()).length()>trimVersion(curRelation.version().getText()).length()){
+					shortestRelation=curRelation;
+					shortestRelations.clear();
+					shortestRelations.add(curRelation);
+				}
+				if(trimVersion(shortestRelation.version().getText()).length()==trimVersion(curRelation.version().getText()).length()){
+					shortestRelations.add(curRelation);
+				}
+			}
+		//Start Merge 
+			
+			boolean fixPresent=false; // ToDo relation ...
+			String fix=""; // ToDo FixedVersion String
+			try {
+				NodeList vulnSoftware = (NodeList) item.xPath().evaluate("//entry/vulnerable-software-list/product/text()", item.XmlDocument, XPathConstants.NODESET);
+				List<String> products=new ArrayList<String>();
+				if (vulnSoftware.getLength() > 0)
+					for (int j = 0; j < vulnSoftware.getLength(); j++) {
+						Node productNode = vulnSoftware.item(j);  // productNode = ein Eintrag in der vuln Liste
+						String product = productNode.getTextContent(); // produkt = String der CPE
+						products.add(product); // Liste von CPE Strings
+						}
+				// cpeName: höchster Match zu shortestRelation (in diesem Fall)
+				String cpename=LuceneIndexCreator.cpeEncoding(LuceneIndexCreator.searchForCpeName(shortestRelation.name().getText()+" "+shortestRelation.version().getText()));
+				String[] split=cpename.split(":");
+				for(int i=0;i<4;i++){
+					cpename+=split[i]+":";
+				}
+				// cpeName: gekürzt auf VendorName und Productname z.B. cpe:/a:apache:camel:
+				List<String> remaining=new ArrayList<String>();
+				for(String product:products){
+					if(product.startsWith(cpename))
+						remaining.add(product);
+				}
+				// remaining = Liste der vuln-List Einträge, die mit dem obigen String anfangen
+				// Es werden hier Einträge mit nicht übereinstimmenden Softwareversionen entfernt:
+				remaining=LuceneIndexCreator.getAllCpesWithVersionPrefix(shortestRelation.version().getText(), remaining);
+				
+				String smallest=VersionComparator.getSmallestMatch(remaining);
+				String greatest="";
+				if(fixPresent){
+					greatest=VersionComparator.getGreatestUnderFix(remaining,fix);
+				}
+				else greatest=VersionComparator.getGreatestMatch(remaining);
+			} catch (XPathExpressionException | IOException | ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			
+		//Ende Merge
+		}
+		return null;
+	} 
+	
+	private String trimVersion (String version){
+		if(version.contains(" "))version=version.substring(0, version.indexOf(" "));
+		version=version.trim();
+		if(version.substring(version.length()-2).equals(".x"))version=version.substring(0, version.length()-2);
+		return version;
+	}
 	
 	/*
 	 * Sets a timeout for displaying a message. 
