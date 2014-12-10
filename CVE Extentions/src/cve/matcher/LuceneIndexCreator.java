@@ -123,7 +123,7 @@ public class LuceneIndexCreator {
 		Map<String, List<String>> titles = new HashMap<String, List<String>>();
 		Set<String> set = new HashSet<String>();
 		for (int i = 0; i < cpes.length; i++) {
-			String res = transformTitle(searchForCPE_Names(cpes[i]));
+			String res = transformTitle(searchForTitle(cpes[i]));
 			if (res.length() > 0) {
 				String[] split = cpes[i].split(":");
 				String key = split[2] + ":" + split[3];
@@ -163,7 +163,7 @@ public class LuceneIndexCreator {
 		return result;
 	}
 
-	public static String searchForCPE_Names(String cpeName) throws IOException, ParseException {
+	public static String searchForTitle(String cpeName) throws IOException, ParseException {
 		StandardAnalyzer analyzer = new StandardAnalyzer();
 		Directory index = new SimpleFSDirectory(new File("data/index"));
 		String querystr = cpeDecoding(cpeName);
@@ -183,7 +183,27 @@ public class LuceneIndexCreator {
 		return "";
 	}
 
-	private static String cpeDecoding(String cpe) {
+	public static String searchForCpeName(String title) throws IOException, ParseException {
+		StandardAnalyzer analyzer = new StandardAnalyzer();
+		Directory index = new SimpleFSDirectory(new File("data/index"));
+		String querystr = transformTitle(title);
+
+		Query q = new QueryParser("title", analyzer).parse(querystr);
+
+		int hitsPerPage = 100;
+		IndexReader reader = DirectoryReader.open(index);
+		IndexSearcher searcher = new IndexSearcher(reader);
+		TopScoreDocCollector collector = TopScoreDocCollector.create(hitsPerPage, true);
+		searcher.search(q, collector);
+		ScoreDoc[] hits = collector.topDocs().scoreDocs;
+		if (hits.length > 0)
+			return searcher.doc(hits[0].doc).get("CPE-Name");
+		reader.close();
+
+		return "";
+	}
+
+	public static String cpeDecoding(String cpe) {
 		String[] split = cpe.split(":");
 		StringBuilder sb = new StringBuilder();
 		for (String s : split) {
@@ -208,6 +228,23 @@ public class LuceneIndexCreator {
 		}
 		String result = sb.toString();
 		return result.substring(0, result.length() - 1);
+	}
+
+	public static String cpeEncoding(String cpe_) {
+		String[] split = cpe_.split(" ");
+		StringBuilder sb = new StringBuilder();
+		sb.append(split[0]);
+		sb.append(":");
+		sb.append("/");
+		sb.append(split[1]);
+		sb.append(":");
+		for (int i = 2; i < split.length; i++) {
+			sb.append(split[i]);
+			if (i < split.length - 1) {
+				sb.append(":");
+			}
+		}
+		return sb.toString();
 	}
 
 	private static void addDoc(IndexWriter w, String cpename, String title) throws IOException {
