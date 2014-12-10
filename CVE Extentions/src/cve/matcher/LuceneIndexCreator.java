@@ -42,7 +42,7 @@ import org.xml.sax.SAXException;
 
 public class LuceneIndexCreator {
 
-	public static void main(String[] args) throws IOException, ParseException, ParserConfigurationException, XPathExpressionException, SAXException {
+	public static void test(String[] args) throws IOException, ParseException, ParserConfigurationException, XPathExpressionException, SAXException {
 		// 0. Specify the analyzer for tokenizing text.
 		// The same analyzer should be used for indexing and searching
 		StandardAnalyzer analyzer = new StandardAnalyzer();
@@ -108,7 +108,7 @@ public class LuceneIndexCreator {
 		reader.close();
 	}
 
-	public static void sub(String[] args) throws IOException, ParseException {
+	public static void main(String[] args) throws IOException, ParseException {
 		String[] cpes = { "cpe:/a:ibm:java:7.0.0.0", "cpe:/a:ibm:java:7.0.1.0", "cpe:/a:ibm:java:7.0.2.0", "cpe:/a:ibm:java:7.0.3.0",
 				"cpe:/a:ibm:java:7.0.4.0", "cpe:/a:ibm:java:7.0.4.1", "cpe:/a:ibm:java:7.0.4.2", "cpe:/a:ibm:java:5.0.14.0",
 				"cpe:/a:ibm:java:5.0.15.0", "cpe:/a:ibm:java:5.0.11.1", "cpe:/a:ibm:java:5.0.0.0", "cpe:/a:ibm:java:5.0.11.2",
@@ -123,7 +123,7 @@ public class LuceneIndexCreator {
 		Map<String, List<String>> titles = new HashMap<String, List<String>>();
 		Set<String> set = new HashSet<String>();
 		for (int i = 0; i < cpes.length; i++) {
-			String res = searchForCPE_Names(cpes[i]);
+			String res = transformTitle(searchForCPE_Names(cpes[i]));
 			if (res.length() > 0) {
 				String[] split = cpes[i].split(":");
 				String key = split[2] + ":" + split[3];
@@ -131,7 +131,7 @@ public class LuceneIndexCreator {
 				if (titles.containsKey(key)) {
 					list = titles.get(key);
 				}
-				list.add(res.substring(0, res.indexOf(split[4])));
+				list.add(res.substring(0, res.indexOf(transformTitle(split[4]))));
 				titles.put(key, list);
 			}
 		}
@@ -151,6 +151,16 @@ public class LuceneIndexCreator {
 		}
 		for (int i = 0; i < set.size(); i++)
 			System.out.println(set.toArray()[i]);
+	}
+
+	public static List<String> getAllCpesWithVersionPrefix(String versionPrefix, List<String> cpes) {
+		List<String> result = new ArrayList<String>();
+		for (String cpe : cpes) {
+			if (cpe.split(":")[4].startsWith(versionPrefix)) {
+				result.add(cpe);
+			}
+		}
+		return result;
 	}
 
 	public static String searchForCPE_Names(String cpeName) throws IOException, ParseException {

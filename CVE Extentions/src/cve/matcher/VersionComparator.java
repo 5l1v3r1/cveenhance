@@ -1,5 +1,7 @@
 package cve.matcher;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.StringTokenizer;
 
 public class VersionComparator {
@@ -11,6 +13,36 @@ public class VersionComparator {
 		String vers2 = "11b";
 		System.out.println(compareTo(vers2, vers1));
 
+	}
+
+	public static String getSmallestMatch(List<String> cpes) {
+		String smallest = cpes.get(0);
+		for (int i = 1; i < cpes.size(); i++) {
+			if (compareTo(smallest, cpes.get(i)) >= 1) {
+				smallest = cpes.get(i);
+			}
+		}
+		return smallest;
+	}
+
+	public static String getGreatestMatch(List<String> cpes) {
+		String greatest = cpes.get(0);
+		for (int i = 1; i < cpes.size(); i++) {
+			if (compareTo(greatest, cpes.get(i)) <= -1) {
+				greatest = cpes.get(i);
+			}
+		}
+		return greatest;
+	}
+
+	public static String getGreatestUnderFix(List<String> cpes, String fixVersion) {
+		List<String> smallerThanFix = new ArrayList<String>();
+		for (String cpe : cpes) {
+			if (compareTo(cpe, fixVersion) <= -1) {
+				smallerThanFix.add(cpe);
+			}
+		}
+		return getGreatestMatch(smallerThanFix);
 	}
 
 	public static int compareTo(String arg0, String arg1) {
@@ -51,4 +83,5 @@ public class VersionComparator {
 
 		return 0;
 	}
+
 }
