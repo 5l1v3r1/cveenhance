@@ -335,10 +335,6 @@ public class Snippet {
 	public boolean hasLogicalType() {
 		return logicalType() != null;
 	}
-
-	public boolean hasLogicalType(String checklogicalType) {
-		return checklogicalType.equals(logicalType());
-	}
 	
 	public void setLogicalUnitComment(String unitComment){
 		if(hasLogicalType())logicalUnit.comment=unitComment;

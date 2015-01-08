@@ -36,7 +36,7 @@ public class CveItem {
 			InputSource source = new InputSource(new StringReader(XmlCode));
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder db = dbf.newDocumentBuilder();
-			Document XmlDocument = db.parse(source);
+			XmlDocument = db.parse(source);
 			XPathFactory xpathFactory = XPathFactory.newInstance();
 			xpath = xpathFactory.newXPath();
 			String summary = xpath.evaluate("//entry/summary/text()",
@@ -110,7 +110,7 @@ public class CveItem {
 							while(scanSnip.hasNext()&&!scanSnip.islogicalEnd()&& distance < Konfig.searchdistance){
 								scanSnip=scanSnip.next;
 								distance+=scanSnip.value();
-								if(scanSnip.logicalType().equals("version")){
+								if(scanSnip.isLogicalType("version")){
 									scanSnip.setLogicalUnitComment("last detected vulnerability");
 								}
 							}
@@ -484,11 +484,11 @@ public class CveItem {
 	Vector<Snippet> getSnippetsWithLogicalUnits(String logicalUnitType) {
 		Vector<Snippet> returnVec = new Vector<Snippet>();
 		Snippet curSnip = tokenList.firstElement();
-		if (curSnip.hasLogicalType(logicalUnitType))
+		if (curSnip.isLogicalType(logicalUnitType))
 			returnVec.add(curSnip);
 		while (curSnip.hasNext()) {
 			curSnip = curSnip.next;
-			if (curSnip.hasLogicalType(logicalUnitType)){
+			if (curSnip.isLogicalType(logicalUnitType)){
 				returnVec.add(curSnip);
 				}
 		}

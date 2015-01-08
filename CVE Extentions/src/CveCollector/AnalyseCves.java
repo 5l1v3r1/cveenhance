@@ -123,6 +123,7 @@ public class AnalyseCves {
 		pw = new PrintWriter( bw );
 		int save_Counter=0;							// buffer for current result number
 		for(;it.hasNext();item=it.next()){// for every CVE item:
+			if(Testmode)System.out.println("------- CVE-Item: "+item.getCVEID()+" -------");
 			Vector<Snippet> versions=item.getSnippetsWithLogicalUnits("version");
 			Vector<NameVersionRelation> relations= new Vector<NameVersionRelation>();
 			Iterator<Snippet> versionIt = versions.iterator();
@@ -139,7 +140,10 @@ public class AnalyseCves {
 				System.out.println(softwareName.getText()+"     Version:"+curSnip.getText()+Snippetcomment);	
 			}
 			
-			createResult(relations, item);
+			Vector<VersionRange> results=createResult(relations, item);
+			for(VersionRange result:results){
+				System.out.println("-> Result: "+result);
+			}
 			
 //			System.out.println(item.getCVEID()+":");
 ////			String [] Versions=item.getFixedVersion();		// extraction of fixed versions
@@ -174,74 +178,129 @@ public class AnalyseCves {
 	}
 	
 	private Vector<VersionRange> createResult(Vector<NameVersionRelation> relations, CveItem item){
-		Iterator<NameVersionRelation> relationsIterator=relations.iterator();
+		HashSet<NameVersionRelation> interestingRelations = new HashSet<NameVersionRelation>();
+		interestingRelations.addAll(relations);
+		HashSet<NameVersionRelation> remainingRelations = new HashSet<NameVersionRelation>();
 		HashSet<NameVersionRelation> shortestRelations = new HashSet<NameVersionRelation>();
-		if (relationsIterator.hasNext()){
-			NameVersionRelation shortestRelation=relationsIterator.next();
-			shortestRelations.add(shortestRelation);
-			while(relationsIterator.hasNext()){
-				NameVersionRelation curRelation=relationsIterator.next();
-				if(trimVersion(shortestRelation.version().getText()).length()>trimVersion(curRelation.version().getText()).length()){
-					shortestRelation=curRelation;
-					shortestRelations.clear();
-					shortestRelations.add(curRelation);
-				}
-				if(trimVersion(shortestRelation.version().getText()).length()==trimVersion(curRelation.version().getText()).length()){
-					shortestRelations.add(curRelation);
-				}
-			}
-		//Start Merge 
+		Vector<VersionRange> relatedRelations = new Vector<VersionRange>();
+		
+		
+		if (interestingRelations.size()>0){
 			
-			boolean fixPresent=false; // ToDo relation ...
-			String fix=""; // ToDo FixedVersion String
+			while(interestingRelations.size()>0){ // <--- Unsicher, ob richtig!
+				Iterator<NameVersionRelation> relationsIterator=interestingRelations.iterator();	
+				NameVersionRelation shortestRelation=relationsIterator.next();
+				shortestRelations.add(shortestRelation);			
+			
+				while(relationsIterator.hasNext()){
+					NameVersionRelation curRelation=relationsIterator.next();
+					if(shortestRelation.trimmedVersion().length()>curRelation.trimmedVersion().length()){
+						shortestRelation=curRelation;
+						remainingRelations.addAll(shortestRelations);
+						shortestRelations.clear();
+						shortestRelations.add(curRelation);
+					}
+					else if(shortestRelation.trimmedVersion().length()==curRelation.trimmedVersion().length()){
+						shortestRelations.add(curRelation);
+					}
+					else{
+						remainingRelations.add(curRelation);
+					}
+				}
+				
+				interestingRelations.removeAll(shortestRelations);
+								
+				Iterator<NameVersionRelation> shortestRelationsIterator=shortestRelations.iterator();
+				while(shortestRelationsIterator.hasNext()){
+					NameVersionRelation curShortestRel = shortestRelationsIterator.next();
+					HashSet<NameVersionRelation> curRelRelation = new HashSet<NameVersionRelation>(); // current relation relation = belonging relations
+					curRelRelation.add(curShortestRel);
+					Iterator<NameVersionRelation> remainingRelationsIt = remainingRelations.iterator();
+					while(remainingRelationsIt.hasNext()){
+						NameVersionRelation curNameVerRel = remainingRelationsIt.next(); // iterate over all remaining relations
+						if(curNameVerRel.refersSameSoftware(curShortestRel) && curShortestRel.versionIsMoreGeneral(curNameVerRel)) {
+							curRelRelation.add(curNameVerRel);
+							interestingRelations.remove(curNameVerRel);
+						}
+					}					
+					VersionRange versionRange = new VersionRange();
+					versionRange.addAll(curRelRelation);
+					remainingRelations.removeAll(curRelRelation);
+					relatedRelations.add(versionRange);
+				}
+				shortestRelations.clear();	
+				remainingRelations.clear();
+			}
+			
+			
+			
+		//Start Merge 
+		Iterator<VersionRange> versionRangeIt = relatedRelations.iterator();
+		
+		// Hier für jede shortest Relation folgenden Code durchlaufen:
+		while(versionRangeIt.hasNext()){
+			VersionRange versionRange = versionRangeIt.next();
+			NameVersionRelation curShortestRel = versionRange.shortest();
+			
+			boolean fixPresent=versionRange.fixed(); 
+			String fix = "";
+			if(fixPresent)fix=versionRange.fixedSoftware().getText(); 
+			
 			try {
-				NodeList vulnSoftware = (NodeList) item.xPath().evaluate("//entry/vulnerable-software-list/product/text()", item.XmlDocument, XPathConstants.NODESET);
-				List<String> products=new ArrayList<String>();
-				if (vulnSoftware.getLength() > 0)
+				NodeList vulnSoftware = (NodeList) item.xPath().evaluate("//entry/vulnerable-software-list/product/text()", item.XmlDocument(), XPathConstants.NODESET);
+				List<String> products = new ArrayList<String>(); 
+				if (vulnSoftware.getLength() > 0){
 					for (int j = 0; j < vulnSoftware.getLength(); j++) {
 						Node productNode = vulnSoftware.item(j);  // productNode = ein Eintrag in der vuln Liste
 						String product = productNode.getTextContent(); // produkt = String der CPE
 						products.add(product); // Liste von CPE Strings
 						}
+					}
+				else{
+					for(NameVersionRelation nvr:versionRange.versionList()){ 
+						String cpeMatch = LuceneIndexCreator.searchForCpeName(nvr.name().getText()+" "+nvr.version().getText());
+						if(!cpeMatch.isEmpty())products.add(LuceneIndexCreator.cpeEncoding(cpeMatch));
+					}
+				}
 				// cpeName: höchster Match zu shortestRelation (in diesem Fall)
-				String cpename=LuceneIndexCreator.cpeEncoding(LuceneIndexCreator.searchForCpeName(shortestRelation.name().getText()+" "+shortestRelation.version().getText()));
-				String[] split=cpename.split(":");
-				for(int i=0;i<4;i++){
-					cpename+=split[i]+":";
+				String cpeMatch=LuceneIndexCreator.searchForCpeName(curShortestRel.name().getText()+" "+curShortestRel.version().getText());
+				if(!cpeMatch.isEmpty()){
+					String cpename=LuceneIndexCreator.cpeEncoding(cpeMatch);
+					String[] split=cpename.split(":");
+					cpename="";
+					for(int i=0;i<4;i++){
+						cpename+=split[i]+":";
+					}
+					// cpeName: gekürzt auf VendorName und Productname z.B. cpe:/a:apache:camel:
+					List<String> remaining=new ArrayList<String>();
+					for(String product:products){
+						if(product.startsWith(cpename))
+							remaining.add(product);
+					}
+					// remaining = Liste der vuln-List Einträge, die mit dem obigen String anfangen
+					// Es werden hier Einträge mit nicht übereinstimmenden Softwareversionen entfernt:
+					if(remaining.size()>0){					
+						List<String> filteredRemainings=LuceneIndexCreator.getAllCpesWithVersionPrefix(versionRange.shortest().version().getText(), remaining);
+						if(filteredRemainings.size()!=0) remaining=filteredRemainings; 
+					
+						String smallest=VersionComparator.getSmallestMatch(remaining);
+						String greatest="";
+						if(fixPresent){
+							greatest=VersionComparator.getGreatestUnderFix(remaining,fix); // Achtung: Ergebnisse fließen noch nicht in Ausgabe ein!!
+						}
+						else greatest=VersionComparator.getGreatestMatch(remaining);
+					}
 				}
-				// cpeName: gekürzt auf VendorName und Productname z.B. cpe:/a:apache:camel:
-				List<String> remaining=new ArrayList<String>();
-				for(String product:products){
-					if(product.startsWith(cpename))
-						remaining.add(product);
-				}
-				// remaining = Liste der vuln-List Einträge, die mit dem obigen String anfangen
-				// Es werden hier Einträge mit nicht übereinstimmenden Softwareversionen entfernt:
-				remaining=LuceneIndexCreator.getAllCpesWithVersionPrefix(shortestRelation.version().getText(), remaining);
-				
-				String smallest=VersionComparator.getSmallestMatch(remaining);
-				String greatest="";
-				if(fixPresent){
-					greatest=VersionComparator.getGreatestUnderFix(remaining,fix);
-				}
-				else greatest=VersionComparator.getGreatestMatch(remaining);
 			} catch (XPathExpressionException | IOException | ParseException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			
-			
+		}
 		//Ende Merge
 		}
-		return null;
+		return relatedRelations;
 	} 
-	
-	private String trimVersion (String version){
-		if(version.contains(" "))version=version.substring(0, version.indexOf(" "));
-		version=version.trim();
-		if(version.substring(version.length()-2).equals(".x"))version=version.substring(0, version.length()-2);
-		return version;
-	}
 	
 	/*
 	 * Sets a timeout for displaying a message. 
