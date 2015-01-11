@@ -1,5 +1,6 @@
 package CveCollector;
 
+import java.lang.annotation.Retention;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -7,13 +8,14 @@ import java.util.Iterator;
 
 public class VersionRange{
 	
-	String firstDetectedVersion="";
-	String lastDetectedVersion="";
-	String fixedVersion="";
-	String softwareName="";
-	String generalCpeString="";
-	Snippet fixedSoftware;
-	boolean empty;
+	private String firstDetectedVer="0.0";
+	private String lastDetectedVer="";
+	private String softwareName="";
+	private String generalCpeString="";
+	private Snippet fixedSoftware;
+	private boolean empty;
+	private boolean first;
+	private boolean last;
 	private boolean fixed;
 	
 	private ArrayList<NameVersionRelation> versions;
@@ -22,14 +24,94 @@ public class VersionRange{
 		return versions;
 	}
 	
+	public void updateSoftwareName(String newSoftwareName){
+		softwareName=newSoftwareName;
+	}
+	
+	public void setCPE(String newCPE){
+		generalCpeString=newCPE;
+	}
+	
 	public VersionRange(){
 		empty=true;
 		versions=new ArrayList<NameVersionRelation>();
 		fixed=false;
+		last=false;
+		first=false;
 	}
 	
+	public boolean hasFirst(){
+		return first;
+	}
+	
+	public boolean hasLast(){
+		return last;
+	}
+	
+	public boolean hasFix(){
+		return fixed;
+	}
+	
+	public void setLast(String newLast){
+		lastDetectedVer=newLast;
+	}
+	
+	public void setFirst(String newFirst){
+		firstDetectedVer=newFirst;
+	}
+	
+	public String firstDetectedVersion(){
+		updateRelevantVersions();
+		return firstDetectedVer;
+	}
+	
+	public String lastDetectedVersion(){
+		updateRelevantVersions();
+		return lastDetectedVer;
+	}
+	
+	public String fixedVersion(){
+		updateRelevantVersions();
+		return fixedSoftware().getText();
+	}
+	
+	private void updateRelevantVersions() {
+		searchFirst();
+		searchLast();
+		if(versions.get(versions.size()-1).version().logicalUnitComment().equals("fixed")){
+			if(versions.size()==1){
+				firstDetectedVer="0.0";
+				lastDetectedVer="";
+			}
+			else if(versions.size()==2){
+				firstDetectedVer=shortest().version().getText().replaceFirst("\\.x", ".0");
+				lastDetectedVer="";
+			}
+			else{
+				firstDetectedVer=shortest().version().getText().replaceFirst("\\.x", ".0");
+				lastDetectedVer=versions.get(versions.size()-2).version().getText().replaceFirst("\\.x", ".0");
+			}
+		}
+		else {
+			if(versions.size()==1){
+				if(last||first){
+					
+				}
+				else{
+					firstDetectedVer=versions.get(0).version().getText().replaceFirst("\\.x", ".0");
+					lastDetectedVer=firstDetectedVer;
+				}
+			}
+			else{
+				firstDetectedVer=shortest().version().getText().replaceFirst("\\.x", ".0");
+				lastDetectedVer=biggest().version().getText().replaceFirst("\\.x", ".0");
+			}
+			
+		}
+	}
+
 	public NameVersionRelation shortest(){
-		return versions.get(0); // TODO: Check if get method starts with 0 !!!!
+		return versions.get(0);
 	}
 	
 	public NameVersionRelation biggest(){
@@ -49,6 +131,31 @@ public class VersionRange{
 					}
 				else if(!nvrIt.hasNext())fixed=false;
 			}
+		}
+	}
+	
+	private void searchLast(){
+		Iterator<NameVersionRelation> nvrIt = versions.iterator();
+		Snippet version;
+		while(nvrIt.hasNext()){
+			version=nvrIt.next().version();
+			if(version.logicalUnitComment().equals("last detected vulnerability")) {
+				last=true;
+				lastDetectedVer=version.getText();
+				}
+		}
+	}
+	
+	private void searchFirst(){
+		Iterator<NameVersionRelation> nvrIt = versions.iterator();
+		Snippet version;
+		while(nvrIt.hasNext()){
+			version=nvrIt.next().version();
+			if(version.logicalUnitComment().equals("first detected vulnerability")) {
+				first=true;
+				lastDetectedVer=version.getText();
+				break;
+				}
 		}
 	}
 	
@@ -83,9 +190,10 @@ public class VersionRange{
 	}
 	
 	public String toString(){
-		String returnStr = softwareName+" vulnerable between "+shortest().version().getText()+" and "+biggest().version().getText();
-		if(fixed) returnStr+=" fix:"+fixedSoftware().getText();
+		String returnStr = softwareName+" vulnerable between "+firstDetectedVersion()+" and "+lastDetectedVersion();
+		if(fixed) returnStr+=" fix:"+fixedVersion();
 		else returnStr+= " no fix found";
+		if(!generalCpeString.isEmpty()) returnStr+=" |  "+generalCpeString;
 		return returnStr;
 		
 	}

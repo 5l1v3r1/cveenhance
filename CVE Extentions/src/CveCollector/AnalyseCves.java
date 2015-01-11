@@ -187,7 +187,7 @@ public class AnalyseCves {
 		
 		if (interestingRelations.size()>0){
 			
-			while(interestingRelations.size()>0){ // <--- Unsicher, ob richtig!
+			while(interestingRelations.size()>0){
 				Iterator<NameVersionRelation> relationsIterator=interestingRelations.iterator();	
 				NameVersionRelation shortestRelation=relationsIterator.next();
 				shortestRelations.add(shortestRelation);			
@@ -209,27 +209,46 @@ public class AnalyseCves {
 				}
 				
 				interestingRelations.removeAll(shortestRelations);
-								
+				boolean sameSoftewareRef=false;
 				Iterator<NameVersionRelation> shortestRelationsIterator=shortestRelations.iterator();
 				while(shortestRelationsIterator.hasNext()){
-					NameVersionRelation curShortestRel = shortestRelationsIterator.next();
-					HashSet<NameVersionRelation> curRelRelation = new HashSet<NameVersionRelation>(); // current relation relation = belonging relations
-					curRelRelation.add(curShortestRel);
-					Iterator<NameVersionRelation> remainingRelationsIt = remainingRelations.iterator();
-					while(remainingRelationsIt.hasNext()){
-						NameVersionRelation curNameVerRel = remainingRelationsIt.next(); // iterate over all remaining relations
-						if(curNameVerRel.refersSameSoftware(curShortestRel) && curShortestRel.versionIsMoreGeneral(curNameVerRel)) {
-							curRelRelation.add(curNameVerRel);
-							interestingRelations.remove(curNameVerRel);
-						}
-					}					
+					if(shortestRelation.refersSameSoftware(shortestRelationsIterator.next())){
+						sameSoftewareRef=true;
+					}
+					else{
+						sameSoftewareRef=false;
+						break;
+					}
+				}
+				
+				if(shortestRelations.size()==relations.size()&&sameSoftewareRef){
 					VersionRange versionRange = new VersionRange();
-					versionRange.addAll(curRelRelation);
-					remainingRelations.removeAll(curRelRelation);
+					versionRange.addAll(shortestRelations);
 					relatedRelations.add(versionRange);
 				}
+				else{				
+					shortestRelationsIterator=shortestRelations.iterator();
+					while(shortestRelationsIterator.hasNext()){
+						NameVersionRelation curShortestRel = shortestRelationsIterator.next();
+						HashSet<NameVersionRelation> curRelRelation = new HashSet<NameVersionRelation>(); // current relation relation = belonging relations
+						curRelRelation.add(curShortestRel);
+						Iterator<NameVersionRelation> remainingRelationsIt = remainingRelations.iterator();
+						while(remainingRelationsIt.hasNext()){
+							NameVersionRelation curNameVerRel = remainingRelationsIt.next(); // iterate over all remaining relations
+							if(curNameVerRel.refersSameSoftware(curShortestRel) && (curShortestRel.versionIsMoreGeneral(curNameVerRel)||curShortestRel.hasSameSuperversion(curNameVerRel))) {
+								curRelRelation.add(curNameVerRel);
+								interestingRelations.remove(curNameVerRel);
+							}
+						}					
+						VersionRange versionRange = new VersionRange();
+						versionRange.addAll(curRelRelation);
+						remainingRelations.removeAll(curRelRelation);
+						relatedRelations.add(versionRange);
+					}
+					
 				shortestRelations.clear();	
 				remainingRelations.clear();
+				}
 			}
 			
 			
@@ -255,28 +274,32 @@ public class AnalyseCves {
 						String product = productNode.getTextContent(); // produkt = String der CPE
 						products.add(product); // Liste von CPE Strings
 						}
-					}
+				}
 				else{
 					for(NameVersionRelation nvr:versionRange.versionList()){ 
 						String cpeMatch = LuceneIndexCreator.searchForCpeName(nvr.name().getText()+" "+nvr.version().getText());
 						if(!cpeMatch.isEmpty())products.add(LuceneIndexCreator.cpeEncoding(cpeMatch));
 					}
 				}
+				
+				String cpename = extractCPE(versionRange, products);
+
+								
 				// cpeName: höchster Match zu shortestRelation (in diesem Fall)
-				String cpeMatch=LuceneIndexCreator.searchForCpeName(curShortestRel.name().getText()+" "+curShortestRel.version().getText());
-				if(!cpeMatch.isEmpty()){
-					String cpename=LuceneIndexCreator.cpeEncoding(cpeMatch);
+				if(!cpename.isEmpty()){
 					String[] split=cpename.split(":");
 					cpename="";
 					for(int i=0;i<4;i++){
 						cpename+=split[i]+":";
 					}
+					versionRange.setCPE(cpename);
 					// cpeName: gekürzt auf VendorName und Productname z.B. cpe:/a:apache:camel:
 					List<String> remaining=new ArrayList<String>();
 					for(String product:products){
 						if(product.startsWith(cpename))
 							remaining.add(product);
 					}
+					
 					// remaining = Liste der vuln-List Einträge, die mit dem obigen String anfangen
 					// Es werden hier Einträge mit nicht übereinstimmenden Softwareversionen entfernt:
 					if(remaining.size()>0){					
@@ -284,11 +307,15 @@ public class AnalyseCves {
 						if(filteredRemainings.size()!=0) remaining=filteredRemainings; 
 					
 						String smallest=VersionComparator.getSmallestMatch(remaining);
-						String greatest="";
-						if(fixPresent){
-							greatest=VersionComparator.getGreatestUnderFix(remaining,fix); // Achtung: Ergebnisse fließen noch nicht in Ausgabe ein!!
+						if(!versionRange.hasLast())
+						{
+							String greatest="";
+							if(fixPresent){
+								greatest=VersionComparator.getGreatestUnderFix(remaining,fix); // Achtung: Ergebnisse fließen noch nicht in Ausgabe ein!!
+							}
+							else greatest=VersionComparator.getGreatestMatch(remaining);
+							// if(!greatest.isEmpty()) versionRange.setLast(greatest);
 						}
-						else greatest=VersionComparator.getGreatestMatch(remaining);
 					}
 				}
 			} catch (XPathExpressionException | IOException | ParseException e) {
@@ -317,5 +344,78 @@ public class AnalyseCves {
 		int milliseconds = MessageTime;
 		stopfor(milliseconds);
 	}
+	
+	
+	private String extractCPE(VersionRange versionRange, List<String> products){
+		int levenshteinDistance=Integer.MAX_VALUE;
+		String cpe="";
+		String softwareName = versionRange.shortest().name().getText()+" "+versionRange.shortest().version().getText();
+		int currentdistance;
+		for(String product:products){
+			currentdistance=getLevenshteinDistance(product, softwareName);
+			if(currentdistance<levenshteinDistance){
+				cpe=product;
+				levenshteinDistance=currentdistance;
+				}
+		}
+		return cpe;
+	}
+	
+	/**
+	 * Berechnet den Levenshtein-Abstand zweier Strings 
+	 * @param s erster String
+	 * @param t zweiter String
+	 * @return Levenshtein-Abstand
+	 */
+	// Source: http://mrfoo.de/archiv/1176-Levenshtein-Distance-in-Java.html , 20.08.2013
+	private static int getLevenshteinDistance (String s, String t) {
+	    if (s == null || t == null) {
+	      throw new IllegalArgumentException("Strings must not be null");
+	    }    
+	    int n = s.length(); // length of s
+	    int m = t.length(); // length of t
+	     
+	    if (n == 0) {
+	      return m;
+	    } else if (m == 0) {
+	      return n;
+	    }
+	 
+	    int p[] = new int[n+1]; //'previous' cost array, horizontally
+	    int d[] = new int[n+1]; // cost array, horizontally
+	    int _d[]; //placeholder to assist in swapping p and d
+	 
+	    // indexes into strings s and t
+	    int i; // iterates through s
+	    int j; // iterates through t
+	 
+	    char t_j; // jth character of t
+	 
+	    int cost; // cost
+	 
+	    for (i = 0; i<=n; i++) {
+	       p[i] = i;
+	    }
+	     
+	    for (j = 1; j<=m; j++) {
+	       t_j = t.charAt(j-1);
+	       d[0] = j;
+	     
+	       for (i=1; i<=n; i++) {
+	          cost = s.charAt(i-1)==t_j ? 0 : 1;
+	          // minimum of cell to the left+1, to the top+1, diagonally left and up +cost                         
+	          d[i] = Math.min(Math.min(d[i-1]+1, p[i]+1),  p[i-1]+cost);  
+	       }
+	 
+	       // copy current distance counts to 'previous row' distance counts
+	       _d = p;
+	       p = d;
+	       d = _d;
+	    }
+	     
+	    // our last action in the above loop was to switch d and p, so p now
+	    // actually has the most recent cost counts
+	    return p[n];
+	  }
 
 }

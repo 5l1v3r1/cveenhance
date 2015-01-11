@@ -6,7 +6,7 @@ public class Konfig {
 	// Path to splitted CVE item folder
 	public static final String CveFolder = "..\\CVE-Cases-long\\";
 	// Path to CVE splitted subset folder
-	//public static final String CveDump = "..\\BU-TEST-Files\\";
+	//public static final String CveDump = "..\\Testdump\\";
 	public static final String CveDump = "..\\CVE-Dump-long\\";
 	// Data type of CVE XML files
 	public static final String Datatype = ".xml";

@@ -46,7 +46,7 @@ public class NameVersionRelation implements Comparable<NameVersionRelation>{
 		return trimVersion(version.getText());
 	}
 	
-	private String trimVersion (String version){
+	private String trimVersion(String version){
 		if(version.contains(" "))version=version.substring(0, version.indexOf(" "));
 		version=version.trim();
 		if(version.length()>1 && version.substring(version.length()-2).equals(".x"))version=version.substring(0, version.length()-2);
@@ -60,7 +60,23 @@ public class NameVersionRelation implements Comparable<NameVersionRelation>{
 	
 	public boolean versionIsMoreGeneral(NameVersionRelation otherRel){
 		if(otherRel.version().getText().contains(trimmedVersion())) return true;
-		else return false;
+		return false;
+	}
+	
+	public boolean hasSameSuperversion(NameVersionRelation otherRel) {
+		String otherVersion = otherRel.version().getText();
+		String[] splittedVersion=version.getText().split("\\.");
+		String[] splittedOtherVersion=otherVersion.split("\\.");
+		if(splittedVersion.length<2 || splittedOtherVersion.length<2) {
+			if(splittedVersion[0]==splittedOtherVersion[0]) return true;
+			return false;
+		}
+		else{
+			for(int i=0;(i<(splittedVersion.length-1))&&(i<splittedOtherVersion.length-1);i++){
+				if(splittedVersion[i]!=splittedOtherVersion[i]) return false;
+			}
+			return true;
+		}
 	}
 	
 	public boolean equals (NameVersionRelation otherRelation){
@@ -72,30 +88,46 @@ public class NameVersionRelation implements Comparable<NameVersionRelation>{
 	}
 
 	@Override
-	public int compareTo(NameVersionRelation otherNVR) {	
-	    if (otherNVR.version().getText() == null && this.version().getText() == null) {
+	public int compareTo(NameVersionRelation otherNVR) {
+	    if (otherNVR.trimmedVersion() == null && this.trimmedVersion() == null) {
 	        return 0;
 	      }
-	      if (this.version().getText() == null) {
+	      if (this.trimmedVersion() == null) {
 	        return 1;
 	      }
-	      if (otherNVR.version().getText() == null) {
+	      if (otherNVR.trimmedVersion() == null) {
 	        return -1;
 	      }
-	      CharSequence version = this.version().getText();
-	      CharSequence otherVersion = otherNVR.version().getText();
+	      String[] versionSplit = this.trimmedVersion().split("\\.");
+	      String[] otherVersionSplit =otherNVR.trimmedVersion().split("\\.");
+	      if(versionSplit.length>1&&otherVersionSplit.length>1){
+	    	  try{ // Try to convert versionnumber into Integer and compare it
+	    		  for(int i=0;i<versionSplit.length;i++){
+	    			  if(i>=otherVersionSplit.length) return 1;
+	    			  if(Integer.parseInt(versionSplit[i])>Integer.parseInt(otherVersionSplit[i])) return 1;
+	    			  if(Integer.parseInt(versionSplit[i])<Integer.parseInt(otherVersionSplit[i])) return -1;
+	    		  }
+	    		  if(otherVersionSplit.length>versionSplit.length) return -1;
+	    	  }
+	    	  catch(Exception e){
+	    		  
+	    	  }
+	      }
+	      CharSequence version = this.trimmedVersion();
+	      CharSequence otherVersion = otherNVR.trimmedVersion();
 	      Character versionCharater;
 	      Character otherVersionCharacter;
-	      for (int i = 0; i<version.length() && i<otherVersion.length() ; i++){
+	      for (int i = 0; i<version.length() && i<otherVersion.length() ; i++){ // character-wise compare
 	    	  versionCharater=new Character(version.charAt(i));
-	    	  otherVersionCharacter= new Character(otherVersion.charAt(i));// Was passiert mit 4.10.3 und 4.9.0 ?
-	    	  // Checken, ob "." kleiner oder größer als "a" bzw. "A" ist.
+	    	  otherVersionCharacter= new Character(otherVersion.charAt(i));
 	    	  if(versionCharater.compareTo(otherVersionCharacter)!=0) return versionCharater.compareTo(otherVersionCharacter);
 	      }
 	      if(version.length()==otherVersion.length()) return 0;
 	      if(version.length()<otherVersion.length()) return -1;
 	      else return 1;
 	}
+
+
 	
 	
 }
