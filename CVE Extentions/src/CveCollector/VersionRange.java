@@ -32,6 +32,10 @@ public class VersionRange{
 		generalCpeString=newCPE;
 	}
 	
+	public String cpe(){
+		return generalCpeString;
+	}
+	
 	public VersionRange(){
 		empty=true;
 		versions=new ArrayList<NameVersionRelation>();
@@ -72,7 +76,8 @@ public class VersionRange{
 	
 	public String fixedVersion(){
 		updateRelevantVersions();
-		return fixedSoftware().getText();
+		if(fixed)return fixedSoftware().getText();
+		else return"";
 	}
 	
 	private void updateRelevantVersions() {
@@ -190,10 +195,11 @@ public class VersionRange{
 	}
 	
 	public String toString(){
+		if(softwareName.isEmpty())softwareName=generalCpeString;
 		String returnStr = softwareName+" vulnerable between "+firstDetectedVersion()+" and "+lastDetectedVersion();
 		if(fixed) returnStr+=" fix:"+fixedVersion();
 		else returnStr+= " no fix found";
-		if(!generalCpeString.isEmpty()) returnStr+=" |  "+generalCpeString;
+		if(!generalCpeString.isEmpty()&&Konfig.Testmode) returnStr+=" |  "+generalCpeString;
 		return returnStr;
 		
 	}

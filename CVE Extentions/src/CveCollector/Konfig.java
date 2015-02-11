@@ -1,27 +1,44 @@
 package CveCollector;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Properties;
+
 public class Konfig {
+	static Properties props=new Properties();
+	static
+	{
+		try {
+			props.load(new FileReader("cve.conf"));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	// Path to downloaded CVE XML-Backup
-	public static final String XmlFile = "..\\DatabaseXMLs\\nvdcve-2.0-2014.xml";
+	public static final String XmlFile = props.getProperty("xmlFile");
 	// Path to splitted CVE item folder
-	public static final String CveFolder = "..\\CVE-Cases-long\\";
+	public static final String CveFolder = props.getProperty("cveFolder");
 	// Path to CVE splitted subset folder
 	//public static final String CveDump = "..\\Testdump\\";
-	public static final String CveDump = "..\\CVE-Dump-long\\";
+	public static final String CveDump = props.getProperty("cveDump");
 	// Data type of CVE XML files
-	public static final String Datatype = ".xml";
+	public static final String Datatype = props.getProperty("datatype");
 	// extraction test mode switch
-	public static final boolean Testmode = true;
-
+	public static final boolean Testmode = Boolean.valueOf(props.getProperty("testmode"));
+	//
+	public static final boolean Logging = Boolean.valueOf(props.getProperty("logging"));
 	
 	// size of subset (number of subset cve items)
-	public static final int DumpNumber = 1000;
+	public static final int DumpNumber = Integer.parseInt(props.getProperty("dumpNumber"));
 	// time which program should stop and just display a message
-	public static final int MessageTime = 1500;
+	public static final int MessageTime = Integer.parseInt(props.getProperty("messageTime"));
 	// output file for extraction results
-	public static final String CvePrint = "..\\CveResult.txt";
-	
-	public static final int searchdistance=6;
+	public static final String CvePrint = props.getProperty("cvePrint");
+		
+	public static final int searchdistance=Integer.parseInt(props.getProperty("searchdistance"));
 	
 
 	
@@ -80,7 +97,7 @@ public class Konfig {
 	public static String[] versionTypes = {"fixedversion", "lastunfixedversion"};
 	
 	//TODO: Create Melting Conditions Variable
-	public static String[][] meltingConditions = {{"version", "version"}, {"version", "version", "version"}, {"softwarename", "softwarename"}, {"softwarename", "softwarename", "softwarename"}
+	public static String[][] meltingConditions = {{"version", "version"}, {"version", "version", "version"}, {"softwarename", "softwarename"}, {"softwarename", "softwarename", "softwarename"}, {"softwarename", "softwarename", "softwarename", "softwarename"}, {"softwarename", "softwarename", "softwarename", "softwarename", "softwarename"}
 	};
 	
 	// general structure for software information: 

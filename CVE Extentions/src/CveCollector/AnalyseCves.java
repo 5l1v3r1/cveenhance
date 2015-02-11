@@ -1,4 +1,5 @@
 package CveCollector;
+
 /**
  * >> This Java program analyzes a folder, which contains several separated XML files extracted of the NVD. <<
  * I/O variables are declared in konfig.java
@@ -32,390 +33,495 @@ import cve.matcher.LuceneIndexCreator;
 import cve.matcher.VersionComparator;
 
 public class AnalyseCves {
-	
-	private static Vector<String> filelist = new Vector<String>(); 		// list of file directories
-	private static Vector<CveItem> itemList = new Vector<CveItem>(); 	// list of CVE items (abstract representation of an CVE entry)
-	private static String DumpDir = Konfig.CveDump; 					// directory, which contains CVE XML files FOR CODE TESTING (recommendation: <= 1000 files)
-	private static String CveFolder = Konfig.CveFolder; 				// directory, which contains all CVE XML files for information extraction
-	private static String Datatype = Konfig.Datatype; 					// data type of CVE XML files 
-	private static String CvePrint = Konfig.CvePrint;					// file which should contain the analysis results
-	private static boolean Testmode = Konfig.Testmode; 					// switches the test mode ON/OFF
-	private static int MessageTime = Konfig.MessageTime;				// default time for displaying a message
-	private int anzFiles=0;	
-	
-	
-	public static void main(String[] args) {
-		AnalyseCves ana = new AnalyseCves();		
-		String analyseDir = "";						// directory of containing CVE XML files for current analysis 
-		if(Testmode) analyseDir = DumpDir;			// checks if test mode is active and sets the current directory 
-		else analyseDir = CveFolder;
-		
-		System.out.println("\nSelected Folder: "+System.getProperty("user.dir")+"\\"+analyseDir+"\n");
-		ana.walk(analyseDir);						// analyzes the structure of the current folder and adds all XML files to the file list
-		System.out.println("\n"+filelist.size()+" analyzable XML files found in "+analyseDir+"\n"); 	// message of XML file number
-		ana.stopfor();								// time of result presentation; default by konfig
-		ana.analyse();								// information extraction of all files in the file list		
-	}
-	
-	
-	/**
-	 * This method "walks" recursive through the current directory (path) and collects all analyzable files in the file list.
-	 * @param path path which should be analyzed and found files be saved in filelist
-	 */
-	public void walk( String path ) {
-        File root = new File( path );
-        File[] list = root.listFiles();
 
-        for ( File f : list ) {										// For every file of folder in a directory:
-            if ( f.isDirectory() ) {								// Check if it's a dir or file.
-                walk( f.getAbsolutePath() );						// If it's a dir: recursively call the walk method
-                System.out.println( "Dir:" + f.getAbsoluteFile() ); // and print the result.
-            }
-            else {																		// If it's a file:
-            	anzFiles++;																
-            	String fileresult = f.getAbsoluteFile().toString();						// Check if it has the right data type (only by filename).
-            	String parseName = fileresult.substring(fileresult.lastIndexOf("\\"));
-            	if(parseName.toLowerCase().contains(Datatype)){							// If it has the right data type:
-            		filelist.add(f.getAbsolutePath());  								// Add the absolute path to the filelist
-					String line="";
-					String innerText="";
-            		FileInputStream fstream;											// and create a CVE item by reading the file.
-					try {
-						fstream = new FileInputStream(f.getAbsolutePath());
-						DataInputStream in = new DataInputStream(fstream);
-						BufferedReader br = new BufferedReader(new InputStreamReader(in));			       
-						while((line=br.readLine()) != null) {
-							innerText+=line;
-						}
-						
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-					CveItem curItem = new CveItem(innerText);							
-            		itemList.add(curItem);												// Finally add the created CVE item to the item list.
-            		System.out.println( "File:" + f.getAbsoluteFile() );
-            		
-            	}
-            	else System.out.println( "No XML File:" + f.getAbsoluteFile() ); 		// Message, if a file does not match to the required data type.
-            }
-        }
-    }
-	
-	
-	/**
-	 * The real information extraction part of the program. It analyzes all found files and saves the results in a text file.
-	 * 
-	 */
-	private void analyse(){
-		int resultCouter=0;							// counts the results
-		int successful_item_counter=0;				// counts successful results
-		int validData=0;							// counts valid files
-		Iterator<CveItem> it = itemList.iterator();	// item iterator
-		CveItem item = it.next();					// first CVE item
-		Writer fw;								
-		Writer bw;									// Writer for result text file:
-		PrintWriter pw = null;
-		
+	private static Vector<String> filelist = new Vector<String>(); // list of
+																	// file
+																	// directories
+	private static Vector<CveItem> itemList = new Vector<CveItem>(); // list of
+																		// CVE
+																		// items
+																		// (abstract
+																		// representation
+																		// of an
+																		// CVE
+																		// entry)
+	private static String DumpDir = Konfig.CveDump; // directory, which contains
+													// CVE XML files FOR CODE
+													// TESTING (recommendation:
+													// <= 1000 files)
+	private static String CveFolder = Konfig.CveFolder; // directory, which
+														// contains all CVE XML
+														// files for information
+														// extraction
+	private static String Datatype = Konfig.Datatype; // data type of CVE XML
+														// files
+	private static String CvePrint = Konfig.CvePrint; // file which should
+														// contain the analysis
+														// results
+	private static boolean Testmode = Konfig.Testmode; // switches the test mode
+														// ON/OFF
+	private static int MessageTime = Konfig.MessageTime; // default time for
+															// displaying a
+															// message
+	private static PrintWriter pw;
+	private int anzFiles = 0;
+	private int[] resultCounter = new int[3];
+
+	public static void main(String[] args) {
+		AnalyseCves ana = new AnalyseCves();
+		String analyseDir = ""; // directory of containing CVE XML files for
+								// current analysis
+		if (Testmode)
+			analyseDir = DumpDir; // checks if test mode is active and sets the
+									// current directory
+		else
+			analyseDir = CveFolder;
+		Writer fw;
+		Writer bw; // Writer for result text file:
+		pw = null;
 		try {
 			fw = new FileWriter(CvePrint);
 
-		bw = new BufferedWriter( fw );
-		pw = new PrintWriter( bw );
-		int save_Counter=0;							// buffer for current result number
-		for(;it.hasNext();item=it.next()){// for every CVE item:
-			if(Testmode)System.out.println("------- CVE-Item: "+item.getCVEID()+" -------");
-			Vector<Snippet> versions=item.getSnippetsWithLogicalUnits("version");
-			Vector<NameVersionRelation> relations= new Vector<NameVersionRelation>();
+			bw = new BufferedWriter(fw);
+			pw = new PrintWriter(bw);
+
+			System.out
+					.println("\nSelected Folder: "
+							+ System.getProperty("user.dir") + "\\"
+							+ analyseDir + "\n");
+			ana.walk(analyseDir); // analyzes the structure of the current
+									// folder and adds all XML files to the file
+									// list
+			System.out.println("\n" + filelist.size()
+					+ " analyzable XML files found in " + analyseDir + "\n"); // message
+																				// of
+																				// XML
+																				// file
+																				// number
+			// ana.stopfor(); // time of result presentation; default by konfig
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		pw.close(); // extraction process completed
+	}
+
+	/**
+	 * This method "walks" recursive through the current directory (path) and
+	 * collects all analyzable files in the file list.
+	 * 
+	 * @param path
+	 *            path which should be analyzed and found files be saved in
+	 *            filelist
+	 */
+	public void walk(String path) {
+		File root = new File(path);
+		File[] list = root.listFiles();
+
+		for (File f : list) { // For every file of folder in a directory:
+			if (f.isDirectory()) { // Check if it's a dir or file.
+				walk(f.getAbsolutePath()); // If it's a dir: recursively call
+											// the walk method
+				System.out.println("Dir:" + f.getAbsoluteFile()); // and print
+																	// the
+																	// result.
+			} else { // If it's a file:
+				String fileresult = f.getAbsoluteFile().toString(); // Check if
+																	// it has
+																	// the right
+																	// data type
+																	// (only by
+																	// filename).
+				String parseName = fileresult.substring(fileresult
+						.lastIndexOf("\\"));
+				if (parseName.toLowerCase().contains(Datatype)) { // If it has
+																	// the right
+																	// data
+																	// type:
+					filelist.add(f.getAbsolutePath()); // Add the absolute path
+														// to the filelist
+					String line = "";
+					String innerText = "";
+					FileInputStream fstream; // and create a CVE item by reading
+												// the file.
+					try {
+						fstream = new FileInputStream(f.getAbsolutePath());
+						DataInputStream in = new DataInputStream(fstream);
+						BufferedReader br = new BufferedReader(
+								new InputStreamReader(in));
+						while ((line = br.readLine()) != null) {
+							innerText += line;
+						}
+
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					CveItem curItem = new CveItem(innerText);
+					resultCounter[1]++;
+					this.analyse(curItem); // information extraction of all
+											// files in the file list
+
+					// itemList.add(curItem); // Finally add the created CVE
+					// item to the item list.
+					if (Testmode)
+						System.out.println("File:" + f.getAbsoluteFile());
+					if (!Testmode && resultCounter[1] % 50 == 0)
+						System.out.println(resultCounter[1] + " files read");
+
+				} else
+					System.out.println("No XML File:" + f.getAbsoluteFile()); // Message,
+																				// if
+																				// a
+																				// file
+																				// does
+																				// not
+																				// match
+																				// to
+																				// the
+																				// required
+																				// data
+																				// type.
+			}
+		}
+	}
+
+	/**
+	 * The real information extraction part of the program. It analyzes all
+	 * found files and saves the results in a text file.
+	 * 
+	 */
+	private void analyse(CveItem item) {
+		try {
+			if (Testmode)
+				System.out.println("------- CVE-Item: " + item.getCVEID()
+						+ " -------");
+			Vector<Snippet> versions = item
+					.getSnippetsWithLogicalUnits("version");
+			Vector<NameVersionRelation> relations = new Vector<NameVersionRelation>();
 			Iterator<Snippet> versionIt = versions.iterator();
 			Snippet curSnip;
 			Snippet softwareName;
-			if(versionIt.hasNext())successful_item_counter++;
-			while(versionIt.hasNext()){
-				resultCouter++;
-				String Snippetcomment="";
-				curSnip=versionIt.next();
-				softwareName=item.searchSoftwareNameBefore(curSnip);
-				if(!curSnip.logicalUnitComment().equals("")) Snippetcomment="    ("+curSnip.logicalUnitComment()+") ";
+			while (versionIt.hasNext()) {
+				String snippetComment = "";
+				curSnip = versionIt.next();
+				softwareName = item.searchSoftwareNameBefore(curSnip);
+				if (!curSnip.logicalUnitComment().equals(""))
+					snippetComment = "    (" + curSnip.logicalUnitComment()
+							+ ") ";
 				relations.add(new NameVersionRelation(softwareName, curSnip));
-				System.out.println(softwareName.getText()+"     Version:"+curSnip.getText()+Snippetcomment);	
+				if (Testmode)
+					System.out.println(softwareName.getText() + "     Version:"
+							+ curSnip.getText() + snippetComment);
 			}
-			
-			Vector<VersionRange> results=createResult(relations, item);
-			for(VersionRange result:results){
-				System.out.println("-> Result: "+result);
-			}
-			
-//			System.out.println(item.getCVEID()+":");
-////			String [] Versions=item.getFixedVersion();		// extraction of fixed versions
-////			String [] Software=item.getSoftware();			// allocation of Software
-//			save_Counter=0;
-//			for(int i=0;i<Versions.length; i++){			// displaying an saving of results
-//				System.out.println(Software[i]+" Fixed Version:"+Versions[i]);
-//				String concatVersion=Versions[i].trim();
-//				if(Versions[i].indexOf(" ")!=-1){
-//					concatVersion=Versions[i].replace(" ", ":");
-//				}
-//				else{
-//					Matcher mo;
-//					mo=Pattern.compile("\\p{Alpha}\\p{Alpha}+").matcher(Versions[i]);
-//					if(mo.find() && mo.start()!=0){
-//						concatVersion=Versions[i].substring(0, mo.start())+":"+Versions[i].substring(mo.start());
-//					}
-//				}				
-//				pw.println(item.getCVEID()+"; "+Software[i]+"; "+concatVersion);
-//				save_Counter++;
-//				if(Software[i]!="Software not allocatable!") validData++;
-//			}
-//			if(save_Counter>0) successful_item_counter++;
-//			resultCouter+=save_Counter;
 
-		}
-		 pw.close();		// extraction process completed
-		 System.out.println("\n\nIn "+successful_item_counter+" von "+itemList.size()+" CVE Einträgen wurden "+ resultCouter+"  Versionen gefunden!");
-		} catch (IOException e) {
+			Vector<VersionRange> results = createResult(relations, item);
+			StringBuilder output = new StringBuilder();
+			for (VersionRange result : results) {
+				if (Testmode)
+					System.out.println("-> Result: " + result);
+				if (!Testmode) {
+					if (!Konfig.Logging) {
+						output = getMachineReadableOutput(item, result);
+					} else {
+						output = getHumanReviewOutput(item, result);
+					}
+					pw.println(output.toString());
+				}
+
+			}
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
-	private Vector<VersionRange> createResult(Vector<NameVersionRelation> relations, CveItem item){
+
+	private StringBuilder getHumanReviewOutput(CveItem item, VersionRange result) {
+		StringBuilder output = new StringBuilder();
+		output.append(item.getCVEID());
+		output.append("  ");
+		output.append(result.toString());
+		output.append("  ");
+		output.append(result.cpe());
+		return output;
+	}
+
+	private StringBuilder getMachineReadableOutput(CveItem item,
+			VersionRange result) {
+		StringBuilder output = new StringBuilder();
+		output.append(item.getCVEID());
+		output.append(";");
+		output.append(result.cpe());
+		output.append(";");
+		output.append(result.firstDetectedVersion());
+		output.append(";");
+		output.append(result.lastDetectedVersion());
+		output.append(";");
+		output.append(result.fixedVersion());
+		output.append(";");
+		return output.append(result.toString());
+	}
+
+	private Vector<VersionRange> createResult(
+			Vector<NameVersionRelation> relations, CveItem item) {
+
 		HashSet<NameVersionRelation> interestingRelations = new HashSet<NameVersionRelation>();
 		interestingRelations.addAll(relations);
+
 		HashSet<NameVersionRelation> remainingRelations = new HashSet<NameVersionRelation>();
 		HashSet<NameVersionRelation> shortestRelations = new HashSet<NameVersionRelation>();
 		Vector<VersionRange> relatedRelations = new Vector<VersionRange>();
-		
-		
-		if (interestingRelations.size()>0){
-			
-			while(interestingRelations.size()>0){
-				Iterator<NameVersionRelation> relationsIterator=interestingRelations.iterator();	
-				NameVersionRelation shortestRelation=relationsIterator.next();
-				shortestRelations.add(shortestRelation);			
-			
-				while(relationsIterator.hasNext()){
-					NameVersionRelation curRelation=relationsIterator.next();
-					if(shortestRelation.trimmedVersion().length()>curRelation.trimmedVersion().length()){
-						shortestRelation=curRelation;
-						remainingRelations.addAll(shortestRelations);
-						shortestRelations.clear();
-						shortestRelations.add(curRelation);
-					}
-					else if(shortestRelation.trimmedVersion().length()==curRelation.trimmedVersion().length()){
-						shortestRelations.add(curRelation);
-					}
-					else{
-						remainingRelations.add(curRelation);
-					}
-				}
-				
-				interestingRelations.removeAll(shortestRelations);
-				boolean sameSoftewareRef=false;
-				Iterator<NameVersionRelation> shortestRelationsIterator=shortestRelations.iterator();
-				while(shortestRelationsIterator.hasNext()){
-					if(shortestRelation.refersSameSoftware(shortestRelationsIterator.next())){
-						sameSoftewareRef=true;
-					}
-					else{
-						sameSoftewareRef=false;
-						break;
-					}
-				}
-				
-				if(shortestRelations.size()==relations.size()&&sameSoftewareRef){
-					VersionRange versionRange = new VersionRange();
-					versionRange.addAll(shortestRelations);
-					relatedRelations.add(versionRange);
-				}
-				else{				
-					shortestRelationsIterator=shortestRelations.iterator();
-					while(shortestRelationsIterator.hasNext()){
-						NameVersionRelation curShortestRel = shortestRelationsIterator.next();
-						HashSet<NameVersionRelation> curRelRelation = new HashSet<NameVersionRelation>(); // current relation relation = belonging relations
-						curRelRelation.add(curShortestRel);
-						Iterator<NameVersionRelation> remainingRelationsIt = remainingRelations.iterator();
-						while(remainingRelationsIt.hasNext()){
-							NameVersionRelation curNameVerRel = remainingRelationsIt.next(); // iterate over all remaining relations
-							if(curNameVerRel.refersSameSoftware(curShortestRel) && (curShortestRel.versionIsMoreGeneral(curNameVerRel)||curShortestRel.hasSameSuperversion(curNameVerRel))) {
-								curRelRelation.add(curNameVerRel);
-								interestingRelations.remove(curNameVerRel);
-							}
-						}					
-						VersionRange versionRange = new VersionRange();
-						versionRange.addAll(curRelRelation);
-						remainingRelations.removeAll(curRelRelation);
-						relatedRelations.add(versionRange);
-					}
-					
-				shortestRelations.clear();	
-				remainingRelations.clear();
-				}
-			}
-			
-			
-			
-		//Start Merge 
-		Iterator<VersionRange> versionRangeIt = relatedRelations.iterator();
-		
-		// Hier für jede shortest Relation folgenden Code durchlaufen:
-		while(versionRangeIt.hasNext()){
-			VersionRange versionRange = versionRangeIt.next();
-			NameVersionRelation curShortestRel = versionRange.shortest();
-			
-			boolean fixPresent=versionRange.fixed(); 
-			String fix = "";
-			if(fixPresent)fix=versionRange.fixedSoftware().getText(); 
-			
-			try {
-				NodeList vulnSoftware = (NodeList) item.xPath().evaluate("//entry/vulnerable-software-list/product/text()", item.XmlDocument(), XPathConstants.NODESET);
-				List<String> products = new ArrayList<String>(); 
-				if (vulnSoftware.getLength() > 0){
-					for (int j = 0; j < vulnSoftware.getLength(); j++) {
-						Node productNode = vulnSoftware.item(j);  // productNode = ein Eintrag in der vuln Liste
-						String product = productNode.getTextContent(); // produkt = String der CPE
-						products.add(product); // Liste von CPE Strings
-						}
-				}
-				else{
-					for(NameVersionRelation nvr:versionRange.versionList()){ 
-						String cpeMatch = LuceneIndexCreator.searchForCpeName(nvr.name().getText()+" "+nvr.version().getText());
-						if(!cpeMatch.isEmpty())products.add(LuceneIndexCreator.cpeEncoding(cpeMatch));
-					}
-				}
-				
-				String cpename = extractCPE(versionRange, products);
 
-								
-				// cpeName: höchster Match zu shortestRelation (in diesem Fall)
-				if(!cpename.isEmpty()){
-					String[] split=cpename.split(":");
-					cpename="";
-					for(int i=0;i<4;i++){
-						cpename+=split[i]+":";
-					}
+		if (interestingRelations.size() > 0) {
+
+			relatedRelations = groupRelations(relations, interestingRelations,
+					remainingRelations, shortestRelations);
+
+			for (VersionRange versionRange : relatedRelations) {
+				List<String> products = getProductList(item);
+				String cpename = extractCPE(versionRange, products);
+				if (!cpename.isEmpty()) {
+					cpename = extractCPEVendor(cpename);
 					versionRange.setCPE(cpename);
-					// cpeName: gekürzt auf VendorName und Productname z.B. cpe:/a:apache:camel:
-					List<String> remaining=new ArrayList<String>();
-					for(String product:products){
-						if(product.startsWith(cpename))
-							remaining.add(product);
-					}
-					
-					// remaining = Liste der vuln-List Einträge, die mit dem obigen String anfangen
-					// Es werden hier Einträge mit nicht übereinstimmenden Softwareversionen entfernt:
-					if(remaining.size()>0){					
-						List<String> filteredRemainings=LuceneIndexCreator.getAllCpesWithVersionPrefix(versionRange.shortest().version().getText(), remaining);
-						if(filteredRemainings.size()!=0) remaining=filteredRemainings; 
-					
-						String smallest=VersionComparator.getSmallestMatch(remaining);
-						if(!versionRange.hasLast())
-						{
-							String greatest="";
-							if(fixPresent){
-								greatest=VersionComparator.getGreatestUnderFix(remaining,fix); // Achtung: Ergebnisse fließen noch nicht in Ausgabe ein!!
-							}
-							else greatest=VersionComparator.getGreatestMatch(remaining);
-							// if(!greatest.isEmpty()) versionRange.setLast(greatest);
+					// cpe:/a:apache:camel:
+					List<String> remaining = fillRemainings(products, cpename);
+
+					if (remaining.size() > 0) {
+						List<String> filteredRemainings = LuceneIndexCreator
+								.getAllCpesWithVersionPrefix(versionRange
+										.shortest().version().getText(),
+										remaining);
+
+						if (!versionRange.hasLast()) {
+							if (filteredRemainings.size() != 0)
+								remaining = filteredRemainings;
+							String greatest = "";
+							if (versionRange.fixed()) {
+								String fix = versionRange.fixedSoftware()
+										.getText();
+								greatest = VersionComparator
+										.getGreatestUnderFix(remaining, fix);
+							} else
+								greatest = VersionComparator
+										.getGreatestMatch(remaining);
+							if (!greatest.isEmpty())
+								versionRange.setLast(greatest);
 						}
 					}
 				}
-			} catch (XPathExpressionException | IOException | ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+
 			}
-			
-		}
-		//Ende Merge
 		}
 		return relatedRelations;
-	} 
-	
-	/*
-	 * Sets a timeout for displaying a message. 
-	 */
-	private void stopfor(int milliseconds){
+	}
+
+	private String extractCPEVendor(String cpename) {
+		String[] split = cpename.split(":");
+		cpename = "";
+		for (int i = 0; i < 4; i++) {
+			cpename += split[i] + ":";
+		}
+		return cpename;
+	}
+
+	private List<String> fillRemainings(List<String> products, String cpename) {
+		List<String> remaining = new ArrayList<String>();
+		for (String product : products) {
+			if (product.startsWith(cpename))
+				remaining.add(product);
+		}
+		return remaining;
+	}
+
+	private List<String> getProductList(CveItem item) {
+		List<String> products = new ArrayList<String>();
 		try {
-		    Thread.sleep(milliseconds);
-		} catch(InterruptedException ex) {
-		    Thread.currentThread().interrupt();
+			NodeList vulnSoftware = (NodeList) item.xPath().evaluate(
+					"//entry/vulnerable-software-list/product/text()",
+					item.XmlDocument(), XPathConstants.NODESET);
+			if (vulnSoftware.getLength() > 0) {
+				for (int j = 0; j < vulnSoftware.getLength(); j++) {
+					Node productNode = vulnSoftware.item(j);
+					String product = productNode.getTextContent();
+					products.add(product);
+				}
+			}
+		} catch (XPathExpressionException e) {
+			e.printStackTrace();
+		}
+		return products;
+	}
+
+	private Vector<VersionRange> groupRelations(
+			Vector<NameVersionRelation> relations,
+			HashSet<NameVersionRelation> interestingRelations,
+			HashSet<NameVersionRelation> remainingRelations,
+			HashSet<NameVersionRelation> shortestRelations) {
+		Vector<VersionRange> relatedRelations = new Vector<VersionRange>();
+		while (interestingRelations.size() > 0) {
+			Iterator<NameVersionRelation> relationsIterator = interestingRelations
+					.iterator();
+			NameVersionRelation shortestRelation = relationsIterator.next();
+			shortestRelations.add(shortestRelation);
+
+			while (relationsIterator.hasNext()) {
+				NameVersionRelation curRelation = relationsIterator.next();
+				if (shortestRelation.trimmedVersion().length() > curRelation
+						.trimmedVersion().length()) {
+					shortestRelation = curRelation;
+					remainingRelations.addAll(shortestRelations);
+					shortestRelations.clear();
+					shortestRelations.add(curRelation);
+				} else if (shortestRelation.trimmedVersion().length() == curRelation
+						.trimmedVersion().length()) {
+					shortestRelations.add(curRelation);
+				} else {
+					remainingRelations.add(curRelation);
+				}
+			}
+
+			interestingRelations.removeAll(shortestRelations);
+			boolean sameSoftwareRef = isSameSoftwareRef(shortestRelations,
+					shortestRelation);
+
+			if (shortestRelations.size() == relations.size() && sameSoftwareRef) {
+				VersionRange versionRange = new VersionRange();
+				versionRange.addAll(shortestRelations);
+				relatedRelations.add(versionRange);
+			} else {
+				for (NameVersionRelation curShortestRel : shortestRelations) {
+					HashSet<NameVersionRelation> curRelRelation = new HashSet<NameVersionRelation>();
+					curRelRelation.add(curShortestRel);
+
+					allocateRemainingRelations(interestingRelations,
+							remainingRelations, curShortestRel, curRelRelation);
+
+					VersionRange versionRange = new VersionRange();
+					versionRange.addAll(curRelRelation);
+					remainingRelations.removeAll(curRelRelation);
+					relatedRelations.add(versionRange);
+				}
+
+				shortestRelations.clear();
+				remainingRelations.clear();
+			}
+		}
+
+		return relatedRelations;
+	}
+
+	private boolean isSameSoftwareRef(
+			HashSet<NameVersionRelation> shortestRelations,
+			NameVersionRelation shortestRelation) {
+
+		boolean sameSoftwareRef = false;
+		for (NameVersionRelation nameVersionRealtion : shortestRelations) {
+			if (shortestRelation.refersSameSoftware(nameVersionRealtion)) {
+				sameSoftwareRef = true;
+			} else {
+				sameSoftwareRef = false;
+				break;
+			}
+		}
+		return sameSoftwareRef;
+	}
+
+	private void allocateRemainingRelations(
+			HashSet<NameVersionRelation> interestingRelations,
+			HashSet<NameVersionRelation> remainingRelations,
+			NameVersionRelation curShortestRel,
+			HashSet<NameVersionRelation> curRelRelation) {
+		for (NameVersionRelation curNameVerRel : remainingRelations) {
+			if (curNameVerRel.refersSameSoftware(curShortestRel)
+					&& (curShortestRel.versionIsMoreGeneral(curNameVerRel) || curShortestRel
+							.hasSameSuperversion(curNameVerRel))) {
+				curRelRelation.add(curNameVerRel);
+				interestingRelations.remove(curNameVerRel);
+			}
 		}
 	}
-	
-	private void stopfor(){
+
+	/*
+	 * Sets a timeout for displaying a message.
+	 */
+	private void stopfor(int milliseconds) {
+		try {
+			Thread.sleep(milliseconds);
+		} catch (InterruptedException ex) {
+			Thread.currentThread().interrupt();
+		}
+	}
+
+	private void stopfor() {
 		int milliseconds = MessageTime;
 		stopfor(milliseconds);
 	}
-	
-	
-	private String extractCPE(VersionRange versionRange, List<String> products){
-		int levenshteinDistance=Integer.MAX_VALUE;
-		String cpe="";
-		String softwareName = versionRange.shortest().name().getText()+" "+versionRange.shortest().version().getText();
+
+	private String extractCPE(VersionRange versionRange, List<String> products) {
+		int levenshteinDistance = Integer.MAX_VALUE;
+		String cpe = "";
+		String softwareName = versionRange.shortest().name().getText() + " "
+				+ versionRange.shortest().version().getText();
 		int currentdistance;
-		for(String product:products){
-			currentdistance=getLevenshteinDistance(product, softwareName);
-			if(currentdistance<levenshteinDistance){
-				cpe=product;
-				levenshteinDistance=currentdistance;
-				}
+		for (String product : products) {
+			currentdistance = getLevenshteinDistance(product, softwareName);
+			if (currentdistance < levenshteinDistance) {
+				cpe = product;
+				levenshteinDistance = currentdistance;
+			}
 		}
 		return cpe;
 	}
-	
+
 	/**
-	 * Berechnet den Levenshtein-Abstand zweier Strings 
-	 * @param s erster String
-	 * @param t zweiter String
+	 * Berechnet den Levenshtein-Abstand zweier Strings
+	 * 
+	 * @param first
+	 *            erster String
+	 * @param second
+	 *            zweiter String
 	 * @return Levenshtein-Abstand
 	 */
-	// Source: http://mrfoo.de/archiv/1176-Levenshtein-Distance-in-Java.html , 20.08.2013
-	private static int getLevenshteinDistance (String s, String t) {
-	    if (s == null || t == null) {
-	      throw new IllegalArgumentException("Strings must not be null");
-	    }    
-	    int n = s.length(); // length of s
-	    int m = t.length(); // length of t
-	     
-	    if (n == 0) {
-	      return m;
-	    } else if (m == 0) {
-	      return n;
-	    }
-	 
-	    int p[] = new int[n+1]; //'previous' cost array, horizontally
-	    int d[] = new int[n+1]; // cost array, horizontally
-	    int _d[]; //placeholder to assist in swapping p and d
-	 
-	    // indexes into strings s and t
-	    int i; // iterates through s
-	    int j; // iterates through t
-	 
-	    char t_j; // jth character of t
-	 
-	    int cost; // cost
-	 
-	    for (i = 0; i<=n; i++) {
-	       p[i] = i;
-	    }
-	     
-	    for (j = 1; j<=m; j++) {
-	       t_j = t.charAt(j-1);
-	       d[0] = j;
-	     
-	       for (i=1; i<=n; i++) {
-	          cost = s.charAt(i-1)==t_j ? 0 : 1;
-	          // minimum of cell to the left+1, to the top+1, diagonally left and up +cost                         
-	          d[i] = Math.min(Math.min(d[i-1]+1, p[i]+1),  p[i-1]+cost);  
-	       }
-	 
-	       // copy current distance counts to 'previous row' distance counts
-	       _d = p;
-	       p = d;
-	       d = _d;
-	    }
-	     
-	    // our last action in the above loop was to switch d and p, so p now
-	    // actually has the most recent cost counts
-	    return p[n];
-	  }
+	// Source: http://mrfoo.de/archiv/1176-Levenshtein-Distance-in-Java.html ,
+	// 20.08.2013
+	private static int getLevenshteinDistance(String first, String second) {
+		if (first == null || second == null) {
+			throw new IllegalArgumentException("Strings must not be null");
+		}
+		int firstLen = first.length();
+		int secondLen = second.length();
+
+		if (firstLen == 0) {
+			return secondLen;
+		} else if (secondLen == 0) {
+			return firstLen;
+		}
+
+		int previousCosts[] = new int[firstLen + 1];
+		int currentCosts[] = new int[firstLen + 1];
+		int costTmp[];
+
+		for (int i = 0; i <= firstLen; i++) {
+			previousCosts[i] = i;
+		}
+		int cost = 0;
+
+		for (int j = 1; j <= secondLen; j++) {
+			char sndCh = second.charAt(j - 1);
+			currentCosts[0] = j;
+
+			for (int i = 1; i <= firstLen; i++) {
+				cost = first.charAt(i - 1) == sndCh ? 0 : 1;
+				currentCosts[i] = Math
+						.min(Math.min(currentCosts[i - 1] + 1,
+								previousCosts[i] + 1), previousCosts[i - 1]
+								+ cost);
+			}
+
+			costTmp = previousCosts;
+			previousCosts = currentCosts;
+			currentCosts = costTmp;
+		}
+
+		return previousCosts[firstLen];
+	}
 
 }
