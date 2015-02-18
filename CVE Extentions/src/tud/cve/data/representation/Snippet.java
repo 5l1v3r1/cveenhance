@@ -1,4 +1,4 @@
-package cveextractor;
+package tud.cve.data.representation;
 
 /*
  * ============ CREATIVE COMMONS LICENSE (CC BY 4.0) ============
@@ -18,6 +18,10 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Vector;
 import java.util.regex.Pattern;
+
+import tud.cve.extractor.Config;
+import tud.cve.extractor.FeatureVectorBuilder;
+import tud.cve.extractor.LogicalUnit;
 
 /**
  * This class should represent a part of a floating text e.g. a Token / combined

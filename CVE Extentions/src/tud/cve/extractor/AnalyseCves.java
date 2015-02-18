@@ -1,4 +1,4 @@
-package cveextractor;
+package tud.cve.extractor;
 
 /*
  * ============ CREATIVE COMMONS LICENSE (CC BY 4.0) ============
@@ -35,8 +35,11 @@ import javax.xml.xpath.XPathExpressionException;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import cveextractor.LuceneIndexCreator;
-import cveextractor.VersionComparator;
+import tud.cpe.preparation.LuceneIndexCreator;
+import tud.cve.data.representation.NameVersionRelation;
+import tud.cve.data.representation.Snippet;
+import tud.cve.data.representation.VersionRange;
+import tud.cve.extractor.VersionComparator;
 
 /**
  * >> This class contains the extractor main <<

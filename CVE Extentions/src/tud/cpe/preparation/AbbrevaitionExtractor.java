@@ -1,4 +1,4 @@
-package cveextractor;
+package tud.cpe.preparation;
 
 /*
  * ============ CREATIVE COMMONS LICENSE (CC BY 4.0) ============

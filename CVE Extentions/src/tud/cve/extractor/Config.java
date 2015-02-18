@@ -1,4 +1,4 @@
-package cveextractor;
+package tud.cve.extractor;
 
 /*
  * ============ CREATIVE COMMONS LICENSE (CC BY 4.0) ============

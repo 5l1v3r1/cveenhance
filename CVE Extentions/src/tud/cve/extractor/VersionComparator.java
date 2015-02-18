@@ -1,4 +1,4 @@
-package cveextractor;
+package tud.cve.extractor;
 
 /*
  * ============ CREATIVE COMMONS LICENSE (CC BY 4.0) ============
@@ -17,15 +17,6 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 public class VersionComparator {
-
-	public static void main(String[] args) {
-
-		String vers1 = "1b";
-
-		String vers2 = "11b";
-		System.out.println(compareTo(vers2, vers1));
-
-	}
 
 	public static String getSmallestMatch(List<String> cpes) {
 		String smallest = cpes.get(0);

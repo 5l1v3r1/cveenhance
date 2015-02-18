@@ -1,4 +1,4 @@
-package cveextractor;
+package tud.cve.data.representation;
 
 /*
  * ============ CREATIVE COMMONS LICENSE (CC BY 4.0) ============
@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+
+import tud.cve.extractor.Config;
 
 public class VersionRange {
 

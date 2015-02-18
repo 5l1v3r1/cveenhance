@@ -1,4 +1,4 @@
-package cveextractor;
+package tud.cve.collector;
 
 /*
  * ============ CREATIVE COMMONS LICENSE (CC BY 4.0) ============
@@ -27,6 +27,8 @@ import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Writer;
+
+import tud.cve.extractor.Config;
 
 /**
  * >> This class splits all CVE Database XMLs to single files and stores it in the CVE item folder <<
