@@ -103,34 +103,34 @@ public class Snippet {
 			setFeature("bigletter", check("[A-Z]+.*"));
 			setFeature(
 					"version",
-					keywordCheck(lowerCaseText, Konfig.versionKeywords)
+					keywordCheck(lowerCaseText, Config.versionKeywords)
 							|| (lcheck("[\\d]+[\\p{Punct}\\w]*") && !(lcheck(""))));
-			setFeature("os", keywordCheck(lowerCaseText, Konfig.osKeywords));
+			setFeature("os", keywordCheck(lowerCaseText, Config.osKeywords));
 			setFeature("osext",
-					keywordCheck(lowerCaseText, Konfig.osExctentions));
+					keywordCheck(lowerCaseText, Config.osExctentions));
 			setFeature("stopword",
-					keywordCheck(lowerCaseText, Konfig.stopWords));
+					keywordCheck(lowerCaseText, Config.stopWords));
 			setFeature("concatword",
-					keywordCheck(lowerCaseText, Konfig.concatWords));
-			setFeature("comparingword", keywordCheck(lowerCaseText, Konfig.comparingWord));
+					keywordCheck(lowerCaseText, Config.concatWords));
+			setFeature("comparingword", keywordCheck(lowerCaseText, Config.comparingWord));
 			setFeature("seperator",
-					keywordCheck(lowerCaseText, Konfig.seperatingWord));
+					keywordCheck(lowerCaseText, Config.seperatingWord));
 			setFeature("namestart",
-					keywordCheck(lowerCaseText, Konfig.softwareNameStartWords));
+					keywordCheck(lowerCaseText, Config.softwareNameStartWords));
 			setFeature("versionstart",
-					keywordCheck(lowerCaseText, Konfig.softwareNameStopWords));
-			setFeature("cuebefore", keywordCheck(lowerCaseText,Konfig.softwareNameStopWords));
-			setFeature("cueearlier", keywordCheck(lowerCaseText,Konfig.softwareVersionEnd));
-			setFeature("cuebegin", keywordCheck(lowerCaseText,Konfig.softwareBeginInd));
-			setFeature("cuebetween", keywordCheck(lowerCaseText,Konfig.softwareRangeInd));
+					keywordCheck(lowerCaseText, Config.softwareNameStopWords));
+			setFeature("cuebefore", keywordCheck(lowerCaseText,Config.softwareNameStopWords));
+			setFeature("cueearlier", keywordCheck(lowerCaseText,Config.softwareVersionEnd));
+			setFeature("cuebegin", keywordCheck(lowerCaseText,Config.softwareBeginInd));
+			setFeature("cuebetween", keywordCheck(lowerCaseText,Config.softwareRangeInd));
 			
-			if((getFeatureValue("comma") || lcheck(".+["+ createRegexpFromStrings(Konfig.seperatingChar, "")+"]"))){
+			if((getFeatureValue("comma") || lcheck(".+["+ createRegexpFromStrings(Config.seperatingChar, "")+"]"))){
 						setFeature("logicalend", true);
 						text=text.substring(0, text.length()-1);
 					}
 			if (prev != null
 					&& lcheck("["
-							+ createRegexpFromStrings(Konfig.seperatingChar)
+							+ createRegexpFromStrings(Config.seperatingChar)
 							+ "]"))
 				prev.setFeature("logicalend", true);
 
@@ -221,7 +221,7 @@ public class Snippet {
 
 			tokenValue++;
 
-			setText(text + Konfig.seperator + next.getText());
+			setText(text + Config.seperator + next.getText());
 			if(getText().contains("Gor"))
 				System.out.println();
 			Snippet delSnip = next;

@@ -39,9 +39,9 @@ import java.io.Writer;
 public class CveCollector {
 
 	public static void main(String[] args) {
-		File dir = new File(Konfig.XmlFolder);
+		File dir = new File(Config.XmlFolder);
 		for (File file : dir.listFiles())
-			if (file.getName().endsWith(Konfig.Datatype))
+			if (file.getName().endsWith(Config.Datatype))
 				splitCVExml(file.getAbsolutePath());
 	}
 
@@ -75,10 +75,10 @@ public class CveCollector {
 				}
 
 				if (line.contains("</entry>")) {
-					File folder = new File(Konfig.CveFolder);
+					File folder = new File(Config.CveFolder);
 					if (!folder.exists())
 						folder.mkdirs();
-					fw = new FileWriter(Konfig.CveFolder + fileName + ".xml");
+					fw = new FileWriter(Config.CveFolder + fileName + ".xml");
 					bw = new BufferedWriter(fw);
 					pw = new PrintWriter(bw);
 					pw.print(entryContent);

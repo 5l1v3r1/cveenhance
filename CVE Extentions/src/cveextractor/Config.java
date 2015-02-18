@@ -24,7 +24,7 @@ import java.util.Properties;
  * @version 0.1
  */
 
-public class Konfig {
+public class Config {
 
 // configuration file readout:
 	
