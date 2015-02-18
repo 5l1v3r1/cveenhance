@@ -33,9 +33,9 @@ import java.util.ArrayList;
 public class CveSample {
 
 	private static ArrayList<String> filelist = new ArrayList<String>(); 	// filelist, where all files paths are saved
-	private static String itemDir = Config.CveFolder;	   					// directory, which contains the whole splitted CVE database
-	private static String subsetDir = Config.CveSubsetFolder; 				// directory, which is used to copy a subset of the database
-	private static int desiredSamples=Config.DumpNumber; 					// number of subset elements
+	private static String itemDir = Config.CVE_FOLDER;	   					// directory, which contains the whole splitted CVE database
+	private static String subsetDir = Config.CVE_SUBSET_FOLDER; 				// directory, which is used to copy a subset of the database
+	private static int desiredSamples=Config.DUMP_NUMBER; 					// number of subset elements
 	
 	public static void main(String[] args) {
 		CveSample sp = new CveSample();

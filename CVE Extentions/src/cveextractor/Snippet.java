@@ -10,8 +10,7 @@ package cveextractor;
  * contact: Leonid Glanz (STG), Sebastian Schmidt (KOM), Sebastian Wollny (KOM), Ben Hermann (STG)
  * name: CVE Version Information Extractor
  *
-*/
-
+ */
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -92,8 +91,8 @@ public class Snippet {
 	// Init:
 
 	public void init() {
-		features=new HashMap<String,Boolean>();
-		for(Entry<String,Boolean> entry:defaultVector.entrySet()){
+		features = new HashMap<String, Boolean>();
+		for (Entry<String, Boolean> entry : defaultVector.entrySet()) {
 			features.put(entry.getKey(), entry.getValue());
 		}
 		try {
@@ -103,34 +102,45 @@ public class Snippet {
 			setFeature("bigletter", check("[A-Z]+.*"));
 			setFeature(
 					"version",
-					keywordCheck(lowerCaseText, Config.versionKeywords)
+					keywordCheck(lowerCaseText, Config.VERION_KEYWORDS)
 							|| (lcheck("[\\d]+[\\p{Punct}\\w]*") && !(lcheck(""))));
-			setFeature("os", keywordCheck(lowerCaseText, Config.osKeywords));
+			setFeature("os", keywordCheck(lowerCaseText, Config.OS_KEYWORDS));
 			setFeature("osext",
-					keywordCheck(lowerCaseText, Config.osExctentions));
+					keywordCheck(lowerCaseText, Config.OS_EXTENSIONS));
 			setFeature("stopword",
-					keywordCheck(lowerCaseText, Config.stopWords));
+					keywordCheck(lowerCaseText, Config.STOP_WORDS));
 			setFeature("concatword",
-					keywordCheck(lowerCaseText, Config.concatWords));
-			setFeature("comparingword", keywordCheck(lowerCaseText, Config.comparingWord));
+					keywordCheck(lowerCaseText, Config.CONCAT_WORDS));
+			setFeature("comparingword",
+					keywordCheck(lowerCaseText, Config.COMPARING_WORDS));
 			setFeature("seperator",
-					keywordCheck(lowerCaseText, Config.seperatingWord));
-			setFeature("namestart",
-					keywordCheck(lowerCaseText, Config.softwareNameStartWords));
-			setFeature("versionstart",
-					keywordCheck(lowerCaseText, Config.softwareNameStopWords));
-			setFeature("cuebefore", keywordCheck(lowerCaseText,Config.softwareNameStopWords));
-			setFeature("cueearlier", keywordCheck(lowerCaseText,Config.softwareVersionEnd));
-			setFeature("cuebegin", keywordCheck(lowerCaseText,Config.softwareBeginInd));
-			setFeature("cuebetween", keywordCheck(lowerCaseText,Config.softwareRangeInd));
-			
-			if((getFeatureValue("comma") || lcheck(".+["+ createRegexpFromStrings(Config.seperatingChar, "")+"]"))){
-						setFeature("logicalend", true);
-						text=text.substring(0, text.length()-1);
-					}
+					keywordCheck(lowerCaseText, Config.SEPERATING_WORDS));
+			setFeature(
+					"namestart",
+					keywordCheck(lowerCaseText,
+							Config.SOFTWARE_NAME_START_WORDS));
+			setFeature(
+					"versionstart",
+					keywordCheck(lowerCaseText, Config.SOFTWARE_NAME_STOP_WORDS));
+			setFeature(
+					"cuebefore",
+					keywordCheck(lowerCaseText, Config.SOFTWARE_NAME_STOP_WORDS));
+			setFeature("cueearlier",
+					keywordCheck(lowerCaseText, Config.SOFTWARE_VERSION_ENDS));
+			setFeature("cuebegin",
+					keywordCheck(lowerCaseText, Config.SOFTWARE_BEGIN_IND));
+			setFeature("cuebetween",
+					keywordCheck(lowerCaseText, Config.SOFTWARE_RANGE_IND));
+
+			if ((getFeatureValue("comma") || lcheck(".+["
+					+ createRegexpFromStrings(Config.SEPERATING_CHARS, "")
+					+ "]"))) {
+				setFeature("logicalend", true);
+				text = text.substring(0, text.length() - 1);
+			}
 			if (prev != null
 					&& lcheck("["
-							+ createRegexpFromStrings(Config.seperatingChar)
+							+ createRegexpFromStrings(Config.SEPERATING_CHARS)
 							+ "]"))
 				prev.setFeature("logicalend", true);
 
@@ -221,11 +231,11 @@ public class Snippet {
 
 			tokenValue++;
 
-			setText(text + Config.seperator + next.getText());
-			if(getText().contains("Gor"))
+			setText(text + Config.SEPERATOR + next.getText());
+			if (getText().contains("Gor"))
 				System.out.println();
 			Snippet delSnip = next;
-			
+
 			next = next.next;
 			if (next != null)
 				next.prev = this;
@@ -275,15 +285,15 @@ public class Snippet {
 	public boolean hasLogicalType() {
 		return logicalType() != null;
 	}
-	
-	public void setLogicalUnitComment(String unitComment){
-		if(hasLogicalType())logicalUnit.comment=unitComment;
-	}
-	
-	public String logicalUnitComment(){
-		return logicalUnit.comment;
+
+	public void setLogicalUnitComment(String unitComment) {
+		if (hasLogicalType())
+			logicalUnit.comment = unitComment;
 	}
 
+	public String logicalUnitComment() {
+		return logicalUnit.comment;
+	}
 
 	/**
 	 * @return the part of the floating text
@@ -355,8 +365,8 @@ public class Snippet {
 		}
 		return true;
 	}
-	
-	public int value(){
+
+	public int value() {
 		return tokenValue;
 	}
 
@@ -370,7 +380,7 @@ public class Snippet {
 	}
 
 	private int combinationLen() {
-		
+
 		if (logicalUnit == null)
 			return 0;
 
@@ -383,7 +393,8 @@ public class Snippet {
 			for (String[] condition : correspondingConditions) {
 				try {
 					if (condition.length <= combinationLen + 1
-							|| !curSnip.condition(condition[combinationLen+1])) {
+							|| !curSnip
+									.condition(condition[combinationLen + 1])) {
 						removeList.add(condition);
 					}
 				} catch (Exception e) {
@@ -393,10 +404,9 @@ public class Snippet {
 			}
 			correspondingConditions.removeAll(removeList);
 			// Check the next Snippet for a specific condition
-			if (correspondingConditions.size() != 0){
+			if (correspondingConditions.size() != 0) {
 				combinationLen++;
-			}
-			else
+			} else
 				break;
 			curSnip = curSnip.next;
 		}

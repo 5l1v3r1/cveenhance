@@ -213,13 +213,13 @@ public class VersionRange {
 	public String firstXMLTag() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\t\t\t<");
-		sb.append(Config.xmlExtensionTag);
+		sb.append(Config.XML_EXTENSION_TAG);
 		sb.append(":");
 		sb.append("start>");
 		sb.append(generalCpeString);
 		sb.append(firstDetectedVersion());
 		sb.append("</");
-		sb.append(Config.xmlExtensionTag);
+		sb.append(Config.XML_EXTENSION_TAG);
 		sb.append(":");
 		sb.append("start>");
 		return sb.toString();
@@ -228,13 +228,13 @@ public class VersionRange {
 	public String lastXMLTag() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\t\t\t<");
-		sb.append(Config.xmlExtensionTag);
+		sb.append(Config.XML_EXTENSION_TAG);
 		sb.append(":");
 		sb.append("end>");
 		sb.append(generalCpeString);
 		sb.append(lastDetectedVersion());
 		sb.append("</");
-		sb.append(Config.xmlExtensionTag);
+		sb.append(Config.XML_EXTENSION_TAG);
 		sb.append(":");
 		sb.append("end>");
 		return sb.toString();
@@ -243,13 +243,13 @@ public class VersionRange {
 	public String fixedXMLTag() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\t\t\t<");
-		sb.append(Config.xmlExtensionTag);
+		sb.append(Config.XML_EXTENSION_TAG);
 		sb.append(":");
 		sb.append("fix>");
 		sb.append(generalCpeString);
 		sb.append(fixedVersion());
 		sb.append("</");
-		sb.append(Config.xmlExtensionTag);
+		sb.append(Config.XML_EXTENSION_TAG);
 		sb.append(":");
 		sb.append("fix>");
 		return sb.toString();
@@ -258,7 +258,7 @@ public class VersionRange {
 	public String getXMLRange(){
 		StringBuilder sb = new StringBuilder();
 		sb.append("\t\t<");
-		sb.append(Config.xmlExtensionTag);
+		sb.append(Config.XML_EXTENSION_TAG);
 		sb.append(":");
 		sb.append("range>\n");
 		
@@ -278,7 +278,7 @@ public class VersionRange {
 			}
 		
 		sb.append("\t\t</");
-		sb.append(Config.xmlExtensionTag);
+		sb.append(Config.XML_EXTENSION_TAG);
 		sb.append(":");
 		sb.append("range>\n");
 		return sb.toString();
@@ -293,7 +293,7 @@ public class VersionRange {
 			returnStr += " fix:" + fixedVersion();
 		else
 			returnStr += " no fix found";
-		if (!generalCpeString.isEmpty() && Config.Testmode)
+		if (!generalCpeString.isEmpty() && Config.TEST_MODE)
 			returnStr += " |  " + generalCpeString;
 		return returnStr;
 

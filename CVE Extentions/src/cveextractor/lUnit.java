@@ -23,7 +23,7 @@ import java.util.Vector;
 
 public class lUnit {
 	
-	private String[] possibleUnits=Config.logicalUnits;
+	private String[] possibleUnits=Config.lOGICAL_UNITS;
 	private final String unitType;
 	private boolean valid=false;
 	public String comment ="";
@@ -52,7 +52,7 @@ public class lUnit {
 	 * @return corresponding subset of combination rules
 	 */
 	public Vector<String[]> getCorrespondingConditions(){
-		String[][] conditions = Config.combinationConditions;
+		String[][] conditions = Config.COMBINATION_CONDITIONS;
 		Vector<String[]> resultvector = new Vector<String[]>();
 		for (int i=0; i<conditions.length; i++){
 			if(conditions[i][0].equalsIgnoreCase(type())) resultvector.add(conditions[i]);

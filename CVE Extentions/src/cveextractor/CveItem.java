@@ -113,7 +113,7 @@ public class CveItem {
 							int distance = 0;
 							while (scanSnip.hasNext()
 									&& !scanSnip.islogicalEnd()
-									&& distance < Config.searchdistance) {
+									&& distance < Config.SEARCH_DISTANCE) {
 								scanSnip = scanSnip.next;
 								distance += scanSnip.value();
 								if (scanSnip.isLogicalType("version")) {
@@ -324,7 +324,7 @@ public class CveItem {
 		Snippet curSnip = versionSnippet;
 		Snippet Softwarename = null;
 		int distance = 0;
-		while (distance < Config.searchdistance && curSnip.hasPrev()) {
+		while (distance < Config.SEARCH_DISTANCE && curSnip.hasPrev()) {
 			curSnip = curSnip.prev;
 			if (curSnip.logicalType() != null
 					&& curSnip.logicalType().equals("softwarename")) {

@@ -47,12 +47,12 @@ import cveextractor.VersionComparator;
 public class AnalyseCves {
 
 	private static Vector<String> fileDirections = new Vector<String>();
-	private static String dumpDir = Config.CveSubsetFolder;
-	private static String cveFolder = Config.CveFolder;
-	private static String dataType = Config.Datatype;
-	private static String analysisResultFile = Config.CvePrint;
-	private static boolean testmode = Config.Testmode;
-	private static int messageTime = Config.MessageTime;
+	private static String dumpDir = Config.CVE_SUBSET_FOLDER;
+	private static String cveFolder = Config.CVE_FOLDER;
+	private static String dataType = Config.DATA_TYPE;
+	private static String analysisResultFile = Config.CVE_PRINT;
+	private static boolean testmode = Config.TEST_MODE;
+	private static int messageTime = Config.MESSAGE_TIME;
 
 	private int[] resultCounter = new int[4];
 
@@ -110,7 +110,7 @@ public class AnalyseCves {
 							bw.close();
 						}
 						bw = new BufferedWriter(new FileWriter(new File(
-								Config.outputFolder, "nvdcve-2.0-" + year
+								Config.OUTPUT_FOLDER, "nvdcve-2.0-" + year
 										+ "-enhanced.xml")));
 						bw.write("<?xml version='1.0' encoding='UTF-8'?>\n<nvd xmlns:patch=\"http://scap.nist.gov/schema/patch/0.1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:vuln=\"http://scap.nist.gov/schema/vulnerability/0.4\" xmlns:cpe-lang=\"http://cpe.mitre.org/language/2.0\" xmlns:cvss=\"http://scap.nist.gov/schema/cvss-v2/0.2\" xmlns=\"http://scap.nist.gov/schema/feed/vulnerability/2.0\" xmlns:scap-core=\"http://scap.nist.gov/schema/scap-core/0.1\" nvd_xml_version=\"2.0\" pub_date=\"2013-12-22T07:21:37\" xsi:schemaLocation=\"http://scap.nist.gov/schema/patch/0.1 http://nvd.nist.gov/schema/patch_0.1.xsd http://scap.nist.gov/schema/scap-core/0.1 http://nvd.nist.gov/schema/scap-core_0.1.xsd http://scap.nist.gov/schema/feed/vulnerability/2.0 http://nvd.nist.gov/schema/nvd-cve-feed_2.0.xsd\">\n");
 					}
@@ -214,7 +214,7 @@ public class AnalyseCves {
 				if (testmode)
 					System.out.println("-> Result: " + result);
 				if (!testmode) {
-					if (!Config.Logging) {
+					if (!Config.LOGGING) {
 						output = getMachineReadableOutput(item, result);
 					} else {
 						output = getHumanReviewOutput(item, result);
@@ -255,14 +255,14 @@ public class AnalyseCves {
 	private String getOutputToXMLFile(Vector<VersionRange> results) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\t<");
-		sb.append(Config.xmlExtensionTag);
+		sb.append(Config.XML_EXTENSION_TAG);
 		sb.append(":");
 		sb.append("ranges>\n");
 		for (VersionRange vr : results) {
 			sb.append(vr.getXMLRange());
 		}
 		sb.append("\t</");
-		sb.append(Config.xmlExtensionTag);
+		sb.append(Config.XML_EXTENSION_TAG);
 		sb.append(":");
 		sb.append("ranges>");
 		return sb.toString();
