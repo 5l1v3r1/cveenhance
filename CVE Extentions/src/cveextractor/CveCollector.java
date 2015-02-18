@@ -10,8 +10,7 @@ package cveextractor;
  * contact: Leonid Glanz (STG), Sebastian Schmidt (KOM), Sebastian Wollny (KOM), Ben Hermann (STG)
  * name: CVE Version Information Extractor
  *
-*/
-
+ */
 
 /**
  * >> This programm splits a CVE XML Database backup/file into seperated smaller files, so the extraction can be managed/splited/modified better.<<
@@ -30,7 +29,9 @@ import java.io.PrintWriter;
 import java.io.Writer;
 
 /**
- * >> This class splits all CVE Database XMLs to single files and stores it in the CVE item folder  <<
+ * >> This class splits all CVE Database XMLs to single files and stores it in
+ * the CVE item folder <<
+ * 
  * @author TU Darmstadt KOM, TU Darmstadt STG
  * @version 0.1
  */
@@ -46,37 +47,44 @@ public class CveCollector {
 
 	/**
 	 * splits a CVE database XML to seperated CVE entry files
-	 * @param filePath path to CVE database XML
+	 * 
+	 * @param filePath
+	 *            path to CVE database XML
 	 */
 	public static void splitCVExml(String filePath) {
 
 		try {
 			FileInputStream fileInputStream = new FileInputStream(filePath);
-			DataInputStream dataInputStream = new DataInputStream(fileInputStream);
-			BufferedReader br = new BufferedReader(new InputStreamReader(dataInputStream));
+			DataInputStream dataInputStream = new DataInputStream(
+					fileInputStream);
+			BufferedReader br = new BufferedReader(new InputStreamReader(
+					dataInputStream));
 			Writer fw;
 			Writer bw;
-			PrintWriter pw=null;
+			PrintWriter pw = null;
 			String line;
-			String entryContent="";
-			String fileName="";
-			while((line=br.readLine())!=null){
-				if (line.contains("<entry ")){
-					fileName=line.substring(line.indexOf("id") + 4,
+			String entryContent = "";
+			String fileName = "";
+			while ((line = br.readLine()) != null) {
+				if (line.contains("<entry ")) {
+					fileName = line.substring(line.indexOf("id") + 4,
 							line.indexOf("\"", line.indexOf("id") + 4));
 				}
-				if(!line.startsWith("<?xml")&&!line.startsWith("<nvd")){
-					entryContent+=line+"\n";
+				if (!line.startsWith("<?xml") && !line.startsWith("<nvd")) {
+					entryContent += line + "\n";
 				}
-				
+
 				if (line.contains("</entry>")) {
-					fw = new FileWriter(Konfig.CveFolder+fileName+".xml");
+					File folder = new File(Konfig.CveFolder);
+					if (!folder.exists())
+						folder.mkdirs();
+					fw = new FileWriter(Konfig.CveFolder + fileName + ".xml");
 					bw = new BufferedWriter(fw);
 					pw = new PrintWriter(bw);
 					pw.print(entryContent);
 					System.out.println(fileName);
-					entryContent="";
-					fileName="";
+					entryContent = "";
+					fileName = "";
 					pw.close();
 				}
 			}
