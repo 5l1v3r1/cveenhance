@@ -10,7 +10,7 @@ package cveextractor;
  * contact: Leonid Glanz (STG), Sebastian Schmidt (KOM), Sebastian Wollny (KOM), Ben Hermann (STG)
  * name: CVE Version Information Extractor
  *
-*/
+ */
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -39,7 +39,8 @@ import cveextractor.LuceneIndexCreator;
 import cveextractor.VersionComparator;
 
 /**
- * >> This class contains the extractor main  <<
+ * >> This class contains the extractor main <<
+ * 
  * @author TU Darmstadt KOM, TU Darmstadt STG
  * @version 0.1
  */
@@ -47,24 +48,18 @@ import cveextractor.VersionComparator;
 public class AnalyseCves {
 
 	private static Vector<String> fileDirections = new Vector<String>();
-	private static String dumpDir = Config.CVE_SUBSET_FOLDER;
-	private static String cveFolder = Config.CVE_FOLDER;
-	private static String dataType = Config.DATA_TYPE;
-	private static String analysisResultFile = Config.CVE_PRINT;
-	private static boolean testmode = Config.TEST_MODE;
-	private static int messageTime = Config.MESSAGE_TIME;
 
 	private int[] resultCounter = new int[4];
 
 	public static void main(String[] args) {
 		AnalyseCves ana = new AnalyseCves();
 		String analyseDir = "";
-		if (testmode)
-			analyseDir = dumpDir;
+		if (Config.TEST_MODE)
+			analyseDir = Config.CVE_SUBSET_FOLDER;
 		else
-			analyseDir = cveFolder;
+			analyseDir = Config.CVE_FOLDER;
 		try {
-			Writer fw = new FileWriter(analysisResultFile);
+			Writer fw = new FileWriter(Config.CVE_PRINT);
 
 			Writer bw = new BufferedWriter(fw);
 			PrintWriter pw = new PrintWriter(bw);
@@ -88,39 +83,39 @@ public class AnalyseCves {
 	 * 
 	 * @param path
 	 *            path which should be analyzed; files be saved in filelist
-	 * 			
+	 * 
 	 */
 	public void walk(String path, PrintWriter pw) {
 		File root = new File(path);
 		File[] list = root.listFiles();
 		BufferedWriter bw = null;
 		String year = "";
-		
+
 		try {
-			for (File f : list) { 
+			for (File f : list) {
 				if (f.isDirectory()) {
-					walk(f.getAbsolutePath(), pw); 
-					System.out.println("Dir:" + f.getAbsoluteFile()); 
-				} else { 
+					walk(f.getAbsolutePath(), pw);
+					System.out.println("Dir:" + f.getAbsoluteFile());
+				} else {
 					String fileYear = f.getName().substring(4, 8);
 					if (!year.equals(fileYear)) {
 						year = fileYear;
-						if (bw != null){
-							bw.write("</nvd>");
+						if (bw != null) {
+							bw.write(Config.END_TAG);
 							bw.close();
 						}
 						bw = new BufferedWriter(new FileWriter(new File(
 								Config.OUTPUT_FOLDER, "nvdcve-2.0-" + year
 										+ "-enhanced.xml")));
-						bw.write("<?xml version='1.0' encoding='UTF-8'?>\n<nvd xmlns:patch=\"http://scap.nist.gov/schema/patch/0.1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:vuln=\"http://scap.nist.gov/schema/vulnerability/0.4\" xmlns:cpe-lang=\"http://cpe.mitre.org/language/2.0\" xmlns:cvss=\"http://scap.nist.gov/schema/cvss-v2/0.2\" xmlns=\"http://scap.nist.gov/schema/feed/vulnerability/2.0\" xmlns:scap-core=\"http://scap.nist.gov/schema/scap-core/0.1\" nvd_xml_version=\"2.0\" pub_date=\"2013-12-22T07:21:37\" xsi:schemaLocation=\"http://scap.nist.gov/schema/patch/0.1 http://nvd.nist.gov/schema/patch_0.1.xsd http://scap.nist.gov/schema/scap-core/0.1 http://nvd.nist.gov/schema/scap-core_0.1.xsd http://scap.nist.gov/schema/feed/vulnerability/2.0 http://nvd.nist.gov/schema/nvd-cve-feed_2.0.xsd\">\n");
+						bw.write(Config.START_TAGS);
 					}
 					String fileresult = f.getAbsoluteFile().toString();
 					String parseName = fileresult.substring(fileresult
 							.lastIndexOf("\\"));
-					if (parseName.toLowerCase().contains(dataType)) { 
-						fileDirections.add(f.getAbsolutePath()); 
+					if (parseName.toLowerCase().contains(Config.DATA_TYPE)) {
+						fileDirections.add(f.getAbsolutePath());
 						String line = "";
-						FileInputStream fstream; 
+						FileInputStream fstream;
 						StringBuilder innerText = new StringBuilder();
 						try {
 							fstream = new FileInputStream(f.getAbsolutePath());
@@ -140,26 +135,30 @@ public class AnalyseCves {
 						resultCounter[0]++;
 
 						this.analyse(curItem, pw, bw);
-						if (testmode)
+						if (Config.TEST_MODE)
 							System.out.println("File:" + f.getAbsoluteFile());
-						if (!testmode && resultCounter[0] % 50 == 0)
+						else if (resultCounter[0] % 50 == 0)
 							System.out
 									.println(resultCounter[0] + " files read");
 
 					} else
 						System.out
-								.println("No XML File:" + f.getAbsoluteFile()); 
+								.println("No XML File:" + f.getAbsoluteFile());
 				}
 			}
-			if (bw != null){
-				bw.write("</nvd>");
+			if (bw != null) {
+				bw.write(Config.END_TAG);
 				bw.close();
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	
-		System.out.println("\nCVE entries: "+resultCounter[0]+"\nCVE entries with first information: "+resultCounter[1]+"\nCVE entries with last information: "+resultCounter[2]+"\nCVE entries with fix information: "+resultCounter[3]+"\n");
+
+		System.out.println("\nCVE entries: " + resultCounter[0]
+				+ "\nCVE entries with first information: " + resultCounter[1]
+				+ "\nCVE entries with last information: " + resultCounter[2]
+				+ "\nCVE entries with fix information: " + resultCounter[3]
+				+ "\n");
 	}
 
 	/**
@@ -168,7 +167,7 @@ public class AnalyseCves {
 	 */
 	private void analyse(CveItem item, PrintWriter pw, BufferedWriter bw) {
 		try {
-			if (testmode)
+			if (Config.TEST_MODE)
 				System.out.println("------- CVE-Item: " + item.getCVEID()
 						+ " -------");
 			Vector<Snippet> versions = item
@@ -185,35 +184,38 @@ public class AnalyseCves {
 					snippetComment = "    (" + curSnip.logicalUnitComment()
 							+ ") ";
 				relations.add(new NameVersionRelation(softwareName, curSnip));
-				if (testmode)
+				if (Config.TEST_MODE)
 					System.out.println(softwareName.getText() + "     Version:"
 							+ curSnip.getText() + snippetComment);
 			}
 
 			Vector<VersionRange> results = createResult(relations, item);
-			String entry=item.xmlCode;
-			BufferedReader br=new BufferedReader(new StringReader(entry));
+			String entry = item.xmlCode;
+			BufferedReader br = new BufferedReader(new StringReader(entry));
 			String line;
-			while((line=br.readLine())!=null){
-				if(line.contains("</entry>")){
-					bw.write(getOutputToXMLFile(results)+"\n");
+			while ((line = br.readLine()) != null) {
+				if (line.contains("</entry>")) {
+					bw.write(getOutputToXMLFile(results) + "\n");
 				}
-				bw.write(line+"\n");
+				bw.write(line + "\n");
 			}
-			
+
 			StringBuilder output = new StringBuilder();
-			
-			boolean hasFirst=false;
-			boolean hasLast=false;
-			boolean hasFix=false;
-			
+
+			boolean hasFirst = false;
+			boolean hasLast = false;
+			boolean hasFix = false;
+
 			for (VersionRange result : results) {
-				if(result.hasFirst())hasFirst=true;
-				if(result.hasLast())hasLast=true;
-				if(result.hasFix())hasFix=true;
-				if (testmode)
+				if (result.hasFirst())
+					hasFirst = true;
+				if (result.hasLast())
+					hasLast = true;
+				if (result.hasFix())
+					hasFix = true;
+				if (Config.TEST_MODE)
 					System.out.println("-> Result: " + result);
-				if (!testmode) {
+				else {
 					if (!Config.LOGGING) {
 						output = getMachineReadableOutput(item, result);
 					} else {
@@ -222,20 +224,26 @@ public class AnalyseCves {
 					pw.println(output.toString());
 				}
 			}
-			
-			if(hasFirst) resultCounter[1]++;
-			if(hasLast) resultCounter[2]++;
-			if(hasFix) resultCounter[3]++;
+
+			if (hasFirst)
+				resultCounter[1]++;
+			if (hasLast)
+				resultCounter[2]++;
+			if (hasFix)
+				resultCounter[3]++;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
 	/**
-	 * Creates a human readable text output of extraction results  
-	 * @param item CVE entry
-	 * @param result A version range result
-	 * @return human readable output string 
+	 * Creates a human readable text output of extraction results
+	 * 
+	 * @param item
+	 *            CVE entry
+	 * @param result
+	 *            A version range result
+	 * @return human readable output string
 	 */
 	private StringBuilder getHumanReviewOutput(CveItem item, VersionRange result) {
 		StringBuilder output = new StringBuilder();
@@ -246,9 +254,12 @@ public class AnalyseCves {
 		output.append(result.cpe());
 		return output;
 	}
+
 	/**
-	 * Creates an XML Output 
-	 * @param results extracted version ranges
+	 * Creates an XML Output
+	 * 
+	 * @param results
+	 *            extracted version ranges
 	 * @return XML output string
 	 */
 
@@ -267,12 +278,15 @@ public class AnalyseCves {
 		sb.append("ranges>");
 		return sb.toString();
 	}
-	
+
 	/**
-	 * Creates a machine readable text output of extraction results  
-	 * @param item CVE entry
-	 * @param result A version range result
-	 * @return machine readable output string 
+	 * Creates a machine readable text output of extraction results
+	 * 
+	 * @param item
+	 *            CVE entry
+	 * @param result
+	 *            A version range result
+	 * @return machine readable output string
 	 */
 	private StringBuilder getMachineReadableOutput(CveItem item,
 			VersionRange result) {
@@ -292,8 +306,11 @@ public class AnalyseCves {
 
 	/**
 	 * Creates the result of a single extraction
-	 * @param relations all found NameVersionRelations of a CVE entry
-	 * @param item the corresponding CVE entry
+	 * 
+	 * @param relations
+	 *            all found NameVersionRelations of a CVE entry
+	 * @param item
+	 *            the corresponding CVE entry
 	 * @return resulting version ranges
 	 */
 	private Vector<VersionRange> createResult(
@@ -348,10 +365,12 @@ public class AnalyseCves {
 		}
 		return relatedRelations;
 	}
-	
+
 	/**
 	 * extracts the vendor part of a CPEstring
-	 * @param cpename complete CPE string
+	 * 
+	 * @param cpename
+	 *            complete CPE string
 	 * @return vendor part of CPE
 	 */
 	private String extractCPEVendor(String cpename) {
@@ -371,11 +390,13 @@ public class AnalyseCves {
 		}
 		return remaining;
 	}
-	
+
 	/**
 	 * Extracts the vulnerable software list
-	 * @param item CVE item, whose software list should be extracted
-	 * @return software list 
+	 * 
+	 * @param item
+	 *            CVE item, whose software list should be extracted
+	 * @return software list
 	 */
 
 	private List<String> getProductList(CveItem item) {
@@ -396,10 +417,12 @@ public class AnalyseCves {
 		}
 		return products;
 	}
-	
+
 	/**
 	 * Groups NameVersionRelations to VersionRanges
-	 * @param relations all relations
+	 * 
+	 * @param relations
+	 *            all relations
 	 * @return A vector of version ranges
 	 */
 	private Vector<VersionRange> groupRelations(
@@ -462,8 +485,11 @@ public class AnalyseCves {
 
 	/**
 	 * Checks, if a NameVersionRelation refers to the same software name
-	 * @param shortestRelations Relation list for inserting shortest relation
-	 * @param shortestRelation relation to insert in shortest Relations
+	 * 
+	 * @param shortestRelations
+	 *            Relation list for inserting shortest relation
+	 * @param shortestRelation
+	 *            relation to insert in shortest Relations
 	 */
 	private boolean isSameSoftwareRef(
 			HashSet<NameVersionRelation> shortestRelations,
@@ -497,24 +523,8 @@ public class AnalyseCves {
 	}
 
 	/**
-	 * Sets a timeout for displaying a message.
-	 * @param milliseconds displaying time
-	 */
-	private void stopfor(int milliseconds) {
-		try {
-			Thread.sleep(milliseconds);
-		} catch (InterruptedException ex) {
-			Thread.currentThread().interrupt();
-		}
-	}
-
-	private void stopfor() {
-		int milliseconds = messageTime;
-		stopfor(milliseconds);
-	}
-	
-	/**
 	 * Returns the most alike cpe string
+	 * 
 	 * @param versionRange
 	 * @param products
 	 * @return most alike cpe string

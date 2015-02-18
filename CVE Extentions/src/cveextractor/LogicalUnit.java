@@ -10,79 +10,86 @@ package cveextractor;
  * contact: Leonid Glanz (STG), Sebastian Schmidt (KOM), Sebastian Wollny (KOM), Ben Hermann (STG)
  * name: CVE Version Information Extractor
  *
-*/
-
+ */
 
 import java.util.Vector;
 
 /**
  * >> An object of this class represents an entity type <<
+ * 
  * @author TU Darmstadt KOM, TU Darmstadt STG
  * @version 0.1
  */
 
-public class lUnit {
-	
-	private String[] possibleUnits=Config.lOGICAL_UNITS;
+public class LogicalUnit {
+
+	private String[] possibleUnits = Config.lOGICAL_UNITS;
 	private final String unitType;
-	private boolean valid=false;
-	public String comment ="";
-	
-	public lUnit(String newUnitType) {
-		if(isValidType(newUnitType.trim().toLowerCase())) {
-			unitType=newUnitType;
-			valid=true;
-		}
-		else unitType=null;
+	private boolean valid = false;
+	public String comment = "";
+
+	public LogicalUnit(String newUnitType) {
+		if (isValidType(newUnitType.trim().toLowerCase())) {
+			unitType = newUnitType;
+			valid = true;
+		} else
+			unitType = null;
 	}
-	
+
 	/**
 	 * Checks if a logical Unit type may be created
+	 * 
 	 * @param type
 	 */
-	public boolean isValidType(String type){
-		for(int i=0;i<possibleUnits.length;i++){
-			if(type.equals(possibleUnits[i])) return true;
+	public boolean isValidType(String type) {
+		for (int i = 0; i < possibleUnits.length; i++) {
+			if (type.equals(possibleUnits[i]))
+				return true;
 		}
 		return false;
 	}
-	
+
 	/**
 	 * filters all snippet combination rules to the corresponding subset
+	 * 
 	 * @return corresponding subset of combination rules
 	 */
-	public Vector<String[]> getCorrespondingConditions(){
+	public Vector<String[]> getCorrespondingConditions() {
 		String[][] conditions = Config.COMBINATION_CONDITIONS;
 		Vector<String[]> resultvector = new Vector<String[]>();
-		for (int i=0; i<conditions.length; i++){
-			if(conditions[i][0].equalsIgnoreCase(type())) resultvector.add(conditions[i]);
+		for (int i = 0; i < conditions.length; i++) {
+			if (conditions[i][0].equalsIgnoreCase(type()))
+				resultvector.add(conditions[i]);
 		}
 		return resultvector;
 	}
-	
+
 	/**
 	 * Checks if the logical type really exists
 	 */
-	public boolean isValid(){ return (valid && unitType!=null);}
-	
+	public boolean isValid() {
+		return (valid && unitType != null);
+	}
+
 	/**
 	 * @return logical type value
 	 */
-	public String type(){
+	public String type() {
 		return unitType;
 	}
-	
+
 	/**
 	 * @return If a logical type matches
 	 */
-	public boolean isType(String checkType){
+	public boolean isType(String checkType) {
 		return checkType.equals(type());
 	}
 
-	public String toString(){
-		if(isValid()) return unitType;
-		else return "";
+	public String toString() {
+		if (isValid())
+			return unitType;
+		else
+			return "";
 	}
-	
 
 }

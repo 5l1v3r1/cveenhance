@@ -35,23 +35,12 @@ public class Snippet {
 			.defaultVector();
 
 	private HashMap<String, Boolean> features;
-	/*
-	 * private boolean comma = false; private boolean word = false; private
-	 * boolean possibleVersion = false; private boolean bigLetter = false;
-	 * private boolean notToUse = false; private boolean used = false; private
-	 * boolean version = false; private boolean os = false; private boolean
-	 * osExt = false; private boolean stopword = false; private boolean
-	 * concatword = false; private boolean seperator = false; private boolean
-	 * nameStart = false; private boolean versionStart = false; private boolean
-	 * versionEnd = false;
-	 */
-
 	// handling vars:
 	private String text; // floating text part
 	private String lowerCaseText;
 	private int length = 0;
 	private int tokenValue = 1;
-	private lUnit logicalUnit = null;
+	private LogicalUnit logicalUnit = null;
 
 	// connections to neighbor Snippets
 	public Snippet next = null;
@@ -90,7 +79,7 @@ public class Snippet {
 
 	// Init:
 
-	public void init() {
+	public void initialize() {
 		features = new HashMap<String, Boolean>();
 		for (Entry<String, Boolean> entry : defaultVector.entrySet()) {
 			features.put(entry.getKey(), entry.getValue());
@@ -143,8 +132,6 @@ public class Snippet {
 							+ createRegexpFromStrings(Config.SEPERATING_CHARS)
 							+ "]"))
 				prev.setFeature("logicalend", true);
-
-			// if(getFeatureValue("version")) System.out.println(getText());
 
 			if (hasPrev() == false)
 				setFeature("logicalstart", true);
@@ -259,11 +246,11 @@ public class Snippet {
 	}
 
 	public void setLogicalUnit(String newUnit) {
-		logicalUnit = new lUnit(newUnit);
+		logicalUnit = new LogicalUnit(newUnit);
 
 	}
 
-	public void setLogicalUnit(lUnit newUnit) {
+	public void setLogicalUnit(LogicalUnit newUnit) {
 		logicalUnit = newUnit;
 	}
 
