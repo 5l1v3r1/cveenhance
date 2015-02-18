@@ -10,8 +10,7 @@ package cveextractor;
  * contact: Leonid Glanz (STG), Sebastian Schmidt (KOM), Sebastian Wollny (KOM), Ben Hermann (STG)
  * name: CVE Version Information Extractor
  *
-*/
-
+ */
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -38,11 +37,11 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
- * >> This class is used to get abbreviations used in CVE summaries  <<
+ * >> This class is used to get abbreviations used in CVE summaries <<
+ * 
  * @author TU Darmstadt KOM, TU Darmstadt STG
  * @version 0.1
  */
-
 
 public class AbbrevaitionExtractor {
 

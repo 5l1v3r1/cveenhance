@@ -10,8 +10,7 @@ package cveextractor;
  * contact: Leonid Glanz (STG), Sebastian Schmidt (KOM), Sebastian Wollny (KOM), Ben Hermann (STG)
  * name: CVE Version Information Extractor
  *
-*/
-
+ */
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +54,8 @@ public class VersionComparator {
 				smallerThanFix.add(cpe);
 			}
 		}
-		if(smallerThanFix.size()==0) return "";
+		if (smallerThanFix.size() == 0)
+			return "";
 		return getGreatestMatch(smallerThanFix);
 	}
 

@@ -85,14 +85,14 @@ public class Snippet {
 			features.put(entry.getKey(), entry.getValue());
 		}
 		try {
-			setFeature("comma", lcheck(".*,"));
-			setFeature("possibleversion", lcheck(".*\\d.*"));
+			setFeature("comma", matchesLowerCase(".*,"));
+			setFeature("possibleversion", matchesLowerCase(".*\\d.*"));
 			setFeature("word", (text.length() >= 3));
-			setFeature("bigletter", check("[A-Z]+.*"));
+			setFeature("bigletter", matchesExpression("[A-Z]+.*"));
 			setFeature(
 					"version",
 					keywordCheck(lowerCaseText, Config.VERION_KEYWORDS)
-							|| (lcheck("[\\d]+[\\p{Punct}\\w]*") && !(lcheck(""))));
+							|| (matchesLowerCase("[\\d]+[\\p{Punct}\\w]*") && !(matchesLowerCase(""))));
 			setFeature("os", keywordCheck(lowerCaseText, Config.OS_KEYWORDS));
 			setFeature("osext",
 					keywordCheck(lowerCaseText, Config.OS_EXTENSIONS));
@@ -121,14 +121,14 @@ public class Snippet {
 			setFeature("cuebetween",
 					keywordCheck(lowerCaseText, Config.SOFTWARE_RANGE_IND));
 
-			if ((getFeatureValue("comma") || lcheck(".+["
+			if ((getFeatureValue("comma") || matchesLowerCase(".+["
 					+ createRegexpFromStrings(Config.SEPERATING_CHARS, "")
 					+ "]"))) {
 				setFeature("logicalend", true);
 				text = text.substring(0, text.length() - 1);
 			}
 			if (prev != null
-					&& lcheck("["
+					&& matchesLowerCase("["
 							+ createRegexpFromStrings(Config.SEPERATING_CHARS)
 							+ "]"))
 				prev.setFeature("logicalend", true);
@@ -183,12 +183,12 @@ public class Snippet {
 		return false;
 	}
 
-	private boolean lcheck(String regex) {
+	private boolean matchesLowerCase(String regex) {
 		// lower case regex check
 		return lowerCaseText.matches(regex);
 	}
 
-	private boolean check(String regex) {
+	private boolean matchesExpression(String regex) {
 		// regex check
 		return text.matches(regex);
 	}

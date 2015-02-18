@@ -10,8 +10,7 @@ package cveextractor;
  * contact: Leonid Glanz (STG), Sebastian Schmidt (KOM), Sebastian Wollny (KOM), Ben Hermann (STG)
  * name: CVE Version Information Extractor
  *
-*/
-
+ */
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -97,33 +96,26 @@ public class VersionRange {
 	private void updateRelevantVersions() {
 		searchFirst();
 		searchLast();
-		if (versions.get(versions.size() - 1).version().logicalUnitComment()
-				.equals("fixed")) {
+		if (versions.get(versions.size() - 1).version().logicalUnitComment().equals("fixed")) {
 			if (versions.size() == 1) {
 				firstDetectedVer = "0.0";
 				lastDetectedVer = "";
 			} else if (versions.size() == 2) {
-				firstDetectedVer = shortest().version().getText()
-						.replaceFirst("\\.x", ".0");
+				firstDetectedVer = shortest().version().getText().replaceFirst("\\.x", ".0");
 				lastDetectedVer = "";
 			} else {
-				firstDetectedVer = shortest().version().getText()
-						.replaceFirst("\\.x", ".0");
-				lastDetectedVer = versions.get(versions.size() - 2).version()
-						.getText().replaceFirst("\\.x", ".0");
+				firstDetectedVer = shortest().version().getText().replaceFirst("\\.x", ".0");
+				lastDetectedVer = versions.get(versions.size() - 2).version().getText().replaceFirst("\\.x", ".0");
 			}
 		} else {
 			if (versions.size() == 1) {
 				if (!last && !first) {
-					firstDetectedVer = versions.get(0).version().getText()
-							.replaceFirst("\\.x", ".0");
+					firstDetectedVer = versions.get(0).version().getText().replaceFirst("\\.x", ".0");
 					lastDetectedVer = firstDetectedVer;
 				}
 			} else {
-				firstDetectedVer = shortest().version().getText()
-						.replaceFirst("\\.x", ".0");
-				lastDetectedVer = biggest().version().getText()
-						.replaceFirst("\\.x", ".0");
+				firstDetectedVer = shortest().version().getText().replaceFirst("\\.x", ".0");
+				lastDetectedVer = biggest().version().getText().replaceFirst("\\.x", ".0");
 			}
 
 		}
@@ -158,8 +150,7 @@ public class VersionRange {
 		Snippet version;
 		while (nvrIt.hasNext()) {
 			version = nvrIt.next().version();
-			if (version.logicalUnitComment().equals(
-					"last detected vulnerability")) {
+			if (version.logicalUnitComment().equals("last detected vulnerability")) {
 				last = true;
 				lastDetectedVer = version.getText();
 			}
@@ -171,8 +162,7 @@ public class VersionRange {
 		Snippet version;
 		while (nvrIt.hasNext()) {
 			version = nvrIt.next().version();
-			if (version.logicalUnitComment().equals(
-					"first detected vulnerability")) {
+			if (version.logicalUnitComment().equals("first detected vulnerability")) {
 				first = true;
 				firstDetectedVer = version.getText();
 				break;
@@ -255,40 +245,39 @@ public class VersionRange {
 		return sb.toString();
 	}
 
-	public String getXMLRange(){
+	public String getXMLRange() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\t\t<");
 		sb.append(Config.XML_EXTENSION_TAG);
 		sb.append(":");
 		sb.append("range>\n");
-		
-		if(!firstDetectedVer.equals("0.0")){
+
+		if (!firstDetectedVer.equals("0.0")) {
 			sb.append(firstXMLTag());
 			sb.append("\n");
-			}
-		
-		if(!lastDetectedVer.isEmpty()){
+		}
+
+		if (!lastDetectedVer.isEmpty()) {
 			sb.append(lastXMLTag());
 			sb.append("\n");
-			}
-		
-		if(!fixedVersion().isEmpty()){
+		}
+
+		if (!fixedVersion().isEmpty()) {
 			sb.append(fixedXMLTag());
 			sb.append("\n");
-			}
-		
+		}
+
 		sb.append("\t\t</");
 		sb.append(Config.XML_EXTENSION_TAG);
 		sb.append(":");
 		sb.append("range>\n");
 		return sb.toString();
 	}
-	
+
 	public String toString() {
 		if (softwareName.isEmpty())
 			softwareName = generalCpeString;
-		String returnStr = softwareName + " vulnerable between "
-				+ firstDetectedVersion() + " and " + lastDetectedVersion();
+		String returnStr = softwareName + " vulnerable between " + firstDetectedVersion() + " and " + lastDetectedVersion();
 		if (fixed)
 			returnStr += " fix:" + fixedVersion();
 		else

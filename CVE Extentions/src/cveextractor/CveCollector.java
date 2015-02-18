@@ -29,8 +29,7 @@ import java.io.PrintWriter;
 import java.io.Writer;
 
 /**
- * >> This class splits all CVE Database XMLs to single files and stores it in
- * the CVE item folder <<
+ * >> This class splits all CVE Database XMLs to single files and stores it in the CVE item folder <<
  * 
  * @author TU Darmstadt KOM, TU Darmstadt STG
  * @version 0.1
@@ -55,20 +54,14 @@ public class CveCollector {
 
 		try {
 			FileInputStream fileInputStream = new FileInputStream(filePath);
-			DataInputStream dataInputStream = new DataInputStream(
-					fileInputStream);
-			BufferedReader br = new BufferedReader(new InputStreamReader(
-					dataInputStream));
-			Writer fw;
-			Writer bw;
-			PrintWriter pw = null;
+			DataInputStream dataInputStream = new DataInputStream(fileInputStream);
+			BufferedReader br = new BufferedReader(new InputStreamReader(dataInputStream));
 			String line;
 			String entryContent = "";
 			String fileName = "";
 			while ((line = br.readLine()) != null) {
 				if (line.contains("<entry ")) {
-					fileName = line.substring(line.indexOf("id") + 4,
-							line.indexOf("\"", line.indexOf("id") + 4));
+					fileName = line.substring(line.indexOf("id") + 4, line.indexOf("\"", line.indexOf("id") + 4));
 				}
 				if (!line.startsWith("<?xml") && !line.startsWith("<nvd")) {
 					entryContent += line + "\n";
@@ -78,9 +71,9 @@ public class CveCollector {
 					File folder = new File(Config.CVE_FOLDER);
 					if (!folder.exists())
 						folder.mkdirs();
-					fw = new FileWriter(Config.CVE_FOLDER + fileName + ".xml");
-					bw = new BufferedWriter(fw);
-					pw = new PrintWriter(bw);
+					Writer fw = new FileWriter(Config.CVE_FOLDER + fileName + ".xml");
+					Writer bw = new BufferedWriter(fw);
+					PrintWriter pw = new PrintWriter(bw);
 					pw.print(entryContent);
 					System.out.println(fileName);
 					entryContent = "";
@@ -88,7 +81,7 @@ public class CveCollector {
 					pw.close();
 				}
 			}
-			dataInputStream.close();
+			br.close();
 		} catch (Exception e) {
 			System.err.println("File Read Error: " + e.getMessage());
 		}

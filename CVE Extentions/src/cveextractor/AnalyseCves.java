@@ -64,13 +64,9 @@ public class AnalyseCves {
 			Writer bw = new BufferedWriter(fw);
 			PrintWriter pw = new PrintWriter(bw);
 
-			System.out
-					.println("\nSelected Folder: "
-							+ System.getProperty("user.dir") + "\\"
-							+ analyseDir + "\n");
+			System.out.println("\nSelected Folder: " + System.getProperty("user.dir") + "\\" + analyseDir + "\n");
 			ana.walk(analyseDir, pw);
-			System.out.println("\n" + fileDirections.size()
-					+ " CVE entries analyzed in " + analyseDir + "\n");
+			System.out.println("\n" + fileDirections.size() + " CVE entries analyzed in " + analyseDir + "\n");
 			pw.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -78,8 +74,7 @@ public class AnalyseCves {
 	}
 
 	/**
-	 * This method "walks" recursive through the current directory (path) and
-	 * collects all analyzable files in the file list.
+	 * This method "walks" recursive through the current directory (path) and collects all analyzable files in the file list.
 	 * 
 	 * @param path
 	 *            path which should be analyzed; files be saved in filelist
@@ -104,24 +99,19 @@ public class AnalyseCves {
 							bw.write(Config.END_TAG);
 							bw.close();
 						}
-						bw = new BufferedWriter(new FileWriter(new File(
-								Config.OUTPUT_FOLDER, "nvdcve-2.0-" + year
-										+ "-enhanced.xml")));
+						bw = new BufferedWriter(new FileWriter(new File(Config.OUTPUT_FOLDER, "nvdcve-2.0-" + year + "-enhanced.xml")));
 						bw.write(Config.START_TAGS);
 					}
 					String fileresult = f.getAbsoluteFile().toString();
-					String parseName = fileresult.substring(fileresult
-							.lastIndexOf("\\"));
+					String parseName = fileresult.substring(fileresult.lastIndexOf("\\"));
 					if (parseName.toLowerCase().contains(Config.DATA_TYPE)) {
 						fileDirections.add(f.getAbsolutePath());
-						String line = "";
-						FileInputStream fstream;
 						StringBuilder innerText = new StringBuilder();
 						try {
-							fstream = new FileInputStream(f.getAbsolutePath());
+							FileInputStream fstream = new FileInputStream(f.getAbsolutePath());
 							DataInputStream in = new DataInputStream(fstream);
-							BufferedReader br = new BufferedReader(
-									new InputStreamReader(in));
+							BufferedReader br = new BufferedReader(new InputStreamReader(in));
+							String line;
 							while ((line = br.readLine()) != null) {
 								innerText.append(line);
 								innerText.append("\n");
@@ -138,12 +128,10 @@ public class AnalyseCves {
 						if (Config.TEST_MODE)
 							System.out.println("File:" + f.getAbsoluteFile());
 						else if (resultCounter[0] % 50 == 0)
-							System.out
-									.println(resultCounter[0] + " files read");
+							System.out.println(resultCounter[0] + " files read");
 
 					} else
-						System.out
-								.println("No XML File:" + f.getAbsoluteFile());
+						System.out.println("No XML File:" + f.getAbsoluteFile());
 				}
 			}
 			if (bw != null) {
@@ -154,11 +142,8 @@ public class AnalyseCves {
 			e.printStackTrace();
 		}
 
-		System.out.println("\nCVE entries: " + resultCounter[0]
-				+ "\nCVE entries with first information: " + resultCounter[1]
-				+ "\nCVE entries with last information: " + resultCounter[2]
-				+ "\nCVE entries with fix information: " + resultCounter[3]
-				+ "\n");
+		System.out.println("\nCVE entries: " + resultCounter[0] + "\nCVE entries with first information: " + resultCounter[1]
+				+ "\nCVE entries with last information: " + resultCounter[2] + "\nCVE entries with fix information: " + resultCounter[3] + "\n");
 	}
 
 	/**
@@ -168,10 +153,8 @@ public class AnalyseCves {
 	private void analyse(CveItem item, PrintWriter pw, BufferedWriter bw) {
 		try {
 			if (Config.TEST_MODE)
-				System.out.println("------- CVE-Item: " + item.getCVEID()
-						+ " -------");
-			Vector<Snippet> versions = item
-					.getSnippetsWithLogicalUnits("version");
+				System.out.println("------- CVE-Item: " + item.getCVEID() + " -------");
+			Vector<Snippet> versions = item.getSnippetsWithLogicalUnits("version");
 			Vector<NameVersionRelation> relations = new Vector<NameVersionRelation>();
 			Iterator<Snippet> versionIt = versions.iterator();
 			Snippet curSnip;
@@ -181,12 +164,10 @@ public class AnalyseCves {
 				curSnip = versionIt.next();
 				softwareName = item.searchSoftwareNameBefore(curSnip);
 				if (!curSnip.logicalUnitComment().equals(""))
-					snippetComment = "    (" + curSnip.logicalUnitComment()
-							+ ") ";
+					snippetComment = "    (" + curSnip.logicalUnitComment() + ") ";
 				relations.add(new NameVersionRelation(softwareName, curSnip));
 				if (Config.TEST_MODE)
-					System.out.println(softwareName.getText() + "     Version:"
-							+ curSnip.getText() + snippetComment);
+					System.out.println(softwareName.getText() + "     Version:" + curSnip.getText() + snippetComment);
 			}
 
 			Vector<VersionRange> results = createResult(relations, item);
@@ -288,8 +269,7 @@ public class AnalyseCves {
 	 *            A version range result
 	 * @return machine readable output string
 	 */
-	private StringBuilder getMachineReadableOutput(CveItem item,
-			VersionRange result) {
+	private StringBuilder getMachineReadableOutput(CveItem item, VersionRange result) {
 		StringBuilder output = new StringBuilder();
 		output.append(item.getCVEID());
 		output.append(";");
@@ -313,8 +293,7 @@ public class AnalyseCves {
 	 *            the corresponding CVE entry
 	 * @return resulting version ranges
 	 */
-	private Vector<VersionRange> createResult(
-			Vector<NameVersionRelation> relations, CveItem item) {
+	private Vector<VersionRange> createResult(Vector<NameVersionRelation> relations, CveItem item) {
 
 		HashSet<NameVersionRelation> interestingRelations = new HashSet<NameVersionRelation>();
 		interestingRelations.addAll(relations);
@@ -325,8 +304,7 @@ public class AnalyseCves {
 
 		if (interestingRelations.size() > 0) {
 
-			relatedRelations = groupRelations(relations, interestingRelations,
-					remainingRelations, shortestRelations);
+			relatedRelations = groupRelations(relations, interestingRelations, remainingRelations, shortestRelations);
 
 			for (VersionRange versionRange : relatedRelations) {
 				List<String> products = getProductList(item);
@@ -338,23 +316,18 @@ public class AnalyseCves {
 					List<String> remaining = fillRemainings(products, cpename);
 
 					if (remaining.size() > 0) {
-						List<String> filteredRemainings = LuceneIndexCreator
-								.getAllCpesWithVersionPrefix(versionRange
-										.shortest().version().getText(),
-										remaining);
+						List<String> filteredRemainings = LuceneIndexCreator.getAllCpesWithVersionPrefix(versionRange.shortest().version().getText(),
+								remaining);
 
 						if (!versionRange.hasLast()) {
 							if (filteredRemainings.size() != 0)
 								remaining = filteredRemainings;
 							String greatest = "";
 							if (versionRange.fixed()) {
-								String fix = versionRange.fixedSoftware()
-										.getText();
-								greatest = VersionComparator
-										.getGreatestUnderFix(remaining, fix);
+								String fix = versionRange.fixedSoftware().getText();
+								greatest = VersionComparator.getGreatestUnderFix(remaining, fix);
 							} else
-								greatest = VersionComparator
-										.getGreatestMatch(remaining);
+								greatest = VersionComparator.getGreatestMatch(remaining);
 							if (!greatest.isEmpty())
 								versionRange.setLast(greatest);
 						}
@@ -402,9 +375,8 @@ public class AnalyseCves {
 	private List<String> getProductList(CveItem item) {
 		List<String> products = new ArrayList<String>();
 		try {
-			NodeList vulnSoftware = (NodeList) item.xPath().evaluate(
-					"//entry/vulnerable-software-list/product/text()",
-					item.XmlDocument(), XPathConstants.NODESET);
+			NodeList vulnSoftware = (NodeList) item.xPath().evaluate("//entry/vulnerable-software-list/product/text()", item.XmlDocument(),
+					XPathConstants.NODESET);
 			if (vulnSoftware.getLength() > 0) {
 				for (int j = 0; j < vulnSoftware.getLength(); j++) {
 					Node productNode = vulnSoftware.item(j);
@@ -425,28 +397,22 @@ public class AnalyseCves {
 	 *            all relations
 	 * @return A vector of version ranges
 	 */
-	private Vector<VersionRange> groupRelations(
-			Vector<NameVersionRelation> relations,
-			HashSet<NameVersionRelation> interestingRelations,
-			HashSet<NameVersionRelation> remainingRelations,
-			HashSet<NameVersionRelation> shortestRelations) {
+	private Vector<VersionRange> groupRelations(Vector<NameVersionRelation> relations, HashSet<NameVersionRelation> interestingRelations,
+			HashSet<NameVersionRelation> remainingRelations, HashSet<NameVersionRelation> shortestRelations) {
 		Vector<VersionRange> relatedRelations = new Vector<VersionRange>();
 		while (interestingRelations.size() > 0) {
-			Iterator<NameVersionRelation> relationsIterator = interestingRelations
-					.iterator();
+			Iterator<NameVersionRelation> relationsIterator = interestingRelations.iterator();
 			NameVersionRelation shortestRelation = relationsIterator.next();
 			shortestRelations.add(shortestRelation);
 
 			while (relationsIterator.hasNext()) {
 				NameVersionRelation curRelation = relationsIterator.next();
-				if (shortestRelation.trimmedVersion().length() > curRelation
-						.trimmedVersion().length()) {
+				if (shortestRelation.trimmedVersion().length() > curRelation.trimmedVersion().length()) {
 					shortestRelation = curRelation;
 					remainingRelations.addAll(shortestRelations);
 					shortestRelations.clear();
 					shortestRelations.add(curRelation);
-				} else if (shortestRelation.trimmedVersion().length() == curRelation
-						.trimmedVersion().length()) {
+				} else if (shortestRelation.trimmedVersion().length() == curRelation.trimmedVersion().length()) {
 					shortestRelations.add(curRelation);
 				} else {
 					remainingRelations.add(curRelation);
@@ -454,8 +420,7 @@ public class AnalyseCves {
 			}
 
 			interestingRelations.removeAll(shortestRelations);
-			boolean sameSoftwareRef = isSameSoftwareRef(shortestRelations,
-					shortestRelation);
+			boolean sameSoftwareRef = isSameSoftwareRef(shortestRelations, shortestRelation);
 
 			if (shortestRelations.size() == relations.size() && sameSoftwareRef) {
 				VersionRange versionRange = new VersionRange();
@@ -466,8 +431,7 @@ public class AnalyseCves {
 					HashSet<NameVersionRelation> curRelRelation = new HashSet<NameVersionRelation>();
 					curRelRelation.add(curShortestRel);
 
-					allocateRemainingRelations(interestingRelations,
-							remainingRelations, curShortestRel, curRelRelation);
+					allocateRemainingRelations(interestingRelations, remainingRelations, curShortestRel, curRelRelation);
 
 					VersionRange versionRange = new VersionRange();
 					versionRange.addAll(curRelRelation);
@@ -491,9 +455,7 @@ public class AnalyseCves {
 	 * @param shortestRelation
 	 *            relation to insert in shortest Relations
 	 */
-	private boolean isSameSoftwareRef(
-			HashSet<NameVersionRelation> shortestRelations,
-			NameVersionRelation shortestRelation) {
+	private boolean isSameSoftwareRef(HashSet<NameVersionRelation> shortestRelations, NameVersionRelation shortestRelation) {
 
 		boolean sameSoftwareRef = false;
 		for (NameVersionRelation nameVersionRealtion : shortestRelations) {
@@ -507,15 +469,11 @@ public class AnalyseCves {
 		return sameSoftwareRef;
 	}
 
-	private void allocateRemainingRelations(
-			HashSet<NameVersionRelation> interestingRelations,
-			HashSet<NameVersionRelation> remainingRelations,
-			NameVersionRelation curShortestRel,
-			HashSet<NameVersionRelation> curRelRelation) {
+	private void allocateRemainingRelations(HashSet<NameVersionRelation> interestingRelations, HashSet<NameVersionRelation> remainingRelations,
+			NameVersionRelation curShortestRel, HashSet<NameVersionRelation> curRelRelation) {
 		for (NameVersionRelation curNameVerRel : remainingRelations) {
 			if (curNameVerRel.refersSameSoftware(curShortestRel)
-					&& (curShortestRel.versionIsMoreGeneral(curNameVerRel) || curShortestRel
-							.hasSameSuperversion(curNameVerRel))) {
+					&& (curShortestRel.versionIsMoreGeneral(curNameVerRel) || curShortestRel.hasSameSuperversion(curNameVerRel))) {
 				curRelRelation.add(curNameVerRel);
 				interestingRelations.remove(curNameVerRel);
 			}
@@ -532,8 +490,7 @@ public class AnalyseCves {
 	private String extractCPE(VersionRange versionRange, List<String> products) {
 		int levenshteinDistance = Integer.MAX_VALUE;
 		String cpe = "";
-		String softwareName = versionRange.shortest().name().getText() + " "
-				+ versionRange.shortest().version().getText();
+		String softwareName = versionRange.shortest().name().getText() + " " + versionRange.shortest().version().getText();
 		int currentdistance;
 		for (String product : products) {
 			currentdistance = getLevenshteinDistance(product, softwareName);
@@ -584,10 +541,7 @@ public class AnalyseCves {
 
 			for (int i = 1; i <= firstLen; i++) {
 				cost = first.charAt(i - 1) == sndCh ? 0 : 1;
-				currentCosts[i] = Math
-						.min(Math.min(currentCosts[i - 1] + 1,
-								previousCosts[i] + 1), previousCosts[i - 1]
-								+ cost);
+				currentCosts[i] = Math.min(Math.min(currentCosts[i - 1] + 1, previousCosts[i] + 1), previousCosts[i - 1] + cost);
 			}
 
 			costTmp = previousCosts;

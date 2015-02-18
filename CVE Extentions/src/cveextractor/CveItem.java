@@ -56,8 +56,7 @@ public class CveItem {
 			xmlDocument = db.parse(source);
 			XPathFactory xpathFactory = XPathFactory.newInstance();
 			xpath = xpathFactory.newXPath();
-			String summary = xpath.evaluate("//entry/summary/text()",
-					xmlDocument);
+			String summary = xpath.evaluate("//entry/summary/text()", xmlDocument);
 			cveSummary = summary;
 
 		} catch (Exception e) {
@@ -111,9 +110,7 @@ public class CveItem {
 							curSnip.setLogicalUnitComment("first detected vulnerability");
 							Snippet scanSnip = curSnip;
 							int distance = 0;
-							while (scanSnip.hasNext()
-									&& !scanSnip.islogicalEnd()
-									&& distance < Config.SEARCH_DISTANCE) {
+							while (scanSnip.hasNext() && !scanSnip.islogicalEnd() && distance < Config.SEARCH_DISTANCE) {
 								scanSnip = scanSnip.next;
 								distance += scanSnip.value();
 								if (scanSnip.isLogicalType("version")) {
@@ -121,8 +118,7 @@ public class CveItem {
 								}
 							}
 						}
-						if (curSnip.prev.condition("!comparingword")
-								&& curSnip.prev.hasPrev()) {
+						if (curSnip.prev.condition("!comparingword") && curSnip.prev.hasPrev()) {
 							if (curSnip.prev.prev.condition("!cueearlier"))
 								curSnip.setLogicalUnitComment("last detected vulnerability");
 							if (curSnip.prev.prev.condition("!cuebegin"))
@@ -131,8 +127,7 @@ public class CveItem {
 
 					}
 					if (curSnip.hasNext() && curSnip.next.hasNext()) {
-						if (curSnip.next.condition("!concatword")
-								&& curSnip.next.next.condition("!cueearlier"))
+						if (curSnip.next.condition("!concatword") && curSnip.next.next.condition("!cueearlier"))
 							curSnip.setLogicalUnitComment("last detected vulnerability");
 					}
 
@@ -195,8 +190,7 @@ public class CveItem {
 	 * @return CVE-ID string
 	 */
 	public String getCVEID() {
-		return tagSubstr("vuln:cve-id").firstElement()[1].replaceAll(
-				"\\<.*?\\>", "");
+		return tagSubstr("vuln:cve-id").firstElement()[1].replaceAll("\\<.*?\\>", "");
 	}
 
 	/**
@@ -326,14 +320,12 @@ public class CveItem {
 		int distance = 0;
 		while (distance < Config.SEARCH_DISTANCE && curSnip.hasPrev()) {
 			curSnip = curSnip.prev;
-			if (curSnip.logicalType() != null
-					&& curSnip.logicalType().equals("softwarename")) {
+			if (curSnip.logicalType() != null && curSnip.logicalType().equals("softwarename")) {
 				Softwarename = curSnip;
 				break;
 			} else {
 				distance += curSnip.getTokenValue();
-				if (curSnip.logicalType() != null
-						&& curSnip.logicalType().equals("version"))
+				if (curSnip.logicalType() != null && curSnip.logicalType().equals("version"))
 					distance = 0;
 			}
 		}
@@ -445,24 +437,19 @@ public class CveItem {
 		String[] partresult = null;
 		String innerNoTagText;
 		Matcher ma, mo;
-		ma = Pattern.compile("<" + tagname + ">")
-				.matcher(xmlCode.toLowerCase());
-		mo = Pattern.compile("</" + tagname + ">").matcher(
-				xmlCode.toLowerCase());
+		ma = Pattern.compile("<" + tagname + ">").matcher(xmlCode.toLowerCase());
+		mo = Pattern.compile("</" + tagname + ">").matcher(xmlCode.toLowerCase());
 		while (ma.find()) {
 			if (mo.find(ma.end())) {
 				partresult = new String[2];
 				partresult[0] = tagname;
-				innerNoTagText = StringEscapeUtils.unescapeXml(xmlCode
-						.substring(ma.start(), mo.end())); // .replaceAll("\\<.*?\\>",
-															// "")
-				innerNoTagText = innerNoTagText
-						.replaceAll("[\\t\\n\\f\\r]", "");
+				innerNoTagText = StringEscapeUtils.unescapeXml(xmlCode.substring(ma.start(), mo.end())); // .replaceAll("\\<.*?\\>",
+																											// "")
+				innerNoTagText = innerNoTagText.replaceAll("[\\t\\n\\f\\r]", "");
 				partresult[1] = innerNoTagText;
 				vec.add(partresult);
 			} else {
-				System.out.println("FEHLER: Der Tag </" + tagname
-						+ "> konnte nicht gefunden werden!");
+				System.out.println("FEHLER: Der Tag </" + tagname + "> konnte nicht gefunden werden!");
 			}
 		}
 		return vec;
