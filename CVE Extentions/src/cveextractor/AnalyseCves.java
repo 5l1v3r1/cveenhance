@@ -99,6 +99,9 @@ public class AnalyseCves {
 							bw.write(Config.END_TAG);
 							bw.close();
 						}
+						File folder = new File(Config.OUTPUT_FOLDER);
+						if (!folder.exists())
+							folder.mkdirs();
 						bw = new BufferedWriter(new FileWriter(new File(Config.OUTPUT_FOLDER, "nvdcve-2.0-" + year + "-enhanced.xml")));
 						bw.write(Config.START_TAGS);
 					}
