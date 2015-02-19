@@ -16,6 +16,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
+/**
+ * >> Compares version strings and CPE strings and defines an order.<<
+ * 
+ * @author TU Darmstadt KOM, TU Darmstadt STG
+ * @version 0.1
+ */
+
 public class VersionComparator {
 
 	public static String getSmallestMatch(List<String> cpes) {

@@ -1,9 +1,44 @@
-Usage instructions
+============ CREATIVE COMMONS LICENSE (CC BY 4.0) ============
+This work is licensed under the Creative Commons Attribution 4.0 International License. 
+To view a copy of this license, visit http://creativecommons.org/licenses/by/4.0/. 
 
-Firstly, you have to download the enhancer.jar, extraction.jar, cve.conf and the CVE entry files, which you want to
-enhance.
+authors: Technische Universität Darmstadt - Multimedia Communication Lab (KOM), Technische Universität Darmstadt - Software Technology Group (STG)
+websites: http://www.kom.tu-darmstadt.de/, http://www.stg.tu-darmstadt.de/
+contact: Leonid Glanz (STG), Sebastian Schmidt (KOM), Sebastian Wollny (KOM), Ben Hermann (STG)
+name: CVE Version Information Extractor
 
-Secondly, you should configure your cve.conf file.
+===================== USAGE INSTRUCTIONS =====================
+
+To run the programm, cveinit.jar, cveextract.jar and cve.conf are needed. 
+Moreover a XML folder with extracted NVD data feeds (Version 2.0) are needed.
+You can download these on https://nvd.nist.gov/download.cfm . Please extract
+the XML files to an empty folder and enter the path to this folder in the 
+cve.conf under "xmlFolder". 
+To extract the information you have to initialise the extractor. The 
+cveinit.jar splits the XML data feeds into seperated files, which will be 
+stored in the folder, which is mentioned under "cveFolder" in cve.conf.
+After this process, the extraction can be started by running the 
+cveextract.jar. The enhenced datastreams will be stored under "outputFolder",
+mentioned ind the cve.conf.
+
+Please make shure, that all folders are correctly entered in cve.conf.
+To work with our tool you should execute first the extraction.jar and afterwards the enhancer.jar.
+In the command line you can use the following commands:
+java -jar extraction.jar
+
+java -jar enhancer.jar
+
+If both command are finished without interruption your enhanced CVE files should be in your specified output
+folder.
+
+
+Thank you for your interest in our tool, we hope you enjoyed it.
+
+Best regards,
+
+STG & KOM TU Darmstadt
+
+==================== STANDARD CONFIGURATION ====================
 
 The most important properties are:
 
@@ -22,18 +57,6 @@ outputFolder=..\\CVE-Output\\
 
 The other properties are described in the cve.conf itself.
 
-To work with our tool you should execute first the extraction.jar and afterwards the enhancer.jar.
-In the command line you could use the following commands:
-java -jar extraction.jar
-
-java -jar enhancer.jar
-
-If both command are finished without interruption your enhanced CVE files should be in your specified output
-folder.
 
 
-Thank you for your interest in our tool, we hope you enjoyed it.
 
-Best regards,
-
-STG & KOM TU Darmstadt

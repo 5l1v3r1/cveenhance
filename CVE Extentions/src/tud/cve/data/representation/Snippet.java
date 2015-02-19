@@ -24,8 +24,8 @@ import tud.cve.extractor.FeatureVectorBuilder;
 import tud.cve.extractor.LogicalUnit;
 
 /**
- * This class should represent a part of a floating text e.g. a Token / combined
- * Tokens. Furthermore a Snippet should represents a logical unit e.g. a
+ * This class should represent a part of a floating text e.g. a token / combined
+ * tokens. Furthermore a Snippet should represents a logical unit e.g. a
  * software name, a version number or a stopword.
  * 
  * @author TU Darmstadt KOM, TU Darmstadt STG
@@ -54,6 +54,9 @@ public class Snippet {
 		return tokenValue;
 	}
 
+	/**
+	 * Checks if the snippet is the last of a sentence or clause
+	 */
 	public boolean islogicalEnd() {
 		try {
 			return getFeatureValue("logicalend") || !hasNext();
@@ -180,6 +183,9 @@ public class Snippet {
 		return createRegexpFromStrings(keywords, " | ");
 	}
 
+	/**
+	 * Checks, if the last character of the snippet content matches with the input character
+	 */
 	public boolean endsWith(char checkChar) {
 		char lastChar = lowerCaseText.charAt(lowerCaseText.length());
 		if (checkChar == lastChar)
@@ -187,16 +193,26 @@ public class Snippet {
 		return false;
 	}
 
+	/**
+	 * Checks, if a regular expression matches to the snippet content (case sensitve)
+	 */
 	private boolean matchesLowerCase(String regex) {
 		// lower case regex check
 		return lowerCaseText.matches(regex);
 	}
 
+	/**
+	 * Checks, if a regular expression matches to the snippet content (case sensitve)
+	 */
 	private boolean matchesExpression(String regex) {
 		// regex check
 		return text.matches(regex);
 	}
 
+	/**
+	 * Checks, if the content of the Snippet matches with an entry of a keyword list
+
+	 */
 	private boolean keywordCheck(String checkword, String[] keywordList) {
 		// checks weather a Snippet matches a keyword, listed in keywordList
 		checkword = checkword.replaceAll("\\p{Punct}", "");
@@ -206,7 +222,10 @@ public class Snippet {
 		}
 		return false;
 	}
-
+	
+	/**
+	 * combines the Snippet with the next Snippet
+	 */
 	public void mergeWithNextSnippet() {
 		if (hasNext()) {
 
@@ -237,34 +256,54 @@ public class Snippet {
 
 	}
 
-	// public void mergeWithPrevSnippet(){
-
-	// }
-
+	/**
+	 * @return true, if the snippet has a next snippet in the summary
+	 */
 	public boolean hasNext() {
 		return (next != null);
 	}
 
+	/**
+	 * @return true, if the snippet has a previous snippet in the summary
+	 */
 	public boolean hasPrev() {
 		return (prev != null);
 	}
 
+	/**
+	 * Sets a logical unit
+	 */
 	public void setLogicalUnit(String newUnit) {
 		logicalUnit = new LogicalUnit(newUnit);
 
 	}
 
+	/**
+	 * Sets a new logical unit
+	 * @param newUnit
+	 */
 	public void setLogicalUnit(LogicalUnit newUnit) {
 		logicalUnit = newUnit;
 	}
 
-	public String logicalType() {
+	/**
+	 * @return The logical type of the Snippet
+	 */
+	public String logicalUnit() {
 		if (logicalUnit == null || !logicalUnit.isValid())
 			return null;
 		else
 			return logicalUnit.type();
 	}
 
+	/**
+	 * Checks, if the logical unit name of the Snippet matches to imput String
+	 * 
+	 * @param type
+	 *            Name of a logical type
+	 * @return true, if the name of the set logical unit of the snippet machtes
+	 *         to the input string
+	 */
 	public boolean isLogicalType(String type) {
 		if (logicalUnit == null || !logicalUnit.isValid())
 			return false;
@@ -273,12 +312,15 @@ public class Snippet {
 		return false;
 	}
 
-	public boolean hasLogicalType() {
-		return logicalType() != null;
+	/**
+	 * @return If a logical type is already set in this Snippet
+	 */
+	public boolean hasLogicalUnit() {
+		return logicalUnit() != null;
 	}
 
 	public void setLogicalUnitComment(String unitComment) {
-		if (hasLogicalType())
+		if (hasLogicalUnit())
 			logicalUnit.comment = unitComment;
 	}
 
@@ -317,9 +359,15 @@ public class Snippet {
 			mergeWithNextSnippet();
 	}
 
+	/**
+	 * Checks weather a Snippet matches to a condition. This is needed for
+	 * checking a combination rule.
+	 * 
+	 * @param requestCondition
+	 *            Check-Condition Example: !possibleVersion;/os/osext;
+	 * @return true if condition matches
+	 */
 	public boolean condition(String requestCondition) throws Exception {
-		// Condition Syntax: !possibleVersion;/os/osext;
-
 		String[] conditions = requestCondition.split(";");
 		if (conditions.length == 0)
 			return false;
@@ -357,10 +405,19 @@ public class Snippet {
 		return true;
 	}
 
+	/**
+	 * @return The number of tokens in the Snippet
+	 */
 	public int value() {
 		return tokenValue;
 	}
 
+	/**
+	 * 
+	 * @param featureName
+	 *            Feature name (have to be mentioned in Config)
+	 * @return Value of the desired feature
+	 */
 	private boolean getFeatureValue(String featureName) throws Exception {
 		if (!features.containsKey(featureName)) {
 			throw new Exception(
@@ -370,8 +427,11 @@ public class Snippet {
 		return features.get(featureName);
 	}
 
+	/**
+	 * @return Maximum number of combinations, which are possible by the defined
+	 *         combination rules
+	 */
 	private int combinationLen() {
-
 		if (logicalUnit == null)
 			return 0;
 
@@ -394,7 +454,6 @@ public class Snippet {
 				}
 			}
 			correspondingConditions.removeAll(removeList);
-			// Check the next Snippet for a specific condition
 			if (correspondingConditions.size() != 0) {
 				combinationLen++;
 			} else

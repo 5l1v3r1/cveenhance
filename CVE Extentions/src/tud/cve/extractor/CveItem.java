@@ -41,7 +41,7 @@ import org.xml.sax.InputSource;
 import tud.cve.data.representation.Snippet;
 
 /**
- * >> On object of this class represents a CVE Entry <<
+ * >> An object of this class represents a CVE Entry <<
  * 
  * @author TU Darmstadt KOM, TU Darmstadt STG
  * @version 0.1
@@ -99,7 +99,7 @@ public class CveItem {
 		while (tokenIterator.hasNext()) {
 			curSnip = tokenIterator.next();
 			try {
-				if (curSnip.hasLogicalType()) {
+				if (curSnip.hasLogicalUnit()) {
 					if (curSnip.hasPrev()) {
 						if (curSnip.prev.condition("!cuebefore"))
 							curSnip.setLogicalUnitComment("fixed");
@@ -169,23 +169,6 @@ public class CveItem {
 		return xmlDocument;
 	}
 
-	// protected String xpathFromString(String source, String command) {
-	// try {
-	// InputSource inputSource = new InputSource(new StringReader(source));
-	// DocumentBuilderFactory docbuildfac = DocumentBuilderFactory
-	// .newInstance();
-	// DocumentBuilder docbuild;
-	// docbuild = docbuildfac.newDocumentBuilder();
-	// Document XmlDoc = docbuild.parse(inputSource);
-	// XPathFactory xpathFactory = XPathFactory.newInstance();
-	// XPath xpa = xpathFactory.newXPath();
-	// return xpa.evaluate(command, XmlDoc);
-	// } catch (Exception e) {
-	// e.printStackTrace();
-	// }
-	// return "";
-	// }
-
 	/**
 	 * @return CVE-ID string
 	 */
@@ -228,12 +211,12 @@ public class CveItem {
 		int distance = 0;
 		while (distance < Config.SEARCH_DISTANCE && curSnip.hasPrev()) {
 			curSnip = curSnip.prev;
-			if (curSnip.logicalType() != null && curSnip.logicalType().equals("softwarename")) {
+			if (curSnip.logicalUnit() != null && curSnip.logicalUnit().equals("softwarename")) {
 				Softwarename = curSnip;
 				break;
 			} else {
 				distance += curSnip.getTokenValue();
-				if (curSnip.logicalType() != null && curSnip.logicalType().equals("version"))
+				if (curSnip.logicalUnit() != null && curSnip.logicalUnit().equals("version"))
 					distance = 0;
 			}
 		}
@@ -251,8 +234,6 @@ public class CveItem {
 	 */
 
 	public Vector<String[]> tagSubstr(String tagname) {
-		// german: Liefert den Inhalt zwischen einem öffnenden und einem
-		// schließenden Tag des Typs tagname
 		Vector<String[]> vec = new Vector<String[]>();
 		String[] partresult = null;
 		String innerNoTagText;
@@ -263,8 +244,7 @@ public class CveItem {
 			if (mo.find(ma.end())) {
 				partresult = new String[2];
 				partresult[0] = tagname;
-				innerNoTagText = StringEscapeUtils.unescapeXml(xmlCode.substring(ma.start(), mo.end())); // .replaceAll("\\<.*?\\>",
-																											// "")
+				innerNoTagText = StringEscapeUtils.unescapeXml(xmlCode.substring(ma.start(), mo.end()));
 				innerNoTagText = innerNoTagText.replaceAll("[\\t\\n\\f\\r]", "");
 				partresult[1] = innerNoTagText;
 				vec.add(partresult);
@@ -275,6 +255,9 @@ public class CveItem {
 		return vec;
 	}
 
+	/** 
+	 * Rebuilds connections between Snippets after a snippet combination
+	 */
 	public void rebuildTokenVector() {
 		Vector<Snippet> newtokenList = new Vector<Snippet>();
 		Snippet curSnip = tokenList.firstElement();
@@ -285,6 +268,9 @@ public class CveItem {
 		}
 	}
 
+	/**
+	 * @return all Snippets with the desired logical unit (entity)
+	 */
 	Vector<Snippet> getSnippetsWithLogicalUnits(String logicalUnitType) {
 		Vector<Snippet> returnVec = new Vector<Snippet>();
 		Snippet curSnip = tokenList.firstElement();

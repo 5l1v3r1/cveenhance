@@ -77,16 +77,25 @@ public class VersionRange {
 		firstDetectedVer = newFirst;
 	}
 
+	/**
+	 * @return The first version of the version range; Returns a string "0.0", if it is not set
+	 */
 	public String firstDetectedVersion() {
 		updateRelevantVersions();
 		return firstDetectedVer;
 	}
 
+	/**
+	 * @return The last version of the version range; Returns an empty string, if it is not set
+	 */
 	public String lastDetectedVersion() {
 		updateRelevantVersions();
 		return lastDetectedVer;
 	}
 
+	/**
+	 * @return The fixed version of the version range; Returns an empty string, if it is not set
+	 */
 	public String fixedVersion() {
 		updateRelevantVersions();
 		if (fixed)
@@ -95,38 +104,66 @@ public class VersionRange {
 			return "";
 	}
 
+	/**
+	 * Updates the relevant versions (first, last fix)
+	 */
 	private void updateRelevantVersions() {
 		searchFirst();
 		searchLast();
-		if (versions.get(versions.size() - 1).version().logicalUnitComment().equals("fixed")) {
+		if (versions.get(versions.size() - 1).version().logicalUnitComment()
+				.equals("fixed")) {
 			if (versions.size() == 1) {
 				firstDetectedVer = "0.0";
 				lastDetectedVer = "";
 			} else if (versions.size() == 2) {
-				firstDetectedVer = shortest().version().getText().replaceFirst("\\.x", ".0");
+				firstDetectedVer = shortest().version().getText()
+						.replaceFirst("\\.x", ".0");
 				lastDetectedVer = "";
 			} else {
-				firstDetectedVer = shortest().version().getText().replaceFirst("\\.x", ".0");
-				lastDetectedVer = versions.get(versions.size() - 2).version().getText().replaceFirst("\\.x", ".0");
+				firstDetectedVer = shortest().version().getText()
+						.replaceFirst("\\.x", ".0");
+				lastDetectedVer = versions.get(versions.size() - 2).version()
+						.getText().replaceFirst("\\.x", ".0");
 			}
 		} else {
-			if (versions.size() == 1) {
-				if (!last && !first) {
-					firstDetectedVer = versions.get(0).version().getText().replaceFirst("\\.x", ".0");
-					lastDetectedVer = firstDetectedVer;
-				}
+			if (versions.get(versions.size() - 1).version()
+					.logicalUnitComment().equals("last detected vulnerability")) {
+				if (versions.size() > 1)
+					firstDetectedVer = shortest().version().getText()
+							.replaceFirst("\\.x", ".0");
+				else
+					firstDetectedVer = "0.0";
+				lastDetectedVer = biggest().version().getText()
+						.replaceFirst("\\.x", ".0");
 			} else {
-				firstDetectedVer = shortest().version().getText().replaceFirst("\\.x", ".0");
-				lastDetectedVer = biggest().version().getText().replaceFirst("\\.x", ".0");
+				if (versions.size() == 1
+						&& versions.get(0).version().logicalUnitComment()
+								.equals("first detected vulnerability")) {
+					firstDetectedVer = shortest().version().getText()
+							.replaceFirst("\\.x", ".0");
+					lastDetectedVer = "";
+				} else {
+					firstDetectedVer = shortest().version().getText()
+							.replaceFirst("\\.x", ".0");
+					lastDetectedVer = biggest().version().getText()
+							.replaceFirst("\\.x", ".0");
+				}
 			}
 
 		}
 	}
 
+	/**
+	 * @return Returns the first released version in the list
+	 */
 	public NameVersionRelation shortest() {
 		return versions.get(0);
 	}
-
+	
+	/**
+	 * 
+	 * @return Returns the last released version in the list
+	 */
 	public NameVersionRelation biggest() {
 		return versions.get(versions.size() - 1);
 	}
@@ -152,7 +189,8 @@ public class VersionRange {
 		Snippet version;
 		while (nvrIt.hasNext()) {
 			version = nvrIt.next().version();
-			if (version.logicalUnitComment().equals("last detected vulnerability")) {
+			if (version.logicalUnitComment().equals(
+					"last detected vulnerability")) {
 				last = true;
 				lastDetectedVer = version.getText();
 			}
@@ -164,7 +202,8 @@ public class VersionRange {
 		Snippet version;
 		while (nvrIt.hasNext()) {
 			version = nvrIt.next().version();
-			if (version.logicalUnitComment().equals("first detected vulnerability")) {
+			if (version.logicalUnitComment().equals(
+					"first detected vulnerability")) {
 				first = true;
 				firstDetectedVer = version.getText();
 				break;
@@ -180,6 +219,9 @@ public class VersionRange {
 		return fixedSoftware;
 	}
 
+	/**
+	 * Adds a single NameVersionRelation
+	 */
 	public void add(NameVersionRelation nvr) {
 		if (empty) {
 			softwareName = nvr.name().getText();
@@ -190,6 +232,9 @@ public class VersionRange {
 		isFixed();
 	}
 
+	/**
+	 * Adds NameVersionRelations to the VersionRange and inserts+orders it in the internal NameVersionRelation list 
+	 */
 	public void addAll(Collection<NameVersionRelation> c) {
 		if (c.size() > 0) {
 			if (empty) {
@@ -202,6 +247,9 @@ public class VersionRange {
 		}
 	}
 
+	/**
+	 * @return The XML Code of the first version information
+	 */
 	public String firstXMLTag() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\t\t\t<");
@@ -217,6 +265,9 @@ public class VersionRange {
 		return sb.toString();
 	}
 
+	/**
+	 * @return The XML Code of the last version information
+	 */
 	public String lastXMLTag() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\t\t\t<");
@@ -232,6 +283,9 @@ public class VersionRange {
 		return sb.toString();
 	}
 
+	/**
+	 * @return The XML Code of the fixed version information
+	 */
 	public String fixedXMLTag() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\t\t\t<");
@@ -247,6 +301,9 @@ public class VersionRange {
 		return sb.toString();
 	}
 
+	/**
+	 * @return The XML Code of the version range
+	 */
 	public String getXMLRange() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\t\t<");
@@ -254,12 +311,12 @@ public class VersionRange {
 		sb.append(":");
 		sb.append("range>\n");
 
-		if (!firstDetectedVer.equals("0.0")) {
+		if (!firstDetectedVersion().equals("0.0")) {
 			sb.append(firstXMLTag());
 			sb.append("\n");
 		}
 
-		if (!lastDetectedVer.isEmpty()) {
+		if (!lastDetectedVersion().isEmpty()) {
 			sb.append(lastXMLTag());
 			sb.append("\n");
 		}
@@ -279,7 +336,8 @@ public class VersionRange {
 	public String toString() {
 		if (softwareName.isEmpty())
 			softwareName = generalCpeString;
-		String returnStr = softwareName + " vulnerable between " + firstDetectedVersion() + " and " + lastDetectedVersion();
+		String returnStr = softwareName + " vulnerable between "
+				+ firstDetectedVersion() + " and " + lastDetectedVersion();
 		if (fixed)
 			returnStr += " fix:" + fixedVersion();
 		else
