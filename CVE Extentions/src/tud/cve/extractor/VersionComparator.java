@@ -35,26 +35,28 @@ public class VersionComparator {
 		return smallest;
 	}
 
-	public static String getGreatestMatch(List<String> cpes) {
+	public static String getGreatestMatch(List<String> cpes, String vendor) {
 		String greatest = cpes.get(0);
 		for (int i = 1; i < cpes.size(); i++) {
-			if (compareTo(greatest, cpes.get(i)) <= -1) {
+			String version = cpes.get(i).substring(vendor.length());
+			if (compareTo(greatest.substring(vendor.length()), version) <= -1) {
 				greatest = cpes.get(i);
 			}
 		}
 		return greatest;
 	}
 
-	public static String getGreatestUnderFix(List<String> cpes, String fixVersion) {
+	public static String getGreatestUnderFix(List<String> cpes, String fixVersion, String vendor) {
 		List<String> smallerThanFix = new ArrayList<String>();
 		for (String cpe : cpes) {
-			if (compareTo(cpe, fixVersion) <= -1) {
+			String version = cpe.substring(vendor.length());
+			if (compareTo(version, fixVersion) <= -1) {
 				smallerThanFix.add(cpe);
 			}
 		}
 		if (smallerThanFix.size() == 0)
 			return "";
-		return getGreatestMatch(smallerThanFix);
+		return getGreatestMatch(smallerThanFix, vendor);
 	}
 
 	public static int compareTo(String arg0, String arg1) {
@@ -70,6 +72,10 @@ public class VersionComparator {
 			int token1Len = token1.length();
 			int token2Len = token2.length();
 			int minLen = Math.min(token1Len, token2Len);
+			if (token1Len > token2Len)
+				return 1;
+			else if (token2Len > token1Len)
+				return -1;
 			for (int j = 0; j < minLen; j++) {
 				Character c1 = token1.charAt(j);
 				Character c2 = token2.charAt(j);
@@ -82,10 +88,6 @@ public class VersionComparator {
 					return cmp;
 				}
 			}
-			if (token1Len > token2Len)
-				return 1;
-			else if (token2Len > token1Len)
-				return -1;
 
 		}
 		if (countSt1 > countSt2) {

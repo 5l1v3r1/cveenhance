@@ -139,21 +139,6 @@ public class CveItem {
 		}
 	}
 
-	/**
-	 * XPath interface
-	 * 
-	 * @param command
-	 *            XPath evaluation command
-	 * @return XPath result string
-	 */
-	protected String xpathRequest(String command) {
-		try {
-			return xpath.evaluate(command, xmlDocument);
-		} catch (XPathExpressionException e) {
-			e.printStackTrace();
-		}
-		return "";
-	}
 
 	/**
 	 * @return XPath instance
