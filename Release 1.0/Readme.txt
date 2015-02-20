@@ -9,7 +9,7 @@ name: CVE Version Information Extractor
 
 ===================== USAGE INSTRUCTIONS =====================
 
-To run the programm, cveinit.jar, cveextract.jar and cve.conf are needed. 
+To run the programm, restructure.jar, extract.jar and cve.conf are needed. 
 Moreover a XML folder with extracted NVD data feeds (Version 2.0) are needed.
 You can download these on https://nvd.nist.gov/download.cfm . Please extract
 the XML files to an empty folder and enter the path to this folder in the 
