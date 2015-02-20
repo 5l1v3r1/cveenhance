@@ -15,18 +15,18 @@ You can download these on https://nvd.nist.gov/download.cfm . Please extract
 the XML files to an empty folder and enter the path to this folder in the 
 cve.conf under "xmlFolder". 
 To extract the information you have to initialise the extractor. The 
-cveinit.jar splits the XML data feeds into seperated files, which will be 
+restructure.jar splits the XML data feeds into seperated files, which will be 
 stored in the folder, which is mentioned under "cveFolder" in cve.conf.
 After this process, the extraction can be started by running the 
-cveextract.jar. The enhenced datastreams will be stored under "outputFolder",
+extract.jar. The enhenced datastreams will be stored under "outputFolder",
 mentioned ind the cve.conf.
 
 Please make shure, that all folders are correctly entered in cve.conf.
-To work with our tool you should execute first the extraction.jar and afterwards the enhancer.jar.
+To work with our tool you should execute first the restructure.jar and afterwards the extract.jar.
 In the command line you can use the following commands:
-java -jar extraction.jar
+java -jar restructure.jar
 
-java -jar enhancer.jar
+java -jar extract.jar
 
 If both command are finished without interruption your enhanced CVE files should be in your specified output
 folder.
