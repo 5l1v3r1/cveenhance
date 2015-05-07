@@ -75,6 +75,10 @@ public class VersionRange {
 	public void setFirst(String newFirst) {
 		firstDetectedVer = newFirst;
 	}
+	
+	public String getSoftwareName(){
+		return softwareName;
+	}
 
 	/**
 	 * @return The first version of the version range; Returns a string "0.0", if it is not set

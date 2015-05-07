@@ -151,7 +151,7 @@ public class Snippet {
 
 			if (getFeatureValue("version"))
 				setLogicalUnit("version");
-			else if (getFeatureValue("bigletter"))
+			else if (getFeatureValue("bigletter")&&!getFeatureValue("stopword"))
 				setLogicalUnit("softwarename");
 
 		} catch (Exception e) {

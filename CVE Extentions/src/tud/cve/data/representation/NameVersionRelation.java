@@ -124,12 +124,12 @@ public class NameVersionRelation implements Comparable<NameVersionRelation>{
 		String[] splittedVersion=version.getText().split("\\.");
 		String[] splittedOtherVersion=otherVersion.split("\\.");
 		if(splittedVersion.length<2 || splittedOtherVersion.length<2) {
-			if(splittedVersion[0]==splittedOtherVersion[0]) return true;
+			if(splittedVersion[0].equals(splittedOtherVersion[0])) return true;
 			return false;
 		}
 		else{
 			for(int i=0;(i<(splittedVersion.length-1))&&(i<splittedOtherVersion.length-1);i++){
-				if(splittedVersion[i]!=splittedOtherVersion[i]) return false;
+				if(!splittedVersion[i].equals(splittedOtherVersion[i])) return false;
 			}
 			return true;
 		}
@@ -157,30 +157,55 @@ public class NameVersionRelation implements Comparable<NameVersionRelation>{
 	      String[] versionSplit = this.trimmedVersion().split("\\.");
 	      String[] otherVersionSplit =otherNVR.trimmedVersion().split("\\.");
 	      if(versionSplit.length>1&&otherVersionSplit.length>1){
-	    	  try{ // Try to convert versionnumber into Integer and compare it
+	    	  try{ // Try to convert version number into Integer and compare it
 	    		  for(int i=0;i<versionSplit.length;i++){
 	    			  if(i>=otherVersionSplit.length) return 1;
 	    			  if(Integer.parseInt(versionSplit[i])>Integer.parseInt(otherVersionSplit[i])) return 1;
 	    			  if(Integer.parseInt(versionSplit[i])<Integer.parseInt(otherVersionSplit[i])) return -1;
 	    		  }
 	    		  if(otherVersionSplit.length>versionSplit.length) return -1;
+	    		  else 
+	    			  if(this.version().getText().indexOf(" ")==-1&&otherNVR.version().getText().indexOf(" ")==-1) return 0;
 	    	  }
 	    	  catch(Exception e){
 	    		  
 	    	  }
 	      }
-	      CharSequence version = this.trimmedVersion();
-	      CharSequence otherVersion = otherNVR.trimmedVersion();
+	      
+
+	      
+	      CharSequence version = optimizeVersion(this.version().getText());
+	      CharSequence otherVersion = optimizeVersion(otherNVR.version.getText());
 	      Character versionCharater;
 	      Character otherVersionCharacter;
+	      
 	      for (int i = 0; i<version.length() && i<otherVersion.length() ; i++){ // character-wise compare
 	    	  versionCharater=new Character(version.charAt(i));
 	    	  otherVersionCharacter= new Character(otherVersion.charAt(i));
+//	    	  if(!versionCharater.equals(" ")||!otherVersionCharacter.equals(" ")){
+//	    			if(versionCharater.equals(" ")) return 1;
+//	    			else return -1;
+//	    	  }
+	    		  
 	    	  if(versionCharater.compareTo(otherVersionCharacter)!=0) return versionCharater.compareTo(otherVersionCharacter);
 	      }
 	      if(version.length()==otherVersion.length()) return 0;
 	      if(version.length()<otherVersion.length()) return -1;
 	      else return 1;
+	}
+
+	private String optimizeVersion(String version) {
+		String lastpart="";
+		String resultString=version;
+		if(version.indexOf(" ")==0){
+			resultString=version.substring(version.indexOf(" "));
+			lastpart=version.substring(version.indexOf(" "), version.length());
+		}
+		if(resultString.length()>1 && resultString.substring(resultString.length()-2).equals(".x"))resultString=resultString.substring(0, resultString.length()-2);
+		else if(resultString.length()>1 && resultString.substring(resultString.length()-2).equals(".0"))resultString=resultString.substring(0, resultString.length()-2);
+		resultString+=lastpart;
+		
+		return resultString;
 	}
 
 

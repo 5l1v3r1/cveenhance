@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
+import java.util.regex.Pattern;
 
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
@@ -72,7 +73,7 @@ public class AnalyseCves {
 			e.printStackTrace();
 		}
 	}
-
+	
 	/**
 	 * This method "walks" recursive through the current directory (path) and collects all analyzable files in the file list.
 	 * 
@@ -80,7 +81,7 @@ public class AnalyseCves {
 	 *            path which should be analyzed; files be saved in filelist
 	 * 
 	 */
-	public void walk(String path, PrintWriter pw) {
+	protected void walk(String path, PrintWriter pw) {
 		File root = new File(path);
 		File[] list = root.listFiles();
 		BufferedWriter bw = null;
@@ -122,8 +123,8 @@ public class AnalyseCves {
 							e.printStackTrace();
 						}
 						CveItem curItem = new CveItem(innerText.toString());
+						if (Config.LOGGING)System.out.println(curItem.getCVEID());
 						resultCounter[0]++;
-
 						this.analyse(curItem, pw, bw);
 						if (Config.TEST_MODE)
 							System.out.println("File:" + f.getAbsoluteFile());
@@ -151,7 +152,7 @@ public class AnalyseCves {
 	 * This method is used to extract information of a single CVE entry.
 	 * 
 	 */
-	private void analyse(CveItem item, PrintWriter pw, BufferedWriter bw) {
+	protected void analyse(CveItem item, PrintWriter pw, BufferedWriter bw) {
 		try {
 			if (Config.TEST_MODE)
 				System.out.println("------- CVE-Item: " + item.getCVEID() + " -------");
@@ -162,6 +163,7 @@ public class AnalyseCves {
 
 			Vector<VersionRange> results = createResult(relations, item);
 			String entry = item.xmlCode;
+			
 			BufferedReader br = new BufferedReader(new StringReader(entry));
 			String line;
 			while ((line = br.readLine()) != null) {
@@ -209,13 +211,13 @@ public class AnalyseCves {
 		}
 	}
 
-	private void fillRelations(CveItem item, Vector<Snippet> versions, Vector<NameVersionRelation> relations) {
+	protected void fillRelations(CveItem item, Vector<Snippet> versions, Vector<NameVersionRelation> relations) {
 		for (Snippet curSnip : versions) {
 			String snippetComment = "";
 			Snippet softwareName = item.searchSoftwareNameBefore(curSnip);
 			if (!curSnip.logicalUnitComment().isEmpty())
 				snippetComment = "    (" + curSnip.logicalUnitComment() + ") ";
-			relations.add(new NameVersionRelation(softwareName, curSnip));
+			if(!softwareName.getText().isEmpty() && Pattern.matches(".*\\d+.*", curSnip.getText())) relations.add(new NameVersionRelation(softwareName, curSnip));
 			if (Config.TEST_MODE)
 				System.out.println(softwareName.getText() + "     Version:" + curSnip.getText() + snippetComment);
 		}
@@ -230,7 +232,7 @@ public class AnalyseCves {
 	 *            A version range result
 	 * @return human readable output string
 	 */
-	private StringBuilder getHumanReviewOutput(CveItem item, VersionRange result) {
+	protected StringBuilder getHumanReviewOutput(CveItem item, VersionRange result) {
 		StringBuilder output = new StringBuilder();
 		output.append(item.getCVEID());
 		output.append("  ");
@@ -248,7 +250,7 @@ public class AnalyseCves {
 	 * @return XML output string
 	 */
 
-	private String getOutputToXMLFile(Vector<VersionRange> results) {
+	protected String getOutputToXMLFile(Vector<VersionRange> results) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\t<");
 		sb.append(Config.XML_EXTENSION_TAG);
@@ -297,7 +299,7 @@ public class AnalyseCves {
 	 *            the corresponding CVE entry
 	 * @return resulting version ranges
 	 */
-	private Vector<VersionRange> createResult(Vector<NameVersionRelation> relations, CveItem item) {
+	public Vector<VersionRange> createResult(Vector<NameVersionRelation> relations, CveItem item) {
 
 		HashSet<NameVersionRelation> interestingRelations = new HashSet<NameVersionRelation>();
 		interestingRelations.addAll(relations);
@@ -323,7 +325,7 @@ public class AnalyseCves {
 						List<String> filteredRemainings = LuceneIndexCreator.getAllCpesWithVersionPrefix(versionRange.shortest().version().getText(),
 								remaining);
 
-						if (!versionRange.hasLast()) {
+						/*if (!versionRange.hasLast()) {
 							if (filteredRemainings.size() != 0)
 								remaining = filteredRemainings;
 							String greatest = "";
@@ -334,13 +336,37 @@ public class AnalyseCves {
 								greatest = VersionComparator.getGreatestMatch(remaining, cpename);
 							if (!greatest.isEmpty())
 								versionRange.setLast(greatest);
-						}
+						}*/
 					}
 				}
 
 			}
 		}
+		relatedRelations=checkValidity(relatedRelations);
 		return relatedRelations;
+	}
+
+	private Vector<VersionRange> checkValidity(Vector<VersionRange> relatedRelations) {
+		Vector<VersionRange> relatedResultRelations = new Vector<VersionRange>();
+		for(VersionRange curResultRange:relatedRelations){
+			String firstSoftware=curResultRange.firstDetectedVersion();
+			if(firstSoftware.contains(" "))firstSoftware=firstSoftware.substring(0, firstSoftware.indexOf(" "));
+			String lastSoftware=curResultRange.lastDetectedVersion();
+			if(lastSoftware.contains(" "))lastSoftware=lastSoftware.substring(0, lastSoftware.indexOf(" "));
+			String fixedSoftware=curResultRange.fixedVersion();
+			if(fixedSoftware.contains(" "))fixedSoftware=fixedSoftware.substring(0, fixedSoftware.indexOf(" "));
+			
+			if(!curResultRange.getSoftwareName().isEmpty()&&(firstSoftware.isEmpty()||(firstSoftware.toLowerCase().matches("[\\d]+[\\p{Punct}\\w]*")&&firstSoftware.replaceAll("\\d", "").length()!=firstSoftware.length()))&&(lastSoftware.isEmpty()||(lastSoftware.toLowerCase().matches("[\\d]+[\\p{Punct}\\w]*")&&lastSoftware.replaceAll("\\d", "").length()!=lastSoftware.length()))&&(fixedSoftware.isEmpty()||(fixedSoftware.toLowerCase().matches("[\\d]+[\\p{Punct}\\w]*")&&fixedSoftware.replaceAll("\\d", "").length()!=fixedSoftware.length())))relatedResultRelations.add(curResultRange);
+			else{
+				Exception e = new Exception("Final validity check failed: "+curResultRange.getSoftwareName()+" "+firstSoftware+", "+lastSoftware+", "+fixedSoftware);
+				try {
+					throw e;
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+		return relatedResultRelations;
 	}
 
 	/**
@@ -424,12 +450,28 @@ public class AnalyseCves {
 			}
 
 			interestingRelations.removeAll(shortestRelations);
-			boolean sameSoftwareRef = isSameSoftwareRef(shortestRelations, shortestRelation);
 
-			if (shortestRelations.size() == relations.size() && sameSoftwareRef) {
-				VersionRange versionRange = new VersionRange();
-				versionRange.addAll(shortestRelations);
-				relatedRelations.add(versionRange);
+			if (shortestRelations.size() == relations.size()) {
+				
+				for(NameVersionRelation curShortestRel:shortestRelations){
+					Iterator<VersionRange> versionRangeIterator=relatedRelations.iterator();
+					boolean alreadyAdded = false;
+					while(versionRangeIterator.hasNext()){
+						VersionRange curRange=versionRangeIterator.next();
+						if(curShortestRel.refersSameSoftware(curRange.shortest())){
+							if(curShortestRel.hasSameSuperversion(curRange.shortest())){
+								curRange.add(curShortestRel);
+								alreadyAdded=true;
+								continue;
+							}
+						}
+					}
+					if(!alreadyAdded){
+						VersionRange versionRange = new VersionRange();
+						versionRange.add(curShortestRel);
+						relatedRelations.add(versionRange);
+					}
+				}
 			} else {
 				for (NameVersionRelation curShortestRel : shortestRelations) {
 					HashSet<NameVersionRelation> curRelRelation = new HashSet<NameVersionRelation>();
@@ -451,27 +493,6 @@ public class AnalyseCves {
 		return relatedRelations;
 	}
 
-	/**
-	 * Checks, if a NameVersionRelation refers to the same software name
-	 * 
-	 * @param shortestRelations
-	 *            Relation list for inserting shortest relation
-	 * @param shortestRelation
-	 *            relation to insert in shortest Relations
-	 */
-	private boolean isSameSoftwareRef(HashSet<NameVersionRelation> shortestRelations, NameVersionRelation shortestRelation) {
-
-		boolean sameSoftwareRef = false;
-		for (NameVersionRelation nameVersionRealtion : shortestRelations) {
-			if (shortestRelation.refersSameSoftware(nameVersionRealtion)) {
-				sameSoftwareRef = true;
-			} else {
-				sameSoftwareRef = false;
-				break;
-			}
-		}
-		return sameSoftwareRef;
-	}
 
 	private void allocateRemainingRelations(HashSet<NameVersionRelation> interestingRelations, HashSet<NameVersionRelation> remainingRelations,
 			NameVersionRelation curShortestRel, HashSet<NameVersionRelation> curRelRelation) {
