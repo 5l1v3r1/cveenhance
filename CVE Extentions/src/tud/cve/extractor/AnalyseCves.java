@@ -483,7 +483,7 @@ public class AnalyseCves {
 	 * @param products
 	 * @return most alike cpe string
 	 */
-	private String extractCPE(VersionRange versionRange, List<String> products) {
+	public static String extractCPE(VersionRange versionRange, List<String> products) {
 		int levenshteinDistance = Integer.MAX_VALUE;
 		String cpe = "";
 		String softwareName = versionRange.shortest().name().getText() + " " + versionRange.shortest().version().getText();

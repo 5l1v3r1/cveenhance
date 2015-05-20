@@ -101,11 +101,7 @@ public class NameVersionRelation implements Comparable<NameVersionRelation> {
 	private String trimVersion(String version) {
 		if (version.contains(" "))
 			version = version.split(" ")[0];
-		version = version.trim();
-		if (version.length() > 1 && version.endsWith(".x"))
-			version = version.substring(0, version.length() - 2);
-		else if (version.length() > 1 && version.endsWith(".0"))
-			version = version.substring(0, version.length() - 2);
+		version = optimizeVersion(version.trim());
 		return version;
 	}
 
@@ -120,9 +116,7 @@ public class NameVersionRelation implements Comparable<NameVersionRelation> {
 	 * Checks, if a software version is a parent software version
 	 */
 	public boolean versionIsMoreGeneral(NameVersionRelation otherRel) {
-		if (otherRel.version().getText().contains(trimmedVersion()))
-			return true;
-		return false;
+		return otherRel.version().getText().contains(trimmedVersion());
 	}
 
 	/**
@@ -133,11 +127,9 @@ public class NameVersionRelation implements Comparable<NameVersionRelation> {
 		String[] splittedVersion = version.getText().split("\\.");
 		String[] splittedOtherVersion = otherVersion.split("\\.");
 		if (splittedVersion.length < 2 || splittedOtherVersion.length < 2) {
-			if (splittedVersion[0].equals(splittedOtherVersion[0]))
-				return true;
-			return false;
+			return splittedVersion[0].equals(splittedOtherVersion[0]);
 		} else {
-			for (int i = 0; (i < (splittedVersion.length - 1)) && (i < splittedOtherVersion.length - 1); i++) {
+			for (int i = 0; i < Math.min(splittedVersion.length - 1, splittedOtherVersion.length - 1); i++) {
 				if (!splittedVersion[i].equals(splittedOtherVersion[i]))
 					return false;
 			}
@@ -172,10 +164,8 @@ public class NameVersionRelation implements Comparable<NameVersionRelation> {
 				for (int i = 0; i < versionSplit.length; i++) {
 					if (i >= otherVersionSplit.length)
 						return 1;
-					if (Integer.parseInt(versionSplit[i]) > Integer.parseInt(otherVersionSplit[i]))
-						return 1;
-					if (Integer.parseInt(versionSplit[i]) < Integer.parseInt(otherVersionSplit[i]))
-						return -1;
+					if (!versionSplit[i].equals(otherVersionSplit[i]))
+						return new Integer(versionSplit[i]).compareTo(Integer.parseInt(otherVersionSplit[i]));
 				}
 				if (otherVersionSplit.length > versionSplit.length)
 					return -1;
@@ -191,7 +181,7 @@ public class NameVersionRelation implements Comparable<NameVersionRelation> {
 		Character versionCharater;
 		Character otherVersionCharacter;
 
-		for (int i = 0; i < version.length() && i < otherVersion.length(); i++) { // character-wise compare
+		for (int i = 0; i < Math.min(version.length(), otherVersion.length()); i++) { // character-wise compare
 			versionCharater = new Character(version.charAt(i));
 			otherVersionCharacter = new Character(otherVersion.charAt(i));
 			// if(!versionCharater.equals(" ")||!otherVersionCharacter.equals(" ")){
@@ -202,29 +192,12 @@ public class NameVersionRelation implements Comparable<NameVersionRelation> {
 			if (versionCharater.compareTo(otherVersionCharacter) != 0)
 				return versionCharater.compareTo(otherVersionCharacter);
 		}
-		if (version.length() == otherVersion.length())
-			return 0;
-		if (version.length() < otherVersion.length())
-			return -1;
-		else
-			return 1;
+		return new Integer(version.length()).compareTo(otherVersion.length());
 	}
 
-	public String optimizeVersion(String version) {
-		String lastpart = "";
-		String resultString = version;
-		if (version.indexOf(" ") == 0) {
-			resultString = version.substring(version.indexOf(" "));
-			lastpart = version.substring(version.indexOf(" "), version.length());
-		}
-		if (resultString.length() > 1)
-			if (resultString.endsWith(".x"))
-				resultString = resultString.substring(0, resultString.length() - 2);
-			else if (resultString.endsWith(".0"))
-				resultString = resultString.substring(0, resultString.length() - 2);
-		resultString += lastpart;
-
-		return resultString;
+	public static String optimizeVersion(String version) {
+		if (version.length() > 1 && (version.endsWith(".x") || version.endsWith(".0")))
+			return version.substring(0, version.length() - 2);
+		return version;
 	}
-
 }
