@@ -23,30 +23,16 @@ import java.util.Vector;
 
 public class LogicalUnit {
 
-	private String[] possibleUnits = Config.lOGICAL_UNITS;
 	private final String unitType;
 	private boolean valid = false;
 	public String comment = "";
 
 	public LogicalUnit(String newUnitType) {
-		if (isValidType(newUnitType.trim().toLowerCase())) {
+		if (Config.isValidType(newUnitType.trim().toLowerCase())) {
 			unitType = newUnitType;
 			valid = true;
 		} else
 			unitType = null;
-	}
-
-	/**
-	 * Checks if a logical Unit type may be created
-	 * 
-	 * @param type
-	 */
-	public boolean isValidType(String type) {
-		for (int i = 0; i < possibleUnits.length; i++) {
-			if (type.equals(possibleUnits[i]))
-				return true;
-		}
-		return false;
 	}
 
 	/**
@@ -55,14 +41,10 @@ public class LogicalUnit {
 	 * @return corresponding subset of combination rules
 	 */
 	public Vector<String[]> getCorrespondingConditions() {
-		String[][] conditions = Config.COMBINATION_CONDITIONS;
-		Vector<String[]> resultvector = new Vector<String[]>();
-		for (int i = 0; i < conditions.length; i++) {
-			if (conditions[i][0].equalsIgnoreCase(type()))
-				resultvector.add(conditions[i]);
-		}
-		return resultvector;
+		return Config.getConditionsByType(type());
 	}
+
+	
 
 	/**
 	 * Checks if the logical type really exists

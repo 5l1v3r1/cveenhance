@@ -15,7 +15,10 @@ package tud.cve.extractor;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Vector;
 
 /**
  * >> This class is used to handle configurations. Furthermore it contains word
@@ -165,8 +168,8 @@ public class Config {
 			"logicalstart" };
 
 	// logical units which may appear in a text
-	public static final String[] lOGICAL_UNITS = { "version", "versionExtention", "softwarename",
-			"date", "beforeIndicator", "earlierIndicator", "number" };
+	public static final HashSet<String> lOGICAL_UNITS = new HashSet<String>(Arrays.asList(new String[]{ "version", "versionExtention", "softwarename",
+			"date", "beforeIndicator", "earlierIndicator", "number" }));
 
 	public static final String[] VERSION_TYPES = { "fixedversion",
 			"lastunfixedversion" };
@@ -186,5 +189,23 @@ public class Config {
 	public static final String START_TAGS = "<?xml version='1.0' encoding='UTF-8'?>\n<nvd xmlns:patch=\"http://scap.nist.gov/schema/patch/0.1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:vuln=\"http://scap.nist.gov/schema/vulnerability/0.4\" xmlns:cpe-lang=\"http://cpe.mitre.org/language/2.0\" xmlns:cvss=\"http://scap.nist.gov/schema/cvss-v2/0.2\" xmlns=\"http://scap.nist.gov/schema/feed/vulnerability/2.0\" xmlns:scap-core=\"http://scap.nist.gov/schema/scap-core/0.1\" nvd_xml_version=\"2.0\" pub_date=\"2013-12-22T07:21:37\" xsi:schemaLocation=\"http://scap.nist.gov/schema/patch/0.1 http://nvd.nist.gov/schema/patch_0.1.xsd http://scap.nist.gov/schema/scap-core/0.1 http://nvd.nist.gov/schema/scap-core_0.1.xsd http://scap.nist.gov/schema/feed/vulnerability/2.0 http://nvd.nist.gov/schema/nvd-cve-feed_2.0.xsd\">\n";
 	
 	static final String END_TAG = "</nvd>";
+
+	/**
+	 * Checks if a logical Unit type may be created
+	 * 
+	 * @param type
+	 */
+	public static boolean isValidType(String type) {
+		return lOGICAL_UNITS.contains(type);
+	}
+	
+	public static Vector<String[]> getConditionsByType(String type) {
+		Vector<String[]> resultvector = new Vector<String[]>();
+		for (int i = 0; i < COMBINATION_CONDITIONS.length; i++) {
+			if (COMBINATION_CONDITIONS[i][0].equalsIgnoreCase(type))
+				resultvector.add(COMBINATION_CONDITIONS[i]);
+		}
+		return resultvector;
+	}
 
 }

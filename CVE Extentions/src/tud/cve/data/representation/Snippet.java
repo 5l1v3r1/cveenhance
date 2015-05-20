@@ -392,7 +392,7 @@ public class Snippet {
 					return false;
 			} else if (logicalUnit == null)
 				return false;
-			else if (logicalUnit.isValidType(condition)) {
+			else if (Config.isValidType(condition)) {
 				if (!logicalUnit.isType(condition))
 					return false;
 			} else {
