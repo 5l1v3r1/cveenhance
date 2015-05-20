@@ -356,7 +356,7 @@ public class AnalyseCves {
 			String fixedSoftware=curResultRange.fixedVersion();
 			if(fixedSoftware.contains(" "))fixedSoftware=fixedSoftware.substring(0, fixedSoftware.indexOf(" "));
 			
-			if(!curResultRange.getSoftwareName().isEmpty()&&(firstSoftware.isEmpty()||(firstSoftware.toLowerCase().matches("[\\d]+[\\p{Punct}\\w]*")&&firstSoftware.replaceAll("\\d", "").length()!=firstSoftware.length()))&&(lastSoftware.isEmpty()||(lastSoftware.toLowerCase().matches("[\\d]+[\\p{Punct}\\w]*")&&lastSoftware.replaceAll("\\d", "").length()!=lastSoftware.length()))&&(fixedSoftware.isEmpty()||(fixedSoftware.toLowerCase().matches("[\\d]+[\\p{Punct}\\w]*")&&fixedSoftware.replaceAll("\\d", "").length()!=fixedSoftware.length())))relatedResultRelations.add(curResultRange);
+			if(!curResultRange.getSoftwareName().isEmpty()&&(!firstSoftware.isEmpty()||!lastSoftware.isEmpty()||!fixedSoftware.isEmpty())&&(firstSoftware.isEmpty()||(firstSoftware.toLowerCase().matches("[\\d]+[\\p{Punct}\\w]*")&&firstSoftware.replaceAll("\\d", "").length()!=firstSoftware.length()))&&(lastSoftware.isEmpty()||(lastSoftware.toLowerCase().matches("[\\d]+[\\p{Punct}\\w]*")&&lastSoftware.replaceAll("\\d", "").length()!=lastSoftware.length()))&&(fixedSoftware.isEmpty()||(fixedSoftware.toLowerCase().matches("[\\d]+[\\p{Punct}\\w]*")&&fixedSoftware.replaceAll("\\d", "").length()!=fixedSoftware.length())))relatedResultRelations.add(curResultRange);
 			else{
 				Exception e = new Exception("Final validity check failed: "+curResultRange.getSoftwareName()+" "+firstSoftware+", "+lastSoftware+", "+fixedSoftware);
 				try {

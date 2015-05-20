@@ -96,10 +96,9 @@ public class Snippet {
 			setFeature("possibleversion", matchesLowerCase(".*\\d.*"));
 			setFeature("word", (text.length() >= 3));
 			setFeature("bigletter", matchesExpression("[A-Z]+.*"));
+			setFeature("versionext",keywordCheck(lowerCaseText, Config.VERION_KEYWORDS));
 			setFeature(
-					"version",
-					keywordCheck(lowerCaseText, Config.VERION_KEYWORDS)
-							|| (matchesLowerCase("[\\d]+[\\p{Punct}\\w]*") && !(matchesLowerCase(""))));
+					"version",(matchesLowerCase("[\\d]+[\\p{Punct}\\w]*") && !(matchesLowerCase(""))));
 			setFeature("os", keywordCheck(lowerCaseText, Config.OS_KEYWORDS));
 			setFeature("osext",
 					keywordCheck(lowerCaseText, Config.OS_EXTENSIONS));
@@ -153,7 +152,7 @@ public class Snippet {
 				setLogicalUnit("version");
 			else if (getFeatureValue("bigletter")&&!getFeatureValue("stopword"))
 				setLogicalUnit("softwarename");
-
+			else if(getFeatureValue("versionext")) setLogicalUnit("versionExtention");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

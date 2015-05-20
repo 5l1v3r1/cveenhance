@@ -41,6 +41,11 @@ public class VersionRange {
 	}
 
 	public void setCPE(String newCPE) {
+		try {
+		if(!newCPE.matches("cpe:/[aho]:[a-z|_|\\-|\\d|\\.|%]+:[a-z|_|\\-|\\d|\\.|%]+:"))	throw new Exception("CPE String "+newCPE+" is not valid!");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		generalCpeString = newCPE;
 	}
 

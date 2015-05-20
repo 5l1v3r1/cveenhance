@@ -159,13 +159,13 @@ public class Config {
 	// features a snippet may have
 	public static final String[] SNIPPET_FEATURES = { "comma", "word",
 			"possibleversion", "name", "bigletter", "nottouse", "used",
-			"version", "os", "osext", "stopword", "concatword",
+			"version", "versionext", "os", "osext", "stopword", "concatword",
 			"comparingword", "seperator", "namestart", "versionstart",
 			"cuebefore", "cueearlier", "cuebegin", "cuebetween", "logicalend",
 			"logicalstart" };
 
 	// logical units which may appear in a text
-	public static final String[] lOGICAL_UNITS = { "version", "softwarename",
+	public static final String[] lOGICAL_UNITS = { "version", "versionExtention", "softwarename",
 			"date", "beforeIndicator", "earlierIndicator", "number" };
 
 	public static final String[] VERSION_TYPES = { "fixedversion",
@@ -174,6 +174,9 @@ public class Config {
 	public static final String[][] COMBINATION_CONDITIONS = {
 			{ "version", "version" },
 			{ "version", "version", "version" },
+			{ "version", "versionExtention", "version" },
+			{ "version", "version", "versionExtention", "version" },
+			{ "version", "versionExtention", "version", "version" },
 			{ "softwarename", "softwarename" },
 			{ "softwarename", "softwarename", "softwarename" },
 			{ "softwarename", "softwarename", "softwarename", "softwarename" },

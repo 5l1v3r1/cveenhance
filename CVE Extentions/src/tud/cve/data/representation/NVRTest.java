@@ -104,7 +104,7 @@ public class NVRTest {
 		assertTrue(leftIsBigger(left, right));
 	}
 	
-	
+	//------ end of test cases -----
 	
 	boolean leftIsSmaller(NameVersionRelation left, NameVersionRelation right){
 		if(left.compareTo(right)<0) return true;
