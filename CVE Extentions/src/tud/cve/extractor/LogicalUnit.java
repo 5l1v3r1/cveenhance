@@ -24,13 +24,11 @@ import java.util.Vector;
 public class LogicalUnit {
 
 	private final String unitType;
-	private boolean valid = false;
 	public String comment = "";
 
 	public LogicalUnit(String newUnitType) {
 		if (Config.isValidType(newUnitType.trim().toLowerCase())) {
 			unitType = newUnitType;
-			valid = true;
 		} else
 			unitType = null;
 	}
@@ -44,13 +42,11 @@ public class LogicalUnit {
 		return Config.getConditionsByType(type());
 	}
 
-	
-
 	/**
 	 * Checks if the logical type really exists
 	 */
 	public boolean isValid() {
-		return (valid && unitType != null);
+		return unitType != null;
 	}
 
 	/**
@@ -64,7 +60,7 @@ public class LogicalUnit {
 	 * @return If a logical type matches
 	 */
 	public boolean isType(String checkType) {
-		return checkType.equals(type());
+		return checkType.equals(unitType);
 	}
 
 	public String toString() {

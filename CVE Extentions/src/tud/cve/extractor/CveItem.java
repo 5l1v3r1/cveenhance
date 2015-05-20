@@ -143,7 +143,6 @@ public class CveItem {
 		}
 	}
 
-
 	/**
 	 * @return XPath instance
 	 */
@@ -244,7 +243,7 @@ public class CveItem {
 		return vec;
 	}
 
-	/** 
+	/**
 	 * Rebuilds connections between Snippets after a snippet combination
 	 */
 	public void rebuildTokenVector() {
@@ -280,19 +279,14 @@ public class CveItem {
 	 * 
 	 * @return software list
 	 */
-	
+
 	public List<String> getProductList() {
 		List<String> products = new ArrayList<String>();
 		try {
 			NodeList vulnSoftware = (NodeList) xPath().evaluate("//entry/vulnerable-software-list/product/text()", XmlDocument(),
 					XPathConstants.NODESET);
-			if (vulnSoftware.getLength() > 0) {
-				for (int j = 0; j < vulnSoftware.getLength(); j++) {
-					Node productNode = vulnSoftware.item(j);
-					String product = productNode.getTextContent();
-					products.add(product);
-				}
-			}
+			for (int j = 0; j < vulnSoftware.getLength(); j++)
+				products.add(vulnSoftware.item(j).getTextContent());
 		} catch (XPathExpressionException e) {
 			e.printStackTrace();
 		}
