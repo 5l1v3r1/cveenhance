@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import tud.cve.extractor.CveItem;
@@ -31,6 +32,20 @@ public class NVRTest {
 	private NameVersionRelation nvrSmallVersion = new NameVersionRelation(softwareNameSnippet1, smallVersion);
 	private NameVersionRelation nvrMidVersion= new NameVersionRelation(softwareNameSnippet1, midVersion);
 	
+	private NameVersionRelation nvr;
+
+	@Before
+	public void setUp() {
+		nvr = new NameVersionRelation(new Snippet("Macromedia Flash"), new Snippet("3.1"));
+		nvr.version().initialize();
+		nvr.name().initialize();
+	}
+
+	
+	@Test
+	public void toStringTest() {
+		assertTrue(nvr.toString().equals(nvr.name()+" "+nvr.version()));
+	}
 	
 	@Test
 	public void crossCheckTest(){
