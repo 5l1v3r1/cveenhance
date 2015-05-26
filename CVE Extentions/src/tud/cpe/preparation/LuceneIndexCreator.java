@@ -10,13 +10,13 @@ package tud.cpe.preparation;
  * contact: Leonid Glanz (STG), Sebastian Schmidt (KOM), Sebastian Wollny (KOM), Ben Hermann (STG)
  * name: CVE Version Information Extractor
  *
-*/
-
+ */
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -55,13 +55,14 @@ import org.xml.sax.SAXException;
 
 /**
  * >> This class is used to handle cpe strings <<
+ * 
  * @author TU Darmstadt KOM, TU Darmstadt STG
  * @version 0.1
  */
 
 public class LuceneIndexCreator {
 
-	public static void test(String[] args) throws IOException, ParseException, ParserConfigurationException, XPathExpressionException, SAXException {
+	public static void main(String[] args) throws IOException, ParseException, ParserConfigurationException, XPathExpressionException, SAXException {
 		// 0. Specify the analyzer for tokenizing text.
 		// The same analyzer should be used for indexing and searching
 		StandardAnalyzer analyzer = new StandardAnalyzer();
@@ -127,7 +128,7 @@ public class LuceneIndexCreator {
 		reader.close();
 	}
 
-	public static void main(String[] args) throws IOException, ParseException {
+	public static void test(String[] args) throws IOException, ParseException {
 		String[] cpes = { "cpe:/a:ibm:java:7.0.0.0", "cpe:/a:ibm:java:7.0.1.0", "cpe:/a:ibm:java:7.0.2.0", "cpe:/a:ibm:java:7.0.3.0",
 				"cpe:/a:ibm:java:7.0.4.0", "cpe:/a:ibm:java:7.0.4.1", "cpe:/a:ibm:java:7.0.4.2", "cpe:/a:ibm:java:5.0.14.0",
 				"cpe:/a:ibm:java:5.0.15.0", "cpe:/a:ibm:java:5.0.11.1", "cpe:/a:ibm:java:5.0.0.0", "cpe:/a:ibm:java:5.0.11.2",
@@ -202,24 +203,28 @@ public class LuceneIndexCreator {
 		return "";
 	}
 
-	public static String searchForCpeName(String title) throws IOException, ParseException {
+	public static String searchForCpeName(String title) {
+		String output = "";
 		StandardAnalyzer analyzer = new StandardAnalyzer();
-		Directory index = new SimpleFSDirectory(new File("data/index"));
-		String querystr = transformTitle(title);
+		try {
+			Directory index = new SimpleFSDirectory(new File("data/index"));
+			String querystr = transformTitle(title);
 
-		Query q = new QueryParser("title", analyzer).parse(querystr);
+			Query q = new QueryParser("title", analyzer).parse(querystr);
 
-		int hitsPerPage = 100;
-		IndexReader reader = DirectoryReader.open(index);
-		IndexSearcher searcher = new IndexSearcher(reader);
-		TopScoreDocCollector collector = TopScoreDocCollector.create(hitsPerPage, true);
-		searcher.search(q, collector);
-		ScoreDoc[] hits = collector.topDocs().scoreDocs;
-		if (hits.length > 0)
-			return searcher.doc(hits[0].doc).get("CPE-Name");
-		reader.close();
-
-		return "";
+			int hitsPerPage = 100;
+			IndexReader reader = DirectoryReader.open(index);
+			IndexSearcher searcher = new IndexSearcher(reader);
+			TopScoreDocCollector collector = TopScoreDocCollector.create(hitsPerPage, true);
+			searcher.search(q, collector);
+			ScoreDoc[] hits = collector.topDocs().scoreDocs;
+			if (hits.length > 0)
+				output = searcher.doc(hits[0].doc).get("CPE-Name");
+			reader.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return output;
 	}
 
 	public static String cpeDecoding(String cpe) {
@@ -278,6 +283,6 @@ public class LuceneIndexCreator {
 
 	private static String transformTitle(String title) {
 		return title.replaceAll("\\p{Punct}", " ");
-		//return title.replace(".", " ").replace("_", " ").replace("-", " ").replace("(", " ");
+		// return title.replace(".", " ").replace("_", " ").replace("-", " ").replace("(", " ");
 	}
 }
