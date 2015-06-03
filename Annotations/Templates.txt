@@ -1,6 +1,7 @@
-		<ext:ranges>
-			<ext:range>
-				<ext:start></ext:start>
-				<ext:end></ext:end>
-			</ext:range>
-		</ext:ranges>
+	<ext:ranges>
+		<ext:range>
+			<ext:start></ext:start>
+			<ext:end></ext:end>
+			<ext:fix></ext:fix>
+		</ext:range>
+	</ext:ranges>

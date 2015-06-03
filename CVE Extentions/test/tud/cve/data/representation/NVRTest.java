@@ -47,12 +47,6 @@ public class NVRTest {
 		nvr.setVersion(new Snippet("3.0"));
 		assertEquals(nvr.optimizeVersion(nvr.version().getText()), "3");
 	}
-	
-	@Test
-	public void optimizeVersionTest2() {
-		assertEquals(nvr.optimizeVersion(" 3.1 "), "3.1");
-	}
-	
 
 	@Test
 	public void toStringTest() {

@@ -44,12 +44,36 @@ public class AnalyseTest {
 	public void beforeKeywordTest() {
 		try {
 
-			testItems[0] = new CveItem(intoString + "<vuln:product>cpe:/a:macromedia:flashplayer:7.2</vuln:product>" + secondString + "CVE-2000-0000"
-					+ thirdString
-					+ "In the Macromedia Flash Player before 7.3 a cross side vunerability occours. It is often used to gather bank account data. "
-					+ lastString);
-			addPartResult("Macromedia Flash Player", "0.0", "", "7.3", "cpe:/a:macromedia:flashplayer:", "CVE-2000-0000");
+			testItems[0] = new CveItem(
+					intoString
+							+ "<vuln:product>cpe:/a:macromedia:flashplayer:7.2</vuln:product>"
+							+ secondString
+							+ "CVE-2000-0000"
+							+ thirdString
+							+ "In the Macromedia Flash Player before 7.3 a cross side vunerability occours. It is often used to gather bank account data. "
+							+ lastString);
+			addPartResult("Macromedia Flash Player", "", "", "7.3", "cpe:/a:macromedia:flashplayer:", "CVE-2000-0000");
 			assertTrue(checkItemResult(testItems[0], "before keyword check"));
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("AnalyseTest failed: thrown exception");
+		}
+	}
+
+	@Test
+	public void beforeAndEarlierTest() {
+		try {
+
+			testItems[0] = new CveItem(
+					intoString
+							+ "<vuln:product>cpe:/a:macromedia:flashplayer:7.2</vuln:product>"
+							+ secondString
+							+ "CVE-2000-0000"
+							+ thirdString
+							+ "In the Macromedia Flash Player 7.2.3 and earlier before 7.2.4 a cross side vunerability occours. It is often used to gather bank account data. "
+							+ lastString);
+			addPartResult("Macromedia Flash Player", "", "", "7.2.4", "cpe:/a:macromedia:flashplayer:", "CVE-2000-0000");
+			assertTrue(checkItemResult(testItems[0], "double information before/earlier check"));
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("AnalyseTest failed: thrown exception");
@@ -67,7 +91,7 @@ public class AnalyseTest {
 							+ thirdString
 							+ "In the Macromedia Flash Player 7.2 and earlier a cross side vunerability occours. It is often used to gather bank account data. "
 							+ lastString);
-			addPartResult("Macromedia Flash Player", "0.0", "7.2", "", "cpe:/a:macromedia:flashplayer:", "CVE-2000-0001");
+			addPartResult("Macromedia Flash Player", "", "7.2", "", "cpe:/a:macromedia:flashplayer:", "CVE-2000-0001");
 			assertTrue(checkItemResult(testItems[1], "earlier keyword check"));
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -86,8 +110,8 @@ public class AnalyseTest {
 							+ thirdString
 							+ "In the Macromedia Flash Player 7.2 and earlier and Adobe Flash Player before 4.3.2 a cross side vunerability occours. It is often used to gather bank account data. "
 							+ lastString);
-			addPartResult("Macromedia Flash Player", "0.0", "7.2", "", "cpe:/a:macromedia:flashplayer:", "CVE-2000-0002");
-			addPartResult("Adobe Flash Player", "0.0", "", "4.3.2", "cpe:/a:adobe:flashplayer:", "CVE-2000-0002");
+			addPartResult("Macromedia Flash Player", "", "7.2", "", "cpe:/a:macromedia:flashplayer:", "CVE-2000-0002");
+			addPartResult("Adobe Flash Player", "", "", "4.3.2", "cpe:/a:adobe:flashplayer:", "CVE-2000-0002");
 			assertTrue(checkItemResult(testItems[2], "multi software check"));
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -106,8 +130,10 @@ public class AnalyseTest {
 							+ thirdString
 							+ "In the Macromedia Flash Player 7.2 before 7.2.8 and in 8.3.x before 8.3.4 a cross side vunerability occours. It is often used to gather bank account data. "
 							+ lastString);
-			addPartResult("Macromedia Flash Player", "7.2", "", "7.2.8", "cpe:/a:macromedia:flashplayer:", "CVE-2000-0003");
-			addPartResult("Macromedia Flash Player", "8.3.0", "", "8.3.4", "cpe:/a:macromedia:flashplayer:", "CVE-2000-0003");
+			addPartResult("Macromedia Flash Player", "7.2", "", "7.2.8", "cpe:/a:macromedia:flashplayer:",
+					"CVE-2000-0003");
+			addPartResult("Macromedia Flash Player", "8.3.0", "", "8.3.4", "cpe:/a:macromedia:flashplayer:",
+					"CVE-2000-0003");
 			assertTrue(checkItemResult(testItems[3], "multi version check 1"));
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -126,8 +152,10 @@ public class AnalyseTest {
 							+ thirdString
 							+ "This introducing sentence is very confusing for humans but should be handled by the PC. Maybe a second sentence my be even more confusing for us humans. In the Multimedia Center of the Mozilla Software Testsuite 3.2.x through 3.2.3 and 4.2.x before 4.2.5 a cross CSS attack is possible. It is often used to gather you personal Backgammon Arcade game data. "
 							+ lastString);
-			addPartResult("Mozilla Software Testsuite", "3.2.0", "3.2.3", "", "cpe:/a:mozilla:softwaretestsuite:", "CVE-2000-0004");
-			addPartResult("Mozilla Software Testsuite", "4.2.0", "", "4.2.5", "cpe:/a:mozilla:softwaretestsuite:", "CVE-2000-0004");
+			addPartResult("Mozilla Software Testsuite", "3.2.0", "3.2.3", "", "cpe:/a:mozilla:softwaretestsuite:",
+					"CVE-2000-0004");
+			addPartResult("Mozilla Software Testsuite", "4.2.0", "", "4.2.5", "cpe:/a:mozilla:softwaretestsuite:",
+					"CVE-2000-0004");
 			assertTrue(checkItemResult(testItems[4], "multi version check 2"));
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -146,8 +174,10 @@ public class AnalyseTest {
 							+ thirdString
 							+ "This introducing sentence is very confusing for humans but should be handled by the PC. Maybe a second sentence my be even more confusing for us humans. In the Multimedia Center of the Mozilla Software Testsuite 3.2.x through 3.2.3 update 2 and 4.2.x before 4.2.5 build 2233 a cross CSS attack is possible. It is often used to gather you personal Backgammon Arcade game data. "
 							+ lastString);
-			addPartResult("Mozilla Software Testsuite", "3.2.0", "3.2.3 update 2", "", "cpe:/a:mozilla:softwaretestsuite:", "CVE-2000-0004");
-			addPartResult("Mozilla Software Testsuite", "4.2.0", "", "4.2.5 build 2233", "cpe:/a:mozilla:softwaretestsuite:", "CVE-2000-0004");
+			addPartResult("Mozilla Software Testsuite", "3.2.0", "3.2.3 update 2", "",
+					"cpe:/a:mozilla:softwaretestsuite:", "CVE-2000-0004");
+			addPartResult("Mozilla Software Testsuite", "4.2.0", "", "4.2.5 build 2233",
+					"cpe:/a:mozilla:softwaretestsuite:", "CVE-2000-0004");
 			assertTrue(checkItemResult(testItems[5], "special version check"));
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -166,7 +196,13 @@ public class AnalyseTest {
 							+ thirdString
 							+ "In the Multimedia Center of the Mozilla Software Testsuite 3.2.1, 3.2.2 and 3.2.3 update 2 a cross CSS attack is possible. It is often used to gather you personal Backgammon Arcade game data. "
 							+ lastString);
-			addPartResult("Mozilla Software Testsuite", "3.2.1", "3.2.3 update 2", "", "cpe:/a:mozilla:softwaretestsuite:", "CVE-2000-0005");
+			addPartResult("Mozilla Software Testsuite", "3.2.1", "3.2.1", "", "cpe:/a:mozilla:softwaretestsuite:",
+					"CVE-2000-0005");
+			addPartResult("Mozilla Software Testsuite", "3.2.2", "3.2.2", "", "cpe:/a:mozilla:softwaretestsuite:",
+					"CVE-2000-0005");
+			addPartResult("Mozilla Software Testsuite", "3.2.3 update 2", "3.2.3 update 2", "",
+					"cpe:/a:mozilla:softwaretestsuite:", "CVE-2000-0005");
+
 			assertTrue(checkItemResult(testItems[6], "version range recognition check"));
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -185,7 +221,8 @@ public class AnalyseTest {
 							+ thirdString
 							+ "In Mozilla Software Testsuite 3.2.1, Adobe Reader, Mozilla Firefox 3.2.2 and 3.2.3 and a cross CSS attack is possible. It is often used to gather you personal Backgammon Arcade game data. "
 							+ lastString);
-			addPartResult("Mozilla Software Testsuite", "3.2.1", "3.2.1", "", "cpe:/a:mozilla:softwaretestsuite:", "CVE-2000-0006");
+			addPartResult("Mozilla Software Testsuite", "3.2.1", "3.2.1", "", "cpe:/a:mozilla:softwaretestsuite:",
+					"CVE-2000-0006");
 			addPartResult("Mozilla Firefox", "3.2.2", "3.2.3", "", "cpe:/a:mozilla:firefox:", "CVE-2000-0006");
 			assertTrue(checkItemResult(testItems[7], "software name recognition check"));
 		} catch (Exception e) {
@@ -194,14 +231,10 @@ public class AnalyseTest {
 		}
 	}
 
-	@Test
-	public void extractCPETest() {
-		
-	}
-
 	// -----------------------------------------
 
-	private void addPartResult(String softwareName, String versionStart, String versionEnd, String versionFix, String cpe, String cveID) {
+	private void addPartResult(String softwareName, String versionStart, String versionEnd, String versionFix,
+			String cpe, String cveID) {
 		VersionRange curVersionRange = new VersionRange();
 		curVersionRange.updateSoftwareName(softwareName);
 		curVersionRange.setCPE(cpe);
@@ -242,10 +275,12 @@ public class AnalyseTest {
 			boolean partResultCorrect = false;
 
 			for (VersionRange result : results) {
-				System.out.println("\nComparing desired result with extracted result no. " + (resultCheckedCounter + 1));
+				System.out
+						.println("\nComparing desired result with extracted result no. " + (resultCheckedCounter + 1));
 				if (desiredResult.getSoftwareName().equals(result.getSoftwareName())
 						&& desiredResult.firstDetectedVersion().equals(result.firstDetectedVersion())
-						&& desiredResult.lastDetectedVersion().equals(result.lastDetectedVersion()) && desiredResult.cpe().equals(result.cpe())) {
+						&& desiredResult.lastDetectedVersion().equals(result.lastDetectedVersion())
+						&& desiredResult.cpe().equals(result.cpe())) {
 					System.out.println("Ckecked: SW-Name OK, First OK, Last OK, CPE OK");
 					if (result.fixedVersion().equals(fix)) {
 						System.out.println("Note: Fix OK");
@@ -261,19 +296,22 @@ public class AnalyseTest {
 					System.out.print("Checked: ");
 					if (!desiredResult.getSoftwareName().equals(result.getSoftwareName())) {
 						System.out.print("SW-Name NG,");
-						failString += "SW-Name desired: " + desiredResult.getSoftwareName() + ", found: " + result.getSoftwareName() + "\n";
+						failString += "SW-Name desired: " + desiredResult.getSoftwareName() + ", found: "
+								+ result.getSoftwareName() + "\n";
 					} else
 						System.out.print("SW-Name OK,");
 
 					if (!desiredResult.firstDetectedVersion().equals(result.firstDetectedVersion())) {
 						System.out.print(" First NG,");
-						failString += "First desired: " + desiredResult.firstDetectedVersion() + ", found: " + result.firstDetectedVersion() + "\n";
+						failString += "First desired: " + desiredResult.firstDetectedVersion() + ", found: "
+								+ result.firstDetectedVersion() + "\n";
 					} else
 						System.out.print(" First OK,");
 
 					if (!desiredResult.lastDetectedVersion().equals(result.lastDetectedVersion())) {
 						System.out.print(" Last NG,");
-						failString += "Last desired: " + desiredResult.lastDetectedVersion() + ", found: " + result.lastDetectedVersion() + "\n";
+						failString += "Last desired: " + desiredResult.lastDetectedVersion() + ", found: "
+								+ result.lastDetectedVersion() + "\n";
 					} else
 						System.out.print(" Last OK,");
 

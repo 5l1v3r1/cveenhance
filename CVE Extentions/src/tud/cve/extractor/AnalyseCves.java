@@ -22,11 +22,21 @@ import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.Vector;
 import java.util.regex.Pattern;
+
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import tud.cpe.preparation.LuceneIndexCreator;
 import tud.cve.data.representation.NameVersionRelation;
@@ -69,7 +79,8 @@ public class AnalyseCves {
 	}
 
 	/**
-	 * This method "walks" recursive through the current directory (path) and collects all analyzable files in the file list.
+	 * This method "walks" recursive through the current directory (path) and collects all analyzable files in the file
+	 * list.
 	 * 
 	 * @param path
 	 *            path which should be analyzed; files be saved in filelist
@@ -97,7 +108,8 @@ public class AnalyseCves {
 						File folder = new File(Config.OUTPUT_FOLDER);
 						if (!folder.exists())
 							folder.mkdirs();
-						bw = new BufferedWriter(new FileWriter(new File(Config.OUTPUT_FOLDER, "nvdcve-2.0-" + year + "-enhanced.xml")));
+						bw = new BufferedWriter(new FileWriter(new File(Config.OUTPUT_FOLDER, "nvdcve-2.0-" + year
+								+ "-enhanced.xml")));
 						bw.write(Config.START_TAGS);
 					}
 					String parseName = f.getName();
@@ -139,8 +151,8 @@ public class AnalyseCves {
 		}
 
 		System.out.println("\nCVE entries: " + resultCounter[0] + "\nCVE entries with information: " + resultCounter[4]
-				+ "\nCVE entries with first information: " + resultCounter[1] + "\nCVE entries with last information: " + resultCounter[2]
-				+ "\nCVE entries with fix information: " + resultCounter[3] + "\n");
+				+ "\nCVE entries with first information: " + resultCounter[1] + "\nCVE entries with last information: "
+				+ resultCounter[2] + "\nCVE entries with fix information: " + resultCounter[3] + "\n");
 	}
 
 	/**
@@ -175,7 +187,7 @@ public class AnalyseCves {
 			boolean hasFix = false;
 
 			for (VersionRange result : results) {
-				if (!result.firstDetectedVersion().equals("0.0"))
+				if (!result.firstDetectedVersion().equals(""))
 					hasFirst = true;
 				if (!result.lastDetectedVersion().isEmpty())
 					hasLast = true;
@@ -309,27 +321,40 @@ public class AnalyseCves {
 			relatedRelations = groupRelations(relations, interestingRelations, remainingRelations, shortestRelations);
 
 			for (VersionRange versionRange : relatedRelations) {
-				List<String> products = item.getProductList();
-				String cpename = extractCPE(versionRange, products);
-				if (!cpename.isEmpty()) {
-					cpename = extractCPEVendor(cpename);
-					versionRange.setCPE(cpename);
-					// cpe:/a:apache:camel:
-					List<String> remaining = fillRemainings(products, cpename);
+				List<String> cpes = getCpeList(item);
+				if (cpes.size() > 0) {
+					Set<String> products = new HashSet<String>();
+					for (String cpe : cpes) {
+						products.add(extractCPEProduct(cpe));
+					}
+					String cpename = (String) products.toArray()[0];
+					if (products.size() > 1)
+						cpename = extractCPE(versionRange, cpes);
+					if (!cpename.isEmpty()) {
+						cpename = extractCPEProduct(cpename);
+						versionRange.setCPE(cpename);
+						// cpe:/a:apache:camel:
+						List<String> remaining = fillRemainings(cpes, cpename);
 
-					if (remaining.size() > 0) {
-						List<String> filteredRemainings = LuceneIndexCreator.getAllCpesWithVersionPrefix(versionRange.shortest().version().getText(),
-								remaining);
+						if (remaining.size() > 0) {
+							List<String> filteredRemainings = LuceneIndexCreator.getAllCpesWithVersionPrefix(
+									versionRange.shortest().version().getText(), remaining);
 
-						/*
-						 * if (!versionRange.hasLast()) { if (filteredRemainings.size() != 0) remaining = filteredRemainings; String greatest = ""; if
-						 * (versionRange.fixed()) { String fix = versionRange.fixedSoftware().getText(); greatest =
-						 * VersionComparator.getGreatestUnderFix(remaining, fix, cpename); } else greatest =
-						 * VersionComparator.getGreatestMatch(remaining, cpename); if (!greatest.isEmpty()) versionRange.setLast(greatest); }
-						 */
+							if (!versionRange.hasLast()) {
+								if (filteredRemainings.size() != 0)
+									remaining = filteredRemainings;
+								String greatest = "";
+								String versionText = versionRange.shortest().version().getText();
+								if (!versionRange.fixed() && versionRange.hasFirst() && versionText.endsWith(".x"))
+									greatest = VersionComparator.getGreatestMatch(remaining, cpename,
+											versionText.substring(0, versionText.length() - 2));
+								if (!greatest.isEmpty())
+									versionRange.setLast(greatest);
+							}
+
+						}
 					}
 				}
-
 			}
 		}
 		relatedRelations = checkValidity(relatedRelations);
@@ -348,20 +373,27 @@ public class AnalyseCves {
 			String fixedSoftware = curResultRange.fixedVersion();
 			if (fixedSoftware.contains(" "))
 				fixedSoftware = fixedSoftware.substring(0, fixedSoftware.indexOf(" "));
-
-			if (!curResultRange.getSoftwareName().isEmpty()
+			boolean lastAndFix = false;
+			if (!fixedSoftware.isEmpty() && !lastSoftware.isEmpty())
+				lastAndFix = true;
+			if (!lastAndFix
+					&& !curResultRange.getSoftwareName().isEmpty()
 					&& (!firstSoftware.isEmpty() || !lastSoftware.isEmpty() || !fixedSoftware.isEmpty())
-					&& (firstSoftware.isEmpty() || (firstSoftware.toLowerCase().matches("[\\d]+[\\p{Punct}\\w]*") && firstSoftware.replaceAll("\\d",
-							"").length() != firstSoftware.length()))
-					&& (lastSoftware.isEmpty() || (lastSoftware.toLowerCase().matches("[\\d]+[\\p{Punct}\\w]*") && lastSoftware.replaceAll("\\d", "")
-							.length() != lastSoftware.length()))
-					&& (fixedSoftware.isEmpty() || (fixedSoftware.toLowerCase().matches("[\\d]+[\\p{Punct}\\w]*") && fixedSoftware.replaceAll("\\d",
-							"").length() != fixedSoftware.length())))
+					&& (firstSoftware.isEmpty() || (firstSoftware.toLowerCase().matches("[\\d]+[\\p{Punct}\\w]*") && firstSoftware
+							.replaceAll("\\d", "").length() != firstSoftware.length()))
+					&& (lastSoftware.isEmpty() || (lastSoftware.toLowerCase().matches("[\\d]+[\\p{Punct}\\w]*") && lastSoftware
+							.replaceAll("\\d", "").length() != lastSoftware.length()))
+					&& (fixedSoftware.isEmpty() || (fixedSoftware.toLowerCase().matches("[\\d]+[\\p{Punct}\\w]*") && fixedSoftware
+							.replaceAll("\\d", "").length() != fixedSoftware.length())))
 				relatedResultRelations.add(curResultRange);
 			else {
-				new Exception("Final validity check failed: " + curResultRange.getSoftwareName() + " " + firstSoftware + ", " + lastSoftware + ", "
-						+ fixedSoftware).printStackTrace();
-
+				Exception e = new Exception("Final validity check failed: " + curResultRange.getSoftwareName() + " "
+						+ firstSoftware + ", " + lastSoftware + ", " + fixedSoftware);
+				try {
+					throw e;
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
 			}
 		}
 		return relatedResultRelations;
@@ -374,7 +406,7 @@ public class AnalyseCves {
 	 *            complete CPE string
 	 * @return vendor part of CPE
 	 */
-	private String extractCPEVendor(String cpename) {
+	public static String extractCPEProduct(String cpename) {
 		String[] split = cpename.split(":");
 		cpename = "";
 		for (int i = 0; i < 4; i++) {
@@ -383,13 +415,39 @@ public class AnalyseCves {
 		return cpename;
 	}
 
-	private List<String> fillRemainings(List<String> products, String cpename) {
+	private List<String> fillRemainings(List<String> cpes, String cpename) {
 		List<String> remaining = new ArrayList<String>();
-		for (String product : products) {
+		for (String product : cpes) {
 			if (product.startsWith(cpename))
 				remaining.add(product);
 		}
 		return remaining;
+	}
+
+	/**
+	 * Extracts the vulnerable software list
+	 * 
+	 * @param item
+	 *            CVE item, whose software list should be extracted
+	 * @return software list
+	 */
+
+	private List<String> getCpeList(CveItem item) {
+		List<String> products = new ArrayList<String>();
+		try {
+			NodeList vulnSoftware = (NodeList) item.xPath().evaluate("//entry/vulnerable-software-list/product/text()",
+					item.XmlDocument(), XPathConstants.NODESET);
+			if (vulnSoftware.getLength() > 0) {
+				for (int j = 0; j < vulnSoftware.getLength(); j++) {
+					Node productNode = vulnSoftware.item(j);
+					String product = productNode.getTextContent();
+					products.add(product);
+				}
+			}
+		} catch (XPathExpressionException e) {
+			e.printStackTrace();
+		}
+		return products;
 	}
 
 	/**
@@ -399,8 +457,9 @@ public class AnalyseCves {
 	 *            all relations
 	 * @return A vector of version ranges
 	 */
-	private Vector<VersionRange> groupRelations(Vector<NameVersionRelation> relations, HashSet<NameVersionRelation> interestingRelations,
-			HashSet<NameVersionRelation> remainingRelations, HashSet<NameVersionRelation> shortestRelations) {
+	private Vector<VersionRange> groupRelations(Vector<NameVersionRelation> relations,
+			HashSet<NameVersionRelation> interestingRelations, HashSet<NameVersionRelation> remainingRelations,
+			HashSet<NameVersionRelation> shortestRelations) {
 		Vector<VersionRange> relatedRelations = new Vector<VersionRange>();
 		while (interestingRelations.size() > 0) {
 			Iterator<NameVersionRelation> relationsIterator = interestingRelations.iterator();
@@ -465,11 +524,13 @@ public class AnalyseCves {
 		return relatedRelations;
 	}
 
-	private void allocateRemainingRelations(HashSet<NameVersionRelation> interestingRelations, HashSet<NameVersionRelation> remainingRelations,
-			NameVersionRelation curShortestRel, HashSet<NameVersionRelation> curRelRelation) {
+	private void allocateRemainingRelations(HashSet<NameVersionRelation> interestingRelations,
+			HashSet<NameVersionRelation> remainingRelations, NameVersionRelation curShortestRel,
+			HashSet<NameVersionRelation> curRelRelation) {
 		for (NameVersionRelation curNameVerRel : remainingRelations) {
 			if (curNameVerRel.refersSameSoftware(curShortestRel)
-					&& (curShortestRel.versionIsMoreGeneral(curNameVerRel) || curShortestRel.hasSameSuperversion(curNameVerRel))) {
+					&& (curShortestRel.versionIsMoreGeneral(curNameVerRel) || curShortestRel
+							.hasSameSuperversion(curNameVerRel))) {
 				curRelRelation.add(curNameVerRel);
 				interestingRelations.remove(curNameVerRel);
 			}
@@ -480,22 +541,55 @@ public class AnalyseCves {
 	 * Returns the most alike cpe string
 	 * 
 	 * @param versionRange
-	 * @param products
+	 * @param cpes
 	 * @return most alike cpe string
 	 */
-	public static String extractCPE(VersionRange versionRange, List<String> products) {
+	private String extractCPE(VersionRange versionRange, List<String> cpes) {
+		Map<String, String> cpeResolutions = new HashMap<String, String>();
+		for (String cpe : cpes) {
+			String resolution;
+			try {
+				resolution = LuceneIndexCreator.findTitle(cpe);
+
+				if (resolution.length() > 0) {
+					cpeResolutions.put(resolution, cpe);
+				} else {
+					cpeResolutions.put(convertCpeToText(cpe), cpe);
+				}
+			} catch (Exception e) {
+				cpeResolutions.put(convertCpeToText(cpe), cpe);
+			}
+		}
 		int levenshteinDistance = Integer.MAX_VALUE;
 		String cpe = "";
-		String softwareName = versionRange.shortest().name().getText() + " " + versionRange.shortest().version().getText();
+		String softwareName = versionRange.shortest().name().getText();
 		int currentdistance;
-		for (String product : products) {
-			currentdistance = getLevenshteinDistance(product, softwareName);
+		for (Entry<String, String> entry : cpeResolutions.entrySet()) {
+			currentdistance = getLevenshteinDistance(entry.getKey(), softwareName);
 			if (currentdistance < levenshteinDistance) {
-				cpe = product;
+				cpe = entry.getValue();
 				levenshteinDistance = currentdistance;
 			}
 		}
 		return cpe;
+	}
+
+	public String convertCpeToText(String cpe) {
+		String[] split = cpe.split(":");
+		String result = split[2] + " " + split[3];
+		boolean isLastEmptySpace = false;
+		String line = "";
+		for (int i = 0; i < result.length(); i++) {
+			char c = result.charAt(i);
+			if (Character.isLetter(c)) {
+				line += c;
+				isLastEmptySpace = false;
+			} else if (!isLastEmptySpace) {
+				line += " ";
+				isLastEmptySpace = true;
+			}
+		}
+		return line.trim().toLowerCase();
 	}
 
 	/**
@@ -537,7 +631,8 @@ public class AnalyseCves {
 
 			for (int i = 1; i <= firstLen; i++) {
 				cost = first.charAt(i - 1) == sndCh ? 0 : 1;
-				currentCosts[i] = Math.min(Math.min(currentCosts[i - 1] + 1, previousCosts[i] + 1), previousCosts[i - 1] + cost);
+				currentCosts[i] = Math.min(Math.min(currentCosts[i - 1] + 1, previousCosts[i] + 1),
+						previousCosts[i - 1] + cost);
 			}
 
 			costTmp = previousCosts;

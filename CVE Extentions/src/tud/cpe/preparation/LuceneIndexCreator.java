@@ -16,7 +16,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -53,6 +52,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import tud.cve.extractor.AnalyseCves;
+
 /**
  * >> This class is used to handle cpe strings <<
  * 
@@ -62,7 +63,8 @@ import org.xml.sax.SAXException;
 
 public class LuceneIndexCreator {
 
-	public static void main(String[] args) throws IOException, ParseException, ParserConfigurationException, XPathExpressionException, SAXException {
+	public static void test(String[] args) throws IOException, ParseException, ParserConfigurationException,
+			XPathExpressionException, SAXException {
 		// 0. Specify the analyzer for tokenizing text.
 		// The same analyzer should be used for indexing and searching
 		StandardAnalyzer analyzer = new StandardAnalyzer();
@@ -92,7 +94,8 @@ public class LuceneIndexCreator {
 			String title = "";
 			for (int j = 0; j < node.getChildNodes().getLength(); j++) {
 				Node fst = node.getChildNodes().item(j);
-				if (fst.getNodeName().equals("title") && fst.getAttributes().getNamedItem("xml:lang").getNodeValue().equals("en-US")) {
+				if (fst.getNodeName().equals("title")
+						&& fst.getAttributes().getNamedItem("xml:lang").getNodeValue().equals("en-US")) {
 					title = transformTitle(fst.getTextContent());
 				}
 			}
@@ -128,18 +131,22 @@ public class LuceneIndexCreator {
 		reader.close();
 	}
 
-	public static void test(String[] args) throws IOException, ParseException {
-		String[] cpes = { "cpe:/a:ibm:java:7.0.0.0", "cpe:/a:ibm:java:7.0.1.0", "cpe:/a:ibm:java:7.0.2.0", "cpe:/a:ibm:java:7.0.3.0",
-				"cpe:/a:ibm:java:7.0.4.0", "cpe:/a:ibm:java:7.0.4.1", "cpe:/a:ibm:java:7.0.4.2", "cpe:/a:ibm:java:5.0.14.0",
-				"cpe:/a:ibm:java:5.0.15.0", "cpe:/a:ibm:java:5.0.11.1", "cpe:/a:ibm:java:5.0.0.0", "cpe:/a:ibm:java:5.0.11.2",
-				"cpe:/a:ibm:java:5.0.12.0", "cpe:/a:ibm:java:5.0.12.1", "cpe:/a:ibm:java:5.0.12.2", "cpe:/a:ibm:java:5.0.12.3",
-				"cpe:/a:ibm:java:5.0.12.4", "cpe:/a:ibm:java:5.0.12.5", "cpe:/a:ibm:java:5.0.13.0", "cpe:/a:ibm:java:5.0.16.2",
-				"cpe:/a:oracle:jre:5.0.16.1", "cpe:/a:oracle:jre:5.0.16.0", "cpe:/a:oracle:jre:5.0.11.0", "cpe:/a:ibm:java:6.0.1.0",
-				"cpe:/a:ibm:java:6.0.11.0", "cpe:/a:ibm:java:6.0.10.1", "cpe:/a:ibm:java:6.0.0.0", "cpe:/a:ibm:java:6.0.12.0",
-				"cpe:/a:ibm:java:6.0.2.0", "cpe:/a:ibm:java:6.0.3.0", "cpe:/a:ibm:java:6.0.4.0", "cpe:/a:ibm:java:6.0.5.0",
-				"cpe:/a:ibm:java:6.0.7.0", "cpe:/a:ibm:java:6.0.6.0", "cpe:/a:ibm:java:6.0.8.1", "cpe:/a:ibm:java:6.0.8.0", "cpe:/a:sun:jre:6.0.9.1",
-				"cpe:/a:sun:jre:6.0.9.0", "cpe:/a:ibm:java:6.0.10.0", "cpe:/a:ibm:java:6.0.9.2", "cpe:/a:ibm:java:6.0.13.0",
-				"cpe:/a:ibm:java:6.0.13.1", "cpe:/a:ibm:java:6.0.13.2" };
+	public static void main(String[] args) throws IOException, ParseException {
+		String[] cpes = { "cpe:/a:ibm:java:7.0.0.0", "cpe:/a:ibm:java:7.0.1.0", "cpe:/a:ibm:java:7.0.2.0",
+				"cpe:/a:ibm:java:7.0.3.0", "cpe:/a:ibm:java:7.0.4.0", "cpe:/a:ibm:java:7.0.4.1",
+				"cpe:/a:ibm:java:7.0.4.2", "cpe:/a:ibm:java:5.0.14.0", "cpe:/a:ibm:java:5.0.15.0",
+				"cpe:/a:ibm:java:5.0.11.1", "cpe:/a:ibm:java:5.0.0.0", "cpe:/a:ibm:java:5.0.11.2",
+				"cpe:/a:ibm:java:5.0.12.0", "cpe:/a:ibm:java:5.0.12.1", "cpe:/a:ibm:java:5.0.12.2",
+				"cpe:/a:ibm:java:5.0.12.3", "cpe:/a:ibm:java:5.0.12.4", "cpe:/a:ibm:java:5.0.12.5",
+				"cpe:/a:ibm:java:5.0.13.0", "cpe:/a:ibm:java:5.0.16.2", "cpe:/a:oracle:jre:5.0.16.1",
+				"cpe:/a:oracle:jre:5.0.16.0", "cpe:/a:oracle:jre:5.0.11.0", "cpe:/a:ibm:java:6.0.1.0",
+				"cpe:/a:ibm:java:6.0.11.0", "cpe:/a:ibm:java:6.0.10.1", "cpe:/a:ibm:java:6.0.0.0",
+				"cpe:/a:ibm:java:6.0.12.0", "cpe:/a:ibm:java:6.0.2.0", "cpe:/a:ibm:java:6.0.3.0",
+				"cpe:/a:ibm:java:6.0.4.0", "cpe:/a:ibm:java:6.0.5.0", "cpe:/a:ibm:java:6.0.7.0",
+				"cpe:/a:ibm:java:6.0.6.0", "cpe:/a:ibm:java:6.0.8.1", "cpe:/a:ibm:java:6.0.8.0",
+				"cpe:/a:sun:jre:6.0.9.1", "cpe:/a:sun:jre:6.0.9.0", "cpe:/a:ibm:java:6.0.10.0",
+				"cpe:/a:ibm:java:6.0.9.2", "cpe:/a:ibm:java:6.0.13.0", "cpe:/a:ibm:java:6.0.13.1",
+				"cpe:/a:ibm:java:6.0.13.2" };
 		Map<String, List<String>> titles = new HashMap<String, List<String>>();
 		Set<String> set = new HashSet<String>();
 		for (int i = 0; i < cpes.length; i++) {
@@ -203,28 +210,48 @@ public class LuceneIndexCreator {
 		return "";
 	}
 
-	public static String searchForCpeName(String title) {
-		String output = "";
+	public static String findTitle(String cpeName) throws IOException, ParseException {
 		StandardAnalyzer analyzer = new StandardAnalyzer();
-		try {
-			Directory index = new SimpleFSDirectory(new File("data/index"));
-			String querystr = transformTitle(title);
+		Directory index = new SimpleFSDirectory(new File("data/index"));
+		String querystr = cpeDecoding(cpeName);
 
-			Query q = new QueryParser("title", analyzer).parse(querystr);
+		Query q = new QueryParser("CPE-Name", analyzer).parse(querystr);
 
-			int hitsPerPage = 100;
-			IndexReader reader = DirectoryReader.open(index);
-			IndexSearcher searcher = new IndexSearcher(reader);
-			TopScoreDocCollector collector = TopScoreDocCollector.create(hitsPerPage, true);
-			searcher.search(q, collector);
-			ScoreDoc[] hits = collector.topDocs().scoreDocs;
-			if (hits.length > 0)
-				output = searcher.doc(hits[0].doc).get("CPE-Name");
-			reader.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return output;
+		int hitsPerPage = 100;
+		IndexReader reader = DirectoryReader.open(index);
+		IndexSearcher searcher = new IndexSearcher(reader);
+		TopScoreDocCollector collector = TopScoreDocCollector.create(hitsPerPage, true);
+		searcher.search(q, collector);
+		ScoreDoc[] hits = collector.topDocs().scoreDocs;
+		String title = "";
+		if (hits.length > 0)
+			title = searcher.doc(hits[0].doc).get("title");
+		reader.close();
+		if (!AnalyseCves.extractCPEProduct(cpeName).equalsIgnoreCase(
+				AnalyseCves.extractCPEProduct(searcher.doc(hits[0].doc).get("CPE-Name"))))
+			title = "";
+
+		return title;
+	}
+
+	public static String searchForCpeName(String title) throws IOException, ParseException {
+		StandardAnalyzer analyzer = new StandardAnalyzer();
+		Directory index = new SimpleFSDirectory(new File("data/index"));
+		String querystr = transformTitle(title);
+
+		Query q = new QueryParser("title", analyzer).parse(querystr);
+
+		int hitsPerPage = 100;
+		IndexReader reader = DirectoryReader.open(index);
+		IndexSearcher searcher = new IndexSearcher(reader);
+		TopScoreDocCollector collector = TopScoreDocCollector.create(hitsPerPage, true);
+		searcher.search(q, collector);
+		ScoreDoc[] hits = collector.topDocs().scoreDocs;
+		if (hits.length > 0)
+			return searcher.doc(hits[0].doc).get("CPE-Name");
+		reader.close();
+
+		return "";
 	}
 
 	public static String cpeDecoding(String cpe) {

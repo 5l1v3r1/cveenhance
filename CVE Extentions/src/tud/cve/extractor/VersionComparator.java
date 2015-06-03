@@ -25,38 +25,55 @@ import java.util.StringTokenizer;
 
 public class VersionComparator {
 
-	public static String getSmallestMatch(List<String> cpes) {
-		String smallest = cpes.get(0);
-		for (int i = 1; i < cpes.size(); i++) {
-			if (compareTo(smallest, cpes.get(i)) >= 1) {
-				smallest = cpes.get(i);
-			}
-		}
-		return smallest;
-	}
-
-	public static String getGreatestMatch(List<String> cpes, String vendor) {
+	public static String getGreatestMatch(List<String> cpes, String product, String prefix) {
 		String greatest = cpes.get(0);
 		for (int i = 1; i < cpes.size(); i++) {
-			String version = cpes.get(i).substring(vendor.length());
-			if (compareTo(greatest.substring(vendor.length()), version) <= -1) {
+			String version = cpes.get(i).split(":")[4];
+			if (compareTo(greatest.split(":")[4], version) <= -1) {
 				greatest = cpes.get(i);
 			}
 		}
-		return greatest;
-	}
-
-	public static String getGreatestUnderFix(List<String> cpes, String fixVersion, String vendor) {
-		List<String> smallerThanFix = new ArrayList<String>();
+		List<String> greaterThanGreat = new ArrayList<String>();
 		for (String cpe : cpes) {
-			String version = cpe.substring(vendor.length());
-			if (compareTo(version, fixVersion) <= -1) {
-				smallerThanFix.add(cpe);
+			if (cpe.startsWith(greatest) && cpe.length() > greatest.length()) {
+				greaterThanGreat.add(cpe);
 			}
 		}
-		if (smallerThanFix.size() == 0)
-			return "";
-		return getGreatestMatch(smallerThanFix, vendor);
+		if (greaterThanGreat.size() == 0)
+			return greatest;
+		else if (greaterThanGreat.size() == 1) {
+			return greaterThanGreat.get(0);
+		} else {
+			int len = greatest.length();
+			greatest = greaterThanGreat.get(0);
+			for (int i = 1; i < greaterThanGreat.size(); i++) {
+				String[] version = convertExtToNumbers(greaterThanGreat.get(i).substring(len)).split(" ");
+				String[] gre = convertExtToNumbers(greatest.substring(len)).split(" ");
+				int minLen = Math.min(version.length, gre.length);
+				for (int j = 0; j < minLen; j++)
+					if (new Integer(gre[j]).compareTo(new Integer(version[j])) <= -1) {
+						greatest = greaterThanGreat.get(i);
+					}
+			}
+			return greatest;
+		}
+	}
+
+	public static String convertExtToNumbers(String cpe) {
+		String result = cpe;
+		boolean isLastEmptySpace = false;
+		String line = "";
+		for (int i = 0; i < result.length(); i++) {
+			char c = result.charAt(i);
+			if (Character.isDigit(c)) {
+				line += c;
+				isLastEmptySpace = false;
+			} else if (!isLastEmptySpace) {
+				line += " ";
+				isLastEmptySpace = true;
+			}
+		}
+		return line.trim();
 	}
 
 	public static int compareTo(String arg0, String arg1) {

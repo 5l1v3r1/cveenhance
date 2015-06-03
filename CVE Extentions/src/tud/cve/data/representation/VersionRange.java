@@ -20,7 +20,7 @@ import tud.cve.extractor.Config;
 
 public class VersionRange {
 
-	private String firstDetectedVer = "0.0";
+	private String firstDetectedVer = "";
 	private String lastDetectedVer = "";
 	private String softwareName = "";
 	private String generalCpeString = "";
@@ -86,7 +86,7 @@ public class VersionRange {
 	}
 
 	/**
-	 * @return The first version of the version range; Returns a string "0.0", if it is not set
+	 * @return The first version of the version range; Returns a string, if it is not set
 	 */
 	public String firstDetectedVersion() {
 		return firstDetectedVer;
@@ -96,7 +96,8 @@ public class VersionRange {
 	 * @return The last version of the version range; Returns an empty string, if it is not set
 	 */
 	public String lastDetectedVersion() {
-		return lastDetectedVer;
+		if(!fixed) return lastDetectedVer;
+		else return "";
 	}
 
 	/**
@@ -117,7 +118,7 @@ public class VersionRange {
 		searchLast();
 		if (versions.get(versions.size() - 1).version().logicalUnitComment().equals("fixed")) {
 			if (versions.size() == 1) {
-				firstDetectedVer = "0.0";
+				firstDetectedVer = "";
 				lastDetectedVer = "";
 			} else if (versions.size() == 2) {
 				firstDetectedVer = shortest().version().getText().replaceFirst("\\.x", ".0");
@@ -131,7 +132,7 @@ public class VersionRange {
 				if (versions.size() > 1)
 					firstDetectedVer = shortest().version().getText().replaceFirst("\\.x", ".0");
 				else
-					firstDetectedVer = "0.0";
+					firstDetectedVer = "";
 				lastDetectedVer = biggest().version().getText().replaceFirst("\\.x", ".0");
 			} else {
 				if (versions.size() == 1 && versions.get(0).version().logicalUnitComment().equals("first detected vulnerability")) {
@@ -297,7 +298,7 @@ public class VersionRange {
 		sb.append(":");
 		sb.append("range>\n");
 
-		if (!firstDetectedVersion().equals("0.0")) {
+		if (!firstDetectedVersion().equals("")) {
 			sb.append(firstXMLTag());
 			sb.append("\n");
 		}
