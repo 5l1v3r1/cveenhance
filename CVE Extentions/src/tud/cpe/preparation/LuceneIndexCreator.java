@@ -63,7 +63,7 @@ import tud.cve.extractor.AnalyseCves;
 
 public class LuceneIndexCreator {
 
-	public static void test(String[] args) throws IOException, ParseException, ParserConfigurationException,
+	public static void main(String[] args) throws IOException, ParseException, ParserConfigurationException,
 			XPathExpressionException, SAXException {
 		// 0. Specify the analyzer for tokenizing text.
 		// The same analyzer should be used for indexing and searching
@@ -131,7 +131,7 @@ public class LuceneIndexCreator {
 		reader.close();
 	}
 
-	public static void main(String[] args) throws IOException, ParseException {
+	public static void test(String[] args) throws IOException, ParseException {
 		String[] cpes = { "cpe:/a:ibm:java:7.0.0.0", "cpe:/a:ibm:java:7.0.1.0", "cpe:/a:ibm:java:7.0.2.0",
 				"cpe:/a:ibm:java:7.0.3.0", "cpe:/a:ibm:java:7.0.4.0", "cpe:/a:ibm:java:7.0.4.1",
 				"cpe:/a:ibm:java:7.0.4.2", "cpe:/a:ibm:java:5.0.14.0", "cpe:/a:ibm:java:5.0.15.0",

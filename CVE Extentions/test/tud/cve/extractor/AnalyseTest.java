@@ -262,7 +262,7 @@ public class AnalyseTest {
 
 		analyseTestUnit.fillRelations(testItem, versions, relations);
 		//
-		Vector<VersionRange> results = analyseTestUnit.createResult(relations, testItem);
+		Vector<VersionRange> results = analyseTestUnit.createResult(relations, testItem.getCpeList());
 
 		System.out.println("===== Analyzing " + extractedCveID + " \"" + testTitle + "\" =====");
 		Iterator<String> fixIterator = allFixes.iterator();
