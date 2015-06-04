@@ -21,8 +21,8 @@ package tud.cve.extractor;
 
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.regex.Matcher;
@@ -31,11 +31,14 @@ import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import tud.cve.data.representation.Snippet;
@@ -269,6 +272,30 @@ public class CveItem {
 		}
 
 		return returnVec;
+	}
+
+	/**
+	 * Extracts the vulnerable software list
+	 * 
+	 * @return software list
+	 */
+	
+	public List<String> getCpeList() {
+		List<String> products = new ArrayList<String>();
+		try {
+			NodeList vulnSoftware = (NodeList) xPath().evaluate("//entry/vulnerable-software-list/product/text()",
+					XmlDocument(), XPathConstants.NODESET);
+			if (vulnSoftware.getLength() > 0) {
+				for (int j = 0; j < vulnSoftware.getLength(); j++) {
+					Node productNode = vulnSoftware.item(j);
+					String product = productNode.getTextContent();
+					products.add(product);
+				}
+			}
+		} catch (XPathExpressionException e) {
+			e.printStackTrace();
+		}
+		return products;
 	}
 
 }

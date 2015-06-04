@@ -32,12 +32,6 @@ import java.util.Set;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 import tud.cpe.preparation.LuceneIndexCreator;
 import tud.cve.data.representation.NameVersionRelation;
 import tud.cve.data.representation.Snippet;
@@ -197,9 +191,9 @@ public class AnalyseCves {
 					System.out.println("-> Result: " + result);
 				else {
 					if (!Config.LOGGING) {
-						output = getMachineReadableOutput(item, result);
+						output = result.getMachineReadableOutput(item.getCVEID());
 					} else {
-						output = getHumanReviewOutput(item, result);
+						output = result.getHumanReviewOutput(item.getCVEID());
 					}
 					pw.println(output.toString());
 				}
@@ -232,25 +226,6 @@ public class AnalyseCves {
 	}
 
 	/**
-	 * Creates a human readable text output of extraction results
-	 * 
-	 * @param item
-	 *            CVE entry
-	 * @param result
-	 *            A version range result
-	 * @return human readable output string
-	 */
-	protected StringBuilder getHumanReviewOutput(CveItem item, VersionRange result) {
-		StringBuilder output = new StringBuilder();
-		output.append(item.getCVEID());
-		output.append("  ");
-		output.append(result.toString());
-		output.append("  ");
-		output.append(result.cpe());
-		return output;
-	}
-
-	/**
 	 * Creates an XML Output
 	 * 
 	 * @param results
@@ -272,30 +247,6 @@ public class AnalyseCves {
 		sb.append(":");
 		sb.append("ranges>");
 		return sb.toString();
-	}
-
-	/**
-	 * Creates a machine readable text output of extraction results
-	 * 
-	 * @param item
-	 *            CVE entry
-	 * @param result
-	 *            A version range result
-	 * @return machine readable output string
-	 */
-	private StringBuilder getMachineReadableOutput(CveItem item, VersionRange result) {
-		StringBuilder output = new StringBuilder();
-		output.append(item.getCVEID());
-		output.append(";");
-		output.append(result.cpe());
-		output.append(";");
-		output.append(result.firstDetectedVersion());
-		output.append(";");
-		output.append(result.lastDetectedVersion());
-		output.append(";");
-		output.append(result.fixedVersion());
-		output.append(";");
-		return output.append(result.toString());
 	}
 
 	/**
@@ -321,7 +272,7 @@ public class AnalyseCves {
 			relatedRelations = groupRelations(relations, interestingRelations, remainingRelations, shortestRelations);
 
 			for (VersionRange versionRange : relatedRelations) {
-				List<String> cpes = getCpeList(item);
+				List<String> cpes = item.getCpeList();
 				if (cpes.size() > 0) {
 					Set<String> products = new HashSet<String>();
 					for (String cpe : cpes) {
@@ -422,32 +373,6 @@ public class AnalyseCves {
 				remaining.add(product);
 		}
 		return remaining;
-	}
-
-	/**
-	 * Extracts the vulnerable software list
-	 * 
-	 * @param item
-	 *            CVE item, whose software list should be extracted
-	 * @return software list
-	 */
-
-	private List<String> getCpeList(CveItem item) {
-		List<String> products = new ArrayList<String>();
-		try {
-			NodeList vulnSoftware = (NodeList) item.xPath().evaluate("//entry/vulnerable-software-list/product/text()",
-					item.XmlDocument(), XPathConstants.NODESET);
-			if (vulnSoftware.getLength() > 0) {
-				for (int j = 0; j < vulnSoftware.getLength(); j++) {
-					Node productNode = vulnSoftware.item(j);
-					String product = productNode.getTextContent();
-					products.add(product);
-				}
-			}
-		} catch (XPathExpressionException e) {
-			e.printStackTrace();
-		}
-		return products;
 	}
 
 	/**
