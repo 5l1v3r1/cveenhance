@@ -193,7 +193,7 @@ public class SnippetTest {
 	public void condition_Test7() throws Exception {
 		versionSnippet.setText("before");
 		versionSnippet.initialize();
-		assertFalse(versionSnippet.condition("/cuebefore/comma"));
+		assertTrue(versionSnippet.condition("/cuebefore/comma"));
 	}
 
 }

@@ -32,9 +32,5 @@ public class FeatureVectorBuilder {
 		
 		return returnVector;
 	}
-	
-	public FeatureVectorBuilder() {
-		
-	}
 
 }
