@@ -96,7 +96,7 @@ public class CveItem {
 	/**
 	 * Refinement of a snippet entity
 	 */
-	private void searchSnippetcontext() {
+	public void searchSnippetcontext() {
 		Iterator<Snippet> tokenIterator = tokenList.iterator();
 		Snippet curSnip;
 		while (tokenIterator.hasNext()) {

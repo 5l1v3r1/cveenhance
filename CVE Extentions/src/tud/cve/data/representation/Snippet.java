@@ -139,7 +139,7 @@ public class Snippet {
 
 	// Methods:
 
-	private void setFeature(String featureName, boolean newValue) throws Exception {
+	public void setFeature(String featureName, boolean newValue) throws Exception {
 		features.put(featureName, newValue);
 		if (features.size() != defaultVector.size())
 			throw new Exception("Feature \"" + featureName + "\" is not defined in konfig!");

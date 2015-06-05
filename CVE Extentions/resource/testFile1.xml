@@ -1,0 +1,52 @@
+  <entry id="CVE-2006-0304">
+    <vuln:vulnerable-configuration id="http://nvd.nist.gov/">
+      <cpe-lang:logical-test negate="false" operator="OR">
+        <cpe-lang:fact-ref name="cpe:/a:achal_dhir:dual_dhcp_dns_server:1.0"/>
+      </cpe-lang:logical-test>
+    </vuln:vulnerable-configuration>
+    <vuln:vulnerable-software-list>
+      <vuln:product>cpe:/a:achal_dhir:dual_dhcp_dns_server:1.0</vuln:product>
+    </vuln:vulnerable-software-list>
+    <vuln:cve-id>CVE-2006-0304</vuln:cve-id>
+    <vuln:published-datetime>2006-01-18T19:03:00.000-05:00</vuln:published-datetime>
+    <vuln:last-modified-datetime>2011-03-07T21:29:45.330-05:00</vuln:last-modified-datetime>
+    <vuln:cvss>
+      <cvss:base_metrics upgraded-from-version="1.0">
+        <cvss:score>7.5</cvss:score>
+        <cvss:access-vector approximated="true">NETWORK</cvss:access-vector>
+        <cvss:access-complexity>LOW</cvss:access-complexity>
+        <cvss:authentication>NONE</cvss:authentication>
+        <cvss:confidentiality-impact>PARTIAL</cvss:confidentiality-impact>
+        <cvss:integrity-impact>PARTIAL</cvss:integrity-impact>
+        <cvss:availability-impact>PARTIAL</cvss:availability-impact>
+        <cvss:source>http://nvd.nist.gov</cvss:source>
+        <cvss:generated-on-datetime>2006-01-19T09:09:00.000-05:00</cvss:generated-on-datetime>
+      </cvss:base_metrics>
+    </vuln:cvss>
+    <vuln:security-protection>ALLOWS_USER_ACCESS</vuln:security-protection>
+    <vuln:references xml:lang="en" reference_type="VENDOR_ADVISORY">
+      <vuln:source>SECUNIA</vuln:source>
+      <vuln:reference href="http://secunia.com/advisories/18486" xml:lang="en">18486</vuln:reference>
+    </vuln:references>
+    <vuln:references xml:lang="en" reference_type="VENDOR_ADVISORY">
+      <vuln:source>MISC</vuln:source>
+      <vuln:reference href="http://aluigi.altervista.org/adv/dualsbof-adv.txt" xml:lang="en">http://aluigi.altervista.org/adv/dualsbof-adv.txt</vuln:reference>
+    </vuln:references>
+    <vuln:references xml:lang="en" reference_type="UNKNOWN">
+      <vuln:source>VUPEN</vuln:source>
+      <vuln:reference href="http://www.vupen.com/english/advisories/2006/0245" xml:lang="en">ADV-2006-0245</vuln:reference>
+    </vuln:references>
+    <vuln:references xml:lang="en" reference_type="UNKNOWN">
+      <vuln:source>XF</vuln:source>
+      <vuln:reference href="http://xforce.iss.net/xforce/xfdb/24191" xml:lang="en">dualdhcpdns-options-field-bo(24191)</vuln:reference>
+    </vuln:references>
+    <vuln:references xml:lang="en" reference_type="UNKNOWN">
+      <vuln:source>BID</vuln:source>
+      <vuln:reference href="http://www.securityfocus.com/bid/16298" xml:lang="en">16298</vuln:reference>
+    </vuln:references>
+    <vuln:references xml:lang="en" reference_type="UNKNOWN">
+      <vuln:source>SECTRACK</vuln:source>
+      <vuln:reference href="http://securitytracker.com/id?1015495" xml:lang="en">1015495</vuln:reference>
+    </vuln:references>
+    <vuln:summary>Buffer overflow in Dual DHCP DNS Server 1.0 allows remote attackers to cause a denial of service (application crash) and possibly execute arbitrary code via the DHCP options field.</vuln:summary>
+  </entry>

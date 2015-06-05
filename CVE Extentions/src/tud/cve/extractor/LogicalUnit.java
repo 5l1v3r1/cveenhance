@@ -25,13 +25,11 @@ public class LogicalUnit {
 
 	private String[] possibleUnits = Config.lOGICAL_UNITS;
 	private final String unitType;
-	private boolean valid = false;
 	public String comment = "";
 
 	public LogicalUnit(String newUnitType) {
 		if (isValidType(newUnitType.trim())) {
 			unitType = newUnitType;
-			valid = true;
 		} else
 			unitType = null;
 	}
@@ -68,7 +66,7 @@ public class LogicalUnit {
 	 * Checks if the logical type really exists
 	 */
 	public boolean isValid() {
-		return (valid && unitType != null);
+		return (unitType != null);
 	}
 
 	/**

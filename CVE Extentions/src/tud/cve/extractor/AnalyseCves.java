@@ -151,7 +151,7 @@ public class AnalyseCves {
 		return bw;
 	}
 
-	private String getInnerText(File f) {
+	public static String getInnerText(File f) {
 		StringBuilder innerText = new StringBuilder();
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(f));

@@ -17,5 +17,16 @@ public class LogicalUnitTest {
 	public void isValidTypeTest() {
 		assertTrue(lu.isValid());
 	}
+	
+	@Test
+	public void toString_Test1() {
+		assertEquals(lu.toString(),"version");
+	}
+	
+	@Test
+	public void toString_Test2() {
+		lu=new LogicalUnit("foo");
+		assertEquals(lu.toString(),"");
+	}
 
 }
