@@ -1,6 +1,9 @@
 package tud.cve.data.representation;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -121,7 +124,7 @@ public class SnippetTest {
 		versionSnippet.initialize();
 		assertEquals(versionSnippet.combinationLen(), 2);
 	}
-	
+
 	@Test
 	public void combine_Test1() {
 		versionSnippet.next = new Snippet("update 10");
@@ -135,7 +138,7 @@ public class SnippetTest {
 		versionSnippet.combine();
 		assertEquals(versionSnippet.combinationLen(), 0);
 	}
-	
+
 	@Test
 	public void combine_Test2() {
 		versionSnippet.next = new Snippet("update 10");
@@ -148,6 +151,49 @@ public class SnippetTest {
 		versionSnippet.initialize();
 		versionSnippet.combine();
 		assertNull(versionSnippet.next);
+	}
+
+	@Test
+	public void condition_Test1() throws Exception {
+		assertFalse(versionSnippet.condition(""));
+	}
+
+	@Test(expected = Exception.class)
+	public void condition_Test2() throws Exception {
+		assertFalse(versionSnippet.condition("!cuebegin"));
+	}
+
+	@Test(expected = Exception.class)
+	public void condition_Test3() throws Exception {
+		assertFalse(versionSnippet.condition("-cuebegin"));
+	}
+	
+	@Test
+	public void condition_Test4() throws Exception {
+		versionSnippet.setText("before");
+		versionSnippet.initialize();
+		assertFalse(versionSnippet.condition("-cuebefore"));
+	}
+	
+	@Test
+	public void condition_Test5() throws Exception {
+		versionSnippet.setText("earlier");
+		versionSnippet.initialize();
+		assertFalse(versionSnippet.condition("!cuebefore"));
+	}
+	
+	@Test
+	public void condition_Test6() throws Exception {
+		versionSnippet.setText("earlier");
+		versionSnippet.initialize();
+		assertFalse(versionSnippet.condition("/cuebefore/comma"));
+	}
+	
+	@Test
+	public void condition_Test7() throws Exception {
+		versionSnippet.setText("before");
+		versionSnippet.initialize();
+		assertFalse(versionSnippet.condition("/cuebefore/comma"));
 	}
 
 }

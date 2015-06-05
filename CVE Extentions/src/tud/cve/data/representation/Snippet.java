@@ -319,7 +319,7 @@ public class Snippet {
 	 */
 	public boolean condition(String requestCondition) throws Exception {
 		String[] conditions = requestCondition.split(";");
-		if (conditions.length == 0)
+		if (conditions.length == 1 && conditions[0].isEmpty())
 			return false;
 
 		for (String condition : conditions) {
@@ -336,7 +336,7 @@ public class Snippet {
 			}
 				break;
 			case '/': {
-				String[] orConditions = condition.split("/");
+				String[] orConditions = condition.substring(1).split("/");
 				boolean returnvalue = false;
 				for (String orCondition : orConditions) {
 					returnvalue |= getFeatureValue(orCondition);
