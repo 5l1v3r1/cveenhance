@@ -198,7 +198,7 @@ public class AnalyseCves {
 			boolean hasFix = false;
 
 			for (VersionRange result : results) {
-				if (!result.firstDetectedVersion().equals(""))
+				if (result.firstDetectedVersion().length() != 0)
 					hasFirst = true;
 				if (!result.lastDetectedVersion().isEmpty())
 					hasLast = true;
@@ -231,8 +231,10 @@ public class AnalyseCves {
 
 	protected void fillRelations(CveItem item, Vector<Snippet> versions, Vector<NameVersionRelation> relations) {
 		for (Snippet curSnip : versions) {
+
 			String snippetComment = "";
 			Snippet softwareName = item.searchSoftwareNameBefore(curSnip);
+
 			if (!curSnip.logicalUnitComment().isEmpty())
 				snippetComment = "    (" + curSnip.logicalUnitComment() + ") ";
 			if (!softwareName.getText().isEmpty() && Pattern.matches(".*\\d+.*", curSnip.getText()))
@@ -303,17 +305,7 @@ public class AnalyseCves {
 						List<String> filteredRemainings = LuceneIndexCreator.getAllCpesWithVersionPrefix(versionRange
 								.shortest().version().getText(), remaining);
 
-						if (!versionRange.hasLast()) {
-							if (filteredRemainings.size() != 0)
-								remaining = filteredRemainings;
-							String greatest = "";
-							String versionText = versionRange.shortest().version().getText();
-							if (!versionRange.fixed() && versionRange.hasFirst() && versionText.endsWith(".x"))
-								greatest = VersionComparator.getGreatestMatch(remaining, cpename,
-										versionText.substring(0, versionText.length() - 2));
-							if (!greatest.isEmpty())
-								versionRange.setLast(greatest);
-						}
+						versionRange.findLast(cpename, remaining, filteredRemainings);
 					}
 				}
 			}
@@ -331,15 +323,10 @@ public class AnalyseCves {
 			String lastSoftware = cutAtSpace(curResultRange.lastDetectedVersion());
 			String fixedSoftware = cutAtSpace(curResultRange.fixedVersion());
 
-			boolean lastAndFix = false;
-			if (!fixedSoftware.isEmpty() && !lastSoftware.isEmpty())
-				lastAndFix = true;
-			if (!lastAndFix && !curResultRange.getSoftwareName().isEmpty()
+			if ((fixedSoftware.isEmpty() || lastSoftware.isEmpty()) && !curResultRange.getSoftwareName().isEmpty()
 					&& (!firstSoftware.isEmpty() || !lastSoftware.isEmpty() || !fixedSoftware.isEmpty())
-
-					&& isSoftwareSmallerWithoutDigits(firstSoftware)
-
-					&& isSoftwareSmallerWithoutDigits(lastSoftware) && isSoftwareSmallerWithoutDigits(fixedSoftware))
+					&& isSoftwareSmallerWithoutDigits(firstSoftware) && isSoftwareSmallerWithoutDigits(lastSoftware)
+					&& isSoftwareSmallerWithoutDigits(fixedSoftware))
 
 				relatedResultRelations.add(curResultRange);
 			else {
@@ -434,14 +421,11 @@ public class AnalyseCves {
 							if (curShortestRel.hasSameSuperversion(curRange.shortest())) {
 								curRange.add(curShortestRel);
 								alreadyAdded = true;
-								continue;
 							}
 						}
 					}
 					if (!alreadyAdded) {
-						VersionRange versionRange = new VersionRange();
-						versionRange.add(curShortestRel);
-						relatedRelations.add(versionRange);
+						relatedRelations.add(new VersionRange(curShortestRel));
 					}
 				}
 			} else {
@@ -451,10 +435,8 @@ public class AnalyseCves {
 
 					allocateRemainingRelations(interestingRelations, remainingRelations, curShortestRel, curRelRelation);
 
-					VersionRange versionRange = new VersionRange();
-					versionRange.addAll(curRelRelation);
 					remainingRelations.removeAll(curRelRelation);
-					relatedRelations.add(versionRange);
+					relatedRelations.add(new VersionRange(curRelRelation));
 				}
 
 				shortestRelations.clear();
@@ -468,10 +450,12 @@ public class AnalyseCves {
 	private void allocateRemainingRelations(HashSet<NameVersionRelation> interestingRelations,
 			HashSet<NameVersionRelation> remainingRelations, NameVersionRelation curShortestRel,
 			HashSet<NameVersionRelation> curRelRelation) {
+
 		for (NameVersionRelation curNameVerRel : remainingRelations) {
 			if (curNameVerRel.refersSameSoftware(curShortestRel)
 					&& (curShortestRel.versionIsMoreGeneral(curNameVerRel) || curShortestRel
 							.hasSameSuperversion(curNameVerRel))) {
+
 				curRelRelation.add(curNameVerRel);
 				interestingRelations.remove(curNameVerRel);
 			}
@@ -481,7 +465,7 @@ public class AnalyseCves {
 	/**
 	 * Returns the most alike cpe string
 	 * 
-	 * @param versionRange
+	 * @param softwareName
 	 * @param cpes
 	 * @return most alike cpe string
 	 */

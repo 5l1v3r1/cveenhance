@@ -124,22 +124,18 @@ public class NameVersionRelation implements Comparable<NameVersionRelation> {
 	 * Checks, if a software version is a parent software version
 	 */
 	public boolean versionIsMoreGeneral(NameVersionRelation otherRel) {
-		if (otherRel.version().getText().contains(trimmedVersion()))
-			return true;
-		return false;
+		return otherRel.version().getText().contains(trimmedVersion());
 	}
 
 	/**
 	 * Checks, if two NameVersionRelations refer to the same parent version
 	 */
 	public boolean hasSameSuperversion(NameVersionRelation otherRel) {
-		String otherVersion = otherRel.version().getText();
 		String[] splittedVersion = version.getText().split("\\.");
-		String[] splittedOtherVersion = otherVersion.split("\\.");
+		String[] splittedOtherVersion = otherRel.version().getText().split("\\.");
+
 		if (splittedVersion.length < 2 || splittedOtherVersion.length < 2) {
-			if (splittedVersion[0].equals(splittedOtherVersion[0]))
-				return true;
-			return false;
+			return splittedVersion[0].equals(splittedOtherVersion[0]);
 		} else {
 			for (int i = 0; (i < (splittedVersion.length - 1)) && (i < splittedOtherVersion.length - 1); i++) {
 				if (!splittedVersion[i].equals(splittedOtherVersion[i]))
@@ -176,10 +172,9 @@ public class NameVersionRelation implements Comparable<NameVersionRelation> {
 				for (int i = 0; i < versionSplit.length; i++) {
 					if (i >= otherVersionSplit.length)
 						return 1;
-					if (Integer.parseInt(versionSplit[i]) > Integer.parseInt(otherVersionSplit[i]))
-						return 1;
-					if (Integer.parseInt(versionSplit[i]) < Integer.parseInt(otherVersionSplit[i]))
-						return -1;
+					int res = new Integer(versionSplit[i]).compareTo(new Integer(otherVersionSplit[i]));
+					if (res != 0)
+						return res;
 				}
 				if (otherVersionSplit.length > versionSplit.length)
 					return -1;
@@ -190,28 +185,19 @@ public class NameVersionRelation implements Comparable<NameVersionRelation> {
 			}
 		}
 
-		CharSequence version = optimizeVersion(this.version().getText());
-		CharSequence otherVersion = optimizeVersion(otherNVR.version.getText());
-		Character versionCharater;
-		Character otherVersionCharacter;
+		String version = optimizeVersion(this.version().getText());
+		String otherVersion = optimizeVersion(otherNVR.version.getText());
 
 		for (int i = 0; i < version.length() && i < otherVersion.length(); i++) { // character-wise compare
-			versionCharater = new Character(version.charAt(i));
-			otherVersionCharacter = new Character(otherVersion.charAt(i));
-			// if(!versionCharater.equals(" ")||!otherVersionCharacter.equals(" ")){
-			// if(versionCharater.equals(" ")) return 1;
-			// else return -1;
-			// }
-
-			if (versionCharater.compareTo(otherVersionCharacter) != 0)
-				return versionCharater.compareTo(otherVersionCharacter);
+			int res = new Character(version.charAt(i)).compareTo(otherVersion.charAt(i));
+			if (res != 0)
+				return res;
 		}
-		if (version.length() == otherVersion.length())
-			return 0;
-		if (version.length() < otherVersion.length())
-			return -1;
-		else
-			return 1;
+		return new Integer(version.length()).compareTo(otherVersion.length());
+	}
+
+	public String getVersionWithoutX() {
+		return version().getText().replaceFirst("\\.x", ".0");
 	}
 
 }

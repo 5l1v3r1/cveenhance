@@ -24,9 +24,8 @@ import tud.cve.extractor.FeatureVectorBuilder;
 import tud.cve.extractor.LogicalUnit;
 
 /**
- * This class should represent a part of a floating text e.g. a token / combined
- * tokens. Furthermore a Snippet should represents a logical unit e.g. a
- * software name, a version number or a stopword.
+ * This class should represent a part of a floating text e.g. a token / combined tokens. Furthermore a Snippet should
+ * represents a logical unit e.g. a software name, a version number or a stopword.
  * 
  * @author TU Darmstadt KOM, TU Darmstadt STG
  * @version 0.1
@@ -35,8 +34,7 @@ import tud.cve.extractor.LogicalUnit;
 public class Snippet {
 
 	// features:
-	private static final HashMap<String, Boolean> defaultVector = FeatureVectorBuilder
-			.defaultVector();
+	private static final HashMap<String, Boolean> defaultVector = FeatureVectorBuilder.defaultVector();
 
 	private HashMap<String, Boolean> features;
 	// handling vars:
@@ -96,47 +94,27 @@ public class Snippet {
 			setFeature("possibleversion", matchesLowerCase(".*\\d.*"));
 			setFeature("word", (text.length() >= 3));
 			setFeature("bigletter", matchesExpression("[A-Z]+.*"));
-			setFeature("versionext",keywordCheck(lowerCaseText, Config.VERION_KEYWORDS));
-			setFeature(
-					"version",(matchesLowerCase("[\\d]+[\\p{Punct}\\w]*") && !(matchesLowerCase(""))));
+			setFeature("versionext", keywordCheck(lowerCaseText, Config.VERION_KEYWORDS));
+			setFeature("version", (matchesLowerCase("[\\d]+[\\p{Punct}\\w]*") && !(matchesLowerCase(""))));
 			setFeature("os", keywordCheck(lowerCaseText, Config.OS_KEYWORDS));
-			setFeature("osext",
-					keywordCheck(lowerCaseText, Config.OS_EXTENSIONS));
-			setFeature("stopword",
-					keywordCheck(lowerCaseText, Config.STOP_WORDS));
-			setFeature("concatword",
-					keywordCheck(lowerCaseText, Config.CONCAT_WORDS));
-			setFeature("comparingword",
-					keywordCheck(lowerCaseText, Config.COMPARING_WORDS));
-			setFeature("seperator",
-					keywordCheck(lowerCaseText, Config.SEPERATING_WORDS));
-			setFeature(
-					"namestart",
-					keywordCheck(lowerCaseText,
-							Config.SOFTWARE_NAME_START_WORDS));
-			setFeature(
-					"versionstart",
-					keywordCheck(lowerCaseText, Config.SOFTWARE_NAME_STOP_WORDS));
-			setFeature(
-					"cuebefore",
-					keywordCheck(lowerCaseText, Config.SOFTWARE_NAME_STOP_WORDS));
-			setFeature("cueearlier",
-					keywordCheck(lowerCaseText, Config.SOFTWARE_VERSION_ENDS));
-			setFeature("cuebegin",
-					keywordCheck(lowerCaseText, Config.SOFTWARE_BEGIN_IND));
-			setFeature("cuebetween",
-					keywordCheck(lowerCaseText, Config.SOFTWARE_RANGE_IND));
+			setFeature("osext", keywordCheck(lowerCaseText, Config.OS_EXTENSIONS));
+			setFeature("stopword", keywordCheck(lowerCaseText, Config.STOP_WORDS));
+			setFeature("concatword", keywordCheck(lowerCaseText, Config.CONCAT_WORDS));
+			setFeature("comparingword", keywordCheck(lowerCaseText, Config.COMPARING_WORDS));
+			setFeature("seperator", keywordCheck(lowerCaseText, Config.SEPERATING_WORDS));
+			setFeature("namestart", keywordCheck(lowerCaseText, Config.SOFTWARE_NAME_START_WORDS));
+			setFeature("versionstart", keywordCheck(lowerCaseText, Config.SOFTWARE_NAME_STOP_WORDS));
+			setFeature("cuebefore", keywordCheck(lowerCaseText, Config.SOFTWARE_NAME_STOP_WORDS));
+			setFeature("cueearlier", keywordCheck(lowerCaseText, Config.SOFTWARE_VERSION_ENDS));
+			setFeature("cuebegin", keywordCheck(lowerCaseText, Config.SOFTWARE_BEGIN_IND));
+			setFeature("cuebetween", keywordCheck(lowerCaseText, Config.SOFTWARE_RANGE_IND));
 
 			if ((getFeatureValue("comma") || matchesLowerCase(".+["
-					+ createRegexpFromStrings(Config.SEPERATING_CHARS, "")
-					+ "]"))) {
+					+ createRegexpFromStrings(Config.SEPERATING_CHARS, "") + "]"))) {
 				setFeature("logicalend", true);
 				text = text.substring(0, text.length() - 1);
 			}
-			if (prev != null
-					&& matchesLowerCase("["
-							+ createRegexpFromStrings(Config.SEPERATING_CHARS)
-							+ "]"))
+			if (prev != null && matchesLowerCase("[" + createRegexpFromStrings(Config.SEPERATING_CHARS) + "]"))
 				prev.setFeature("logicalend", true);
 
 			if (hasPrev() == false)
@@ -150,9 +128,10 @@ public class Snippet {
 
 			if (getFeatureValue("version"))
 				setLogicalUnit("version");
-			else if (getFeatureValue("bigletter")&&!getFeatureValue("stopword"))
+			else if (getFeatureValue("bigletter") && !getFeatureValue("stopword"))
 				setLogicalUnit("softwarename");
-			else if(getFeatureValue("versionext")) setLogicalUnit("versionExtention");
+			else if (getFeatureValue("versionext"))
+				setLogicalUnit("versionExtention");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -160,12 +139,10 @@ public class Snippet {
 
 	// Methods:
 
-	private void setFeature(String featureName, boolean newValue)
-			throws Exception {
+	private void setFeature(String featureName, boolean newValue) throws Exception {
 		features.put(featureName, newValue);
 		if (features.size() != defaultVector.size())
-			throw new Exception("Feature \"" + featureName
-					+ "\" is not defined in konfig!");
+			throw new Exception("Feature \"" + featureName + "\" is not defined in konfig!");
 	}
 
 	public String createRegexpFromStrings(String[] keywords, String seperator) {
@@ -210,7 +187,6 @@ public class Snippet {
 
 	/**
 	 * Checks, if the content of the Snippet matches with an entry of a keyword list
-
 	 */
 	private boolean keywordCheck(String checkword, String[] keywordList) {
 		// checks weather a Snippet matches a keyword, listed in keywordList
@@ -221,7 +197,7 @@ public class Snippet {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * combines the Snippet with the next Snippet
 	 */
@@ -229,13 +205,11 @@ public class Snippet {
 		if (hasNext()) {
 
 			HashMap<String, Boolean> mergeFeatures = next.features;
-			java.util.Iterator<String> featuresIterator = features.keySet()
-					.iterator();
+			java.util.Iterator<String> featuresIterator = features.keySet().iterator();
 			String featureName = "";
 			while (featuresIterator.hasNext()) {
 				featureName = featuresIterator.next();
-				features.put(featureName, features.get(featureName)
-						|| mergeFeatures.get(featureName));
+				features.put(featureName, features.get(featureName) || mergeFeatures.get(featureName));
 			}
 
 			tokenValue++;
@@ -277,6 +251,7 @@ public class Snippet {
 
 	/**
 	 * Sets a new logical unit
+	 * 
 	 * @param newUnit
 	 */
 	public void setLogicalUnit(LogicalUnit newUnit) {
@@ -298,8 +273,7 @@ public class Snippet {
 	 * 
 	 * @param type
 	 *            Name of a logical type
-	 * @return true, if the name of the set logical unit of the snippet machtes
-	 *         to the input string
+	 * @return true, if the name of the set logical unit of the snippet machtes to the input string
 	 */
 	public boolean isLogicalType(String type) {
 		if (logicalUnit == null || !logicalUnit.isValid())
@@ -357,8 +331,7 @@ public class Snippet {
 	}
 
 	/**
-	 * Checks weather a Snippet matches to a condition. This is needed for
-	 * checking a combination rule.
+	 * Checks weather a Snippet matches to a condition. This is needed for checking a combination rule.
 	 * 
 	 * @param requestCondition
 	 *            Check-Condition Example: !possibleVersion;/os/osext;
@@ -368,36 +341,45 @@ public class Snippet {
 		String[] conditions = requestCondition.split(";");
 		if (conditions.length == 0)
 			return false;
+
 		for (String condition : conditions) {
-			String indicator = condition.substring(0, 1);
-			if (indicator.equals("!")) {
-				condition = condition.substring(1);
-				if (!getFeatureValue(condition))
+
+			switch (condition.charAt(0)) {
+			case '!': {
+				if (!getFeatureValue(condition.substring(1)))
 					return false;
-			} else if (indicator.equals("-")) {
-				condition = condition.substring(1);
-				if (getFeatureValue(condition))
+			}
+				break;
+			case '-': {
+				if (getFeatureValue(condition.substring(1)))
 					return false;
-			} else if (indicator.equals("/")) {
+			}
+				break;
+			case '/': {
 				String[] orConditions = condition.split("/");
 				boolean returnvalue = false;
 				for (String orCondition : orConditions) {
-					returnvalue = returnvalue | getFeatureValue(orCondition);
+					returnvalue |= getFeatureValue(orCondition);
 					if (returnvalue)
 						break;
 				}
 				if (!returnvalue)
 					return false;
-			} else if (logicalUnit == null)
-				return false;
-			else if (logicalUnit.isValidType(condition)) {
-				if (!logicalUnit.isType(condition))
-					return false;
-			} else {
-				throw new Exception("Snippet condition: \"" + requestCondition
-						+ "\" NOT VALID!");
 			}
+				break;
+			default: {
+				if (logicalUnit == null)
+					return false;
+				else if (logicalUnit.isValidType(condition)) {
+					if (!logicalUnit.isType(condition))
+						return false;
+				} else {
+					throw new Exception("Snippet condition: \"" + requestCondition + "\" NOT VALID!");
+				}
+			}
+				break;
 
+			}
 		}
 		return true;
 	}
@@ -417,32 +399,27 @@ public class Snippet {
 	 */
 	private boolean getFeatureValue(String featureName) throws Exception {
 		if (!features.containsKey(featureName)) {
-			throw new Exception(
-					"Snippet feature value can not be determined: fature name\""
-							+ featureName + "\" NOT VALID");
+			throw new Exception("Snippet feature value can not be determined: fature name\"" + featureName
+					+ "\" NOT VALID");
 		}
 		return features.get(featureName);
 	}
 
 	/**
-	 * @return Maximum number of combinations, which are possible by the defined
-	 *         combination rules
+	 * @return Maximum number of combinations, which are possible by the defined combination rules
 	 */
 	private int combinationLen() {
 		if (logicalUnit == null)
 			return 0;
 
-		Vector<String[]> correspondingConditions = logicalUnit
-				.getCorrespondingConditions();
+		Vector<String[]> correspondingConditions = logicalUnit.getCorrespondingConditions();
 		int combinationLen = -1;
 		Snippet curSnip = this;
 		while (!curSnip.islogicalEnd() && correspondingConditions.size() != 0) {
 			List<String[]> removeList = new ArrayList<String[]>();
 			for (String[] condition : correspondingConditions) {
 				try {
-					if (condition.length <= combinationLen + 1
-							|| !curSnip
-									.condition(condition[combinationLen + 1])) {
+					if (condition.length <= combinationLen + 1 || !curSnip.condition(condition[combinationLen + 1])) {
 						removeList.add(condition);
 					}
 				} catch (Exception e) {

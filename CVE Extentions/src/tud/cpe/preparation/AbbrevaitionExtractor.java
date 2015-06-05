@@ -45,21 +45,24 @@ import org.xml.sax.SAXException;
 
 public class AbbrevaitionExtractor {
 
-	public static void main(String[] args) throws IOException, XPathExpressionException, ParserConfigurationException, SAXException {
+	public static void main(String[] args) throws IOException, XPathExpressionException, ParserConfigurationException,
+			SAXException {
 
 		FileWriter fw = new FileWriter("data/abbreviations.txt");
 		Set<String> set = getAbbreviations();
 		for (String s : set) {
 			String token = s.replaceAll("[-_.\\/]", " ");
 			try {
-				Document doc = Jsoup.connect("http://www.abbreviations.com/" + token.toUpperCase()).timeout(100000).get();
+				Document doc = Jsoup.connect("http://www.abbreviations.com/" + token.toUpperCase()).timeout(100000)
+						.get();
 
 				Elements tableData = doc.select("td[class=\"tal dx\"]");
 
 				if (tableData.size() > 0) {
 					int maxRanking = -1;
 					for (Element el : tableData) {
-						int ranking = el.siblingElements().select("td[class=\"tar vam rt\"]").get(0).select("span[class=\"sf\"]").size();
+						int ranking = el.siblingElements().select("td[class=\"tar vam rt\"]").get(0)
+								.select("span[class=\"sf\"]").size();
 						if (ranking > maxRanking && ranking == 5) {
 							maxRanking = ranking;
 							fw.write(token + ":  " + el.child(0).text() + "\n");
@@ -78,13 +81,12 @@ public class AbbrevaitionExtractor {
 		fw.close();
 	}
 
-	public static Set<String> getAbbreviations() throws ParserConfigurationException, FileNotFoundException, SAXException, IOException,
-			XPathExpressionException {
+	public static Set<String> getAbbreviations() throws ParserConfigurationException, FileNotFoundException,
+			SAXException, IOException, XPathExpressionException {
 		Set<String> set = new HashSet<String>();
 		DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
 		builderFactory.setNamespaceAware(false);
-		DocumentBuilder builder = null;
-		builder = builderFactory.newDocumentBuilder();
+		DocumentBuilder builder = builderFactory.newDocumentBuilder();
 		File f = new File("data/official-cpe-dictionary_v2.3.xml");
 		org.w3c.dom.Document document = builder.parse(new FileInputStream(f));
 		XPath xPath = XPathFactory.newInstance().newXPath();

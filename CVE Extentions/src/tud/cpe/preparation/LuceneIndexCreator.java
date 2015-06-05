@@ -301,15 +301,11 @@ public class LuceneIndexCreator {
 	private static void addDoc(IndexWriter w, String cpename, String title) throws IOException {
 		Document doc = new Document();
 		doc.add(new TextField("CPE-Name", cpeDecoding(cpename), Field.Store.YES));
-
-		// use a string field for isbn because we don't want it tokenized
 		doc.add(new TextField("title", title, Field.Store.YES));
-		// doc.add(new TextField("cpe23", cpe23, Field.Store.YES));
 		w.addDocument(doc);
 	}
 
 	private static String transformTitle(String title) {
 		return title.replaceAll("\\p{Punct}", " ");
-		// return title.replace(".", " ").replace("_", " ").replace("-", " ").replace("(", " ");
 	}
 }

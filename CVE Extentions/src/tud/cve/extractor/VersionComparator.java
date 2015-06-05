@@ -25,12 +25,10 @@ import java.util.StringTokenizer;
 
 public class VersionComparator {
 
-	public static String getGreatestMatch(List<String> cpes, String product,
-			String prefix) {
+	public static String getGreatestMatch(List<String> cpes, String product, String prefix) {
 		List<String> cleanedList = new ArrayList<String>();
 		for (String cpe : cpes)
-			if (cpe.startsWith(product) && cpe.split(":").length > 4
-					&& cpe.split(":")[4].startsWith(prefix))
+			if (cpe.startsWith(product) && cpe.split(":").length > 4 && cpe.split(":")[4].startsWith(prefix))
 				cleanedList.add(cpe);
 		if (cleanedList.size() > 0) {
 			String greatest = cleanedList.get(0);
@@ -42,8 +40,7 @@ public class VersionComparator {
 			}
 			List<String> greaterThanGreat = new ArrayList<String>();
 			for (String cpe : cleanedList) {
-				if (cpe.startsWith(greatest)
-						&& cpe.length() > greatest.length()) {
+				if (cpe.startsWith(greatest) && cpe.length() > greatest.length()) {
 					greaterThanGreat.add(cpe);
 				}
 			}
@@ -55,14 +52,11 @@ public class VersionComparator {
 				int len = greatest.length();
 				greatest = greaterThanGreat.get(0);
 				for (int i = 1; i < greaterThanGreat.size(); i++) {
-					String[] version = convertExtToNumbers(
-							greaterThanGreat.get(i).substring(len)).split(" ");
-					String[] gre = convertExtToNumbers(greatest.substring(len))
-							.split(" ");
+					String[] version = convertExtToNumbers(greaterThanGreat.get(i).substring(len)).split(" ");
+					String[] gre = convertExtToNumbers(greatest.substring(len)).split(" ");
 					int minLen = Math.min(version.length, gre.length);
 					for (int j = 0; j < minLen; j++)
-						if (new Integer(gre[j]).compareTo(new Integer(
-								version[j])) <= -1) {
+						if (new Integer(gre[j]).compareTo(new Integer(version[j])) <= -1) {
 							greatest = greaterThanGreat.get(i);
 						}
 				}
@@ -73,12 +67,11 @@ public class VersionComparator {
 	}
 
 	public static String convertExtToNumbers(String cpe) {
-		String result = cpe;
 		boolean isLastEmptySpace = false;
 		String line = "";
-		if (result != null)
-			for (int i = 0; i < result.length(); i++) {
-				char c = result.charAt(i);
+		if (cpe != null)
+			for (int i = 0; i < cpe.length(); i++) {
+				char c = cpe.charAt(i);
 				if (Character.isDigit(c)) {
 					line += c;
 					isLastEmptySpace = false;
@@ -94,19 +87,24 @@ public class VersionComparator {
 
 		StringTokenizer st1 = new StringTokenizer(arg0, "._-/()");
 		StringTokenizer st2 = new StringTokenizer(arg1, "._-/()");
+
 		int countSt1 = st1.countTokens();
 		int countSt2 = st2.countTokens();
+
 		int minTokens = Math.min(countSt1, countSt2);
+
 		for (int i = 0; i < minTokens; i++) {
 			String token1 = st1.nextToken();
 			String token2 = st2.nextToken();
+
 			int token1Len = token1.length();
 			int token2Len = token2.length();
+
+			int res = new Integer(token1Len).compareTo(token2Len);
+			if (res != 0)
+				return res;
+
 			int minLen = Math.min(token1Len, token2Len);
-			if (token1Len > token2Len)
-				return 1;
-			else if (token2Len > token1Len)
-				return -1;
 			for (int j = 0; j < minLen; j++) {
 				Character c1 = token1.charAt(j);
 				Character c2 = token2.charAt(j);
@@ -121,12 +119,7 @@ public class VersionComparator {
 			}
 
 		}
-		if (countSt1 > countSt2) {
-			return 1;
-		} else if (countSt2 > countSt1)
-			return -1;
-
-		return 0;
+		return new Integer(countSt1).compareTo(countSt2);
 	}
 
 }

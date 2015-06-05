@@ -15,8 +15,11 @@ package tud.cve.data.representation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 import tud.cve.extractor.Config;
+import tud.cve.extractor.VersionComparator;
 
 public class VersionRange {
 
@@ -42,8 +45,7 @@ public class VersionRange {
 
 	public void setCPE(String newCPE) {
 		try {
-			if (!newCPE
-					.matches("cpe:/[aho]:[a-z|_|\\-|\\d|\\.|%]+:[a-z|_|\\-|\\d|\\.|%]+:"))
+			if (!newCPE.matches("cpe:/[aho]:[a-z|_|\\-|\\d|\\.|%]+:[a-z|_|\\-|\\d|\\.|%]+:"))
 				throw new Exception("CPE String " + newCPE + " is not valid!");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -61,6 +63,24 @@ public class VersionRange {
 		fixed = false;
 		last = false;
 		first = false;
+	}
+	
+	public VersionRange(NameVersionRelation nvr) {
+		empty = true;
+		versions = new ArrayList<NameVersionRelation>();
+		fixed = false;
+		last = false;
+		first = false;
+		add(nvr);
+	}
+	
+	public VersionRange(Set<NameVersionRelation> set) {
+		empty = true;
+		versions = new ArrayList<NameVersionRelation>();
+		fixed = false;
+		last = false;
+		first = false;
+		addAll(set);
 	}
 
 	public boolean hasFirst() {
@@ -88,16 +108,14 @@ public class VersionRange {
 	}
 
 	/**
-	 * @return The first version of the version range; Returns a string, if it
-	 *         is not set
+	 * @return The first version of the version range; Returns a string, if it is not set
 	 */
 	public String firstDetectedVersion() {
 		return firstDetectedVer;
 	}
 
 	/**
-	 * @return The last version of the version range; Returns an empty string,
-	 *         if it is not set
+	 * @return The last version of the version range; Returns an empty string, if it is not set
 	 */
 	public String lastDetectedVersion() {
 		if (!fixed)
@@ -107,8 +125,7 @@ public class VersionRange {
 	}
 
 	/**
-	 * @return The fixed version of the version range; Returns an empty string,
-	 *         if it is not set
+	 * @return The fixed version of the version range; Returns an empty string, if it is not set
 	 */
 	public String fixedVersion() {
 		if (fixed)
@@ -123,43 +140,32 @@ public class VersionRange {
 	private void updateRelevantVersions() {
 		searchFirst();
 		searchLast();
-		if (versions.get(versions.size() - 1).version().logicalUnitComment()
-				.equals("fixed")) {
+		if (versions.get(versions.size() - 1).version().logicalUnitComment().equals("fixed")) {
 			if (versions.size() == 1) {
 				firstDetectedVer = "";
 				lastDetectedVer = "";
 			} else if (versions.size() == 2) {
-				firstDetectedVer = shortest().version().getText()
-						.replaceFirst("\\.x", ".0");
+				firstDetectedVer = shortest().getVersionWithoutX();
 				lastDetectedVer = "";
 			} else {
-				firstDetectedVer = shortest().version().getText()
-						.replaceFirst("\\.x", ".0");
-				lastDetectedVer = versions.get(versions.size() - 2).version()
-						.getText().replaceFirst("\\.x", ".0");
+				firstDetectedVer = shortest().getVersionWithoutX();
+				lastDetectedVer = versions.get(versions.size() - 2).getVersionWithoutX();
 			}
 		} else {
-			if (versions.get(versions.size() - 1).version()
-					.logicalUnitComment().equals("last detected vulnerability")) {
+			if (versions.get(versions.size() - 1).version().logicalUnitComment().equals("last detected vulnerability")) {
 				if (versions.size() > 1)
-					firstDetectedVer = shortest().version().getText()
-							.replaceFirst("\\.x", ".0");
+					firstDetectedVer = shortest().getVersionWithoutX();
 				else
 					firstDetectedVer = "";
-				lastDetectedVer = biggest().version().getText()
-						.replaceFirst("\\.x", ".0");
+				lastDetectedVer = biggest().getVersionWithoutX();
 			} else {
 				if (versions.size() == 1
-						&& versions.get(0).version().logicalUnitComment()
-								.equals("first detected vulnerability")) {
-					firstDetectedVer = shortest().version().getText()
-							.replaceFirst("\\.x", ".0");
+						&& versions.get(0).version().logicalUnitComment().equals("first detected vulnerability")) {
+					firstDetectedVer = shortest().getVersionWithoutX();
 					lastDetectedVer = "";
 				} else {
-					firstDetectedVer = shortest().version().getText()
-							.replaceFirst("\\.x", ".0");
-					lastDetectedVer = biggest().version().getText()
-							.replaceFirst("\\.x", ".0");
+					firstDetectedVer = shortest().getVersionWithoutX();
+					lastDetectedVer = biggest().getVersionWithoutX();
 				}
 			}
 
@@ -197,8 +203,7 @@ public class VersionRange {
 	private void searchLast() {
 		for (NameVersionRelation nvr : versions) {
 			Snippet version = nvr.version();
-			if (version.logicalUnitComment().equals(
-					"last detected vulnerability")) {
+			if (version.logicalUnitComment().equals("last detected vulnerability")) {
 				last = true;
 				lastDetectedVer = version.getText();
 			}
@@ -208,8 +213,7 @@ public class VersionRange {
 	private void searchFirst() {
 		for (NameVersionRelation nvr : versions) {
 			Snippet version = nvr.version();
-			if (version.logicalUnitComment().equals(
-					"first detected vulnerability")) {
+			if (version.logicalUnitComment().equals("first detected vulnerability")) {
 				first = true;
 				firstDetectedVer = version.getText();
 				break;
@@ -240,8 +244,7 @@ public class VersionRange {
 	}
 
 	/**
-	 * Adds NameVersionRelations to the VersionRange and inserts+orders it in
-	 * the internal NameVersionRelation list
+	 * Adds NameVersionRelations to the VersionRange and inserts+orders it in the internal NameVersionRelation list
 	 */
 	public void addAll(Collection<NameVersionRelation> c) {
 		if (c.size() > 0) {
@@ -325,8 +328,7 @@ public class VersionRange {
 			sb.append("\n");
 		}
 
-		if (!lastDetectedVersion().isEmpty()
-				&& lastDetectedVersion().length() > generalCpeString.length()) {
+		if (!lastDetectedVersion().isEmpty() && lastDetectedVersion().length() > generalCpeString.length()) {
 			sb.append(lastXMLTag());
 			sb.append("\n");
 		}
@@ -346,8 +348,7 @@ public class VersionRange {
 	public String toString() {
 		if (softwareName.isEmpty())
 			softwareName = generalCpeString;
-		String returnStr = softwareName + " vulnerable between "
-				+ firstDetectedVer + " and " + lastDetectedVer;
+		String returnStr = softwareName + " vulnerable between " + firstDetectedVer + " and " + lastDetectedVer;
 		if (fixed)
 			returnStr += " fix:" + fixedVersion();
 		else
@@ -395,6 +396,24 @@ public class VersionRange {
 		output.append("  ");
 		output.append(cpe());
 		return output;
+	}
+
+	public void findLast(String cpename, List<String> remaining, List<String> filteredRemainings) {
+	
+		if (!hasLast()) {
+			if (filteredRemainings.size() != 0)
+				remaining = filteredRemainings;
+	
+			String greatest = "";
+			String versionText = shortest().version().getText();
+	
+			if (!fixed() && hasFirst() && versionText.endsWith(".x"))
+				greatest = VersionComparator.getGreatestMatch(remaining, cpename,
+						versionText.substring(0, versionText.length() - 2));
+	
+			if (!greatest.isEmpty())
+				setLast(greatest);
+		}
 	}
 
 }
