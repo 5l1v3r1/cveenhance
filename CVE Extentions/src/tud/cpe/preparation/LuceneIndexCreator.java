@@ -170,7 +170,6 @@ public class LuceneIndexCreator {
 		String[] split = cpe.split(":");
 		StringBuilder sb = new StringBuilder();
 		for (String s : split) {
-			if (s != null)
 				switch (s) {
 				case "cpe":
 					sb.append("cpe ");

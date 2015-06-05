@@ -46,6 +46,18 @@ public class LuceneIndexCreatorTest {
 	}
 
 	@Test
+	public void cpeDecoding_Test4() {
+		assertEquals(LuceneIndexCreator.cpeDecoding("cpe:/o:ibm:java:1.6.0:update_10"),
+				"cpe o ibm java 1.6.0 update_10");
+	}
+
+	@Test
+	public void cpeDecoding_Test5() {
+		assertEquals(LuceneIndexCreator.cpeDecoding("cpe:/h:ibm:java:1.6.0:update_10"),
+				"cpe h ibm java 1.6.0 update_10");
+	}
+
+	@Test
 	public void cpeDecoding_Test3() {
 		assertEquals(LuceneIndexCreator.cpeDecoding(null), "");
 	}
@@ -71,9 +83,7 @@ public class LuceneIndexCreatorTest {
 		try {
 			assertEquals(LuceneIndexCreator.findTitle("cpe:/a:oracle:jre:1.5.0:update_55"),
 					"Oracle JRE 1 5 0 Update 55");
-		} catch (IOException e) {
-			fail(e.getMessage());
-		} catch (ParseException e) {
+		} catch (Exception e) {
 			fail(e.getMessage());
 		}
 	}
@@ -82,9 +92,7 @@ public class LuceneIndexCreatorTest {
 	public void findTitle_Test2() {
 		try {
 			assertEquals(LuceneIndexCreator.findTitle(""), "");
-		} catch (IOException e) {
-			fail(e.getMessage());
-		} catch (ParseException e) {
+		} catch (Exception e) {
 			fail(e.getMessage());
 		}
 	}
@@ -93,9 +101,7 @@ public class LuceneIndexCreatorTest {
 	public void findTitle_Test3() {
 		try {
 			assertEquals(LuceneIndexCreator.findTitle("cpe:/a:bogratz:rumtag:" + (int) (100 * Math.random())), "");
-		} catch (IOException e) {
-			fail(e.getMessage());
-		} catch (ParseException e) {
+		} catch (Exception e) {
 			fail(e.getMessage());
 		}
 	}
@@ -139,6 +145,16 @@ public class LuceneIndexCreatorTest {
 	@Test
 	public void cpeEncoding_Test1() {
 		assertEquals(LuceneIndexCreator.cpeEncoding("cpe a fux baum 1.3.4 t l b"), "cpe:/a:fux:baum:1.3.4:t:l:b");
+	}
+
+	@Test
+	public void cpeEncoding_Test4() {
+		assertEquals(LuceneIndexCreator.cpeEncoding("cpe o fux baum 1.3.4 t l b"), "cpe:/o:fux:baum:1.3.4:t:l:b");
+	}
+
+	@Test
+	public void cpeEncoding_Test5() {
+		assertEquals(LuceneIndexCreator.cpeEncoding("cpe h fux baum 1.3.4 t l b"), "cpe:/h:fux:baum:1.3.4:t:l:b");
 	}
 
 	@Test

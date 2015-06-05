@@ -94,13 +94,13 @@ public class NVRTest {
 		nvr.setVersion(smallVersion);
 		assertTrue(nvr.hasSameSuperversion(new NameVersionRelation(softwareNameSnippet1, midVersionZero)));
 	}
-	
+
 	@Test
 	public void hasSameSuperversion_Test4() {
 		nvr.setVersion(smallVersion1);
 		assertFalse(nvr.hasSameSuperversion(new NameVersionRelation(softwareNameSnippet1, midVersionZero)));
 	}
-	
+
 	@Test
 	public void crossCheckTest() {
 		assertTrue(leftIsSmaller(nvrSmallVersion, nvrMidVersion));

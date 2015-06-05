@@ -147,7 +147,7 @@ public class NameVersionRelation implements Comparable<NameVersionRelation> {
 	}
 
 	public boolean equals(NameVersionRelation otherRelation) {
-		return this.hashCode() == otherRelation.hashCode();
+		return hashCode() == otherRelation.hashCode();
 	}
 
 	@Override

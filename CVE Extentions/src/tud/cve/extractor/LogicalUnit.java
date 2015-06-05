@@ -29,7 +29,7 @@ public class LogicalUnit {
 	public String comment = "";
 
 	public LogicalUnit(String newUnitType) {
-		if (isValidType(newUnitType.trim().toLowerCase())) {
+		if (isValidType(newUnitType.trim())) {
 			unitType = newUnitType;
 			valid = true;
 		} else

@@ -41,9 +41,11 @@ public class CveCollector {
 
 	public static void main(String[] args) {
 		File dir = new File(Config.XML_FOLDER);
-		for (File file : dir.listFiles())
-			if (file.getName().endsWith(Config.DATA_TYPE))
-				splitCVExml(file.getAbsolutePath());
+		File[] list = dir.listFiles();
+		if (list != null)
+			for (File file : list)
+				if (file.getName().endsWith(Config.DATA_TYPE))
+					splitCVExml(file.getAbsolutePath());
 	}
 
 	/**

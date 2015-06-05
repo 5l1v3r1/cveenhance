@@ -87,28 +87,29 @@ public class AnalyseCves {
 		String year = "";
 
 		try {
-			for (File f : list) {
-				if (f.isDirectory()) {
-					walk(f.getAbsolutePath(), pw);
-					System.out.println("Dir:" + f.getAbsoluteFile());
-				} else {
-					String fileYear = f.getName().substring(4, 8);
-					if (!year.equals(fileYear)) {
-						year = fileYear;
-						if (bw != null) {
-							bw.write(Config.END_TAG);
-							bw.close();
+			if (list != null)
+				for (File f : list) {
+					if (f.isDirectory()) {
+						walk(f.getAbsolutePath(), pw);
+						System.out.println("Dir:" + f.getAbsoluteFile());
+					} else {
+						String fileYear = f.getName().substring(4, 8);
+						if (!year.equals(fileYear)) {
+							year = fileYear;
+							if (bw != null) {
+								bw.write(Config.END_TAG);
+								bw.close();
+							}
+							bw = writeNewFile(year);
 						}
-						bw = writeNewFile(year);
-					}
-					String parseName = f.getName();
-					if (parseName.toLowerCase().endsWith(Config.DATA_TYPE.toLowerCase())) {
-						analyzeCveItem(pw, bw, f);
+						String parseName = f.getName();
+						if (parseName.toLowerCase().endsWith(Config.DATA_TYPE.toLowerCase())) {
+							analyzeCveItem(pw, bw, f);
 
-					} else
-						System.out.println("No XML File:" + f.getAbsoluteFile());
+						} else
+							System.out.println("No XML File:" + f.getAbsoluteFile());
+					}
 				}
-			}
 			if (bw != null) {
 				bw.write(Config.END_TAG);
 				bw.close();
@@ -146,6 +147,7 @@ public class AnalyseCves {
 			folder.mkdirs();
 		bw = new BufferedWriter(new FileWriter(new File(Config.OUTPUT_FOLDER, "nvdcve-2.0-" + year + "-enhanced.xml")));
 		bw.write(Config.START_TAGS);
+		bw.flush();
 		return bw;
 	}
 

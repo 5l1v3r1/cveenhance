@@ -292,7 +292,8 @@ public class Snippet {
 	 * @return the end of the floating text subset
 	 */
 	public void setText(String newText) {
-		text = newText.trim();
+		if (newText != null)
+			text = newText.trim();
 	}
 
 	/**
@@ -305,7 +306,7 @@ public class Snippet {
 	public void combine() {
 
 		int combinationLength = combinationLen();
-		for (int i = 0; i < combinationLength; i++)
+		for (int i = 1; i <= combinationLength; i++)
 			mergeWithNextSnippet();
 	}
 
@@ -387,18 +388,18 @@ public class Snippet {
 	/**
 	 * @return Maximum number of combinations, which are possible by the defined combination rules
 	 */
-	private int combinationLen() {
+	public int combinationLen() {
 		if (logicalUnit == null)
 			return 0;
 
 		Vector<String[]> correspondingConditions = logicalUnit.getCorrespondingConditions();
-		int combinationLen = -1;
+		int combinationLen = 0;
 		Snippet curSnip = this;
 		while (!curSnip.islogicalEnd() && correspondingConditions.size() != 0) {
 			List<String[]> removeList = new ArrayList<String[]>();
 			for (String[] condition : correspondingConditions) {
 				try {
-					if (condition.length <= combinationLen + 1 || !curSnip.condition(condition[combinationLen + 1])) {
+					if (condition.length <= combinationLen || !curSnip.condition(condition[combinationLen])) {
 						removeList.add(condition);
 					}
 				} catch (Exception e) {
