@@ -98,14 +98,15 @@ public class NameVersionRelation implements Comparable<NameVersionRelation> {
 	/**
 	 * trims a version and replaces placeholders
 	 */
-	private String trimVersion(String version) {
+	public String trimVersion(String version) {
+		version = version.trim();
 		if (version.contains(" "))
 			version = version.substring(0, version.indexOf(" "));
 		version = version.trim();
 		return optimizeVersion(version);
 	}
 
-	String optimizeVersion(String version) {
+	public String optimizeVersion(String version) {
 		if (version.length() > 1 && version.substring(version.length() - 2).equals(".x"))
 			version = version.substring(0, version.length() - 2);
 		else if (version.length() > 1 && version.substring(version.length() - 2).equals(".0"))

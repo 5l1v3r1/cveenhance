@@ -1,7 +1,6 @@
 package tud.cve.data.representation;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -9,6 +8,7 @@ import org.junit.Test;
 public class NVRTest {
 
 	private Snippet smallVersion = new Snippet("3.1");
+	private Snippet smallVersion1 = new Snippet("3.1.0");
 	private Snippet midVersion = new Snippet("3.2");
 	private Snippet midVersionZero = new Snippet("3.2.0");
 	private Snippet midVersionCross = new Snippet("3.2.x");
@@ -41,7 +41,7 @@ public class NVRTest {
 		nvr.setVersion(new Snippet("3.x"));
 		assertEquals(nvr.optimizeVersion(nvr.version().getText()), "3");
 	}
-	
+
 	@Test
 	public void optimizeVersionTest1() {
 		nvr.setVersion(new Snippet("3.0"));
@@ -53,6 +53,54 @@ public class NVRTest {
 		assertTrue(nvr.toString().equals(nvr.name() + " " + nvr.version()));
 	}
 
+	@Test
+	public void trimmedVersion_Test1() {
+		assertEquals(nvr.trimVersion(" 3  "), "3");
+	}
+
+	@Test
+	public void trimmedVersion_Test2() {
+		assertEquals(nvr.trimVersion(" 3 1 "), "3");
+	}
+
+	@Test
+	public void trimmedVersion_Test3() {
+		assertEquals(nvr.trimVersion(" 3.x "), "3");
+	}
+
+	@Test
+	public void trimmedVersion_Test4() {
+		assertEquals(nvr.trimVersion(" 3.0 "), "3");
+	}
+
+	@Test
+	public void trimmedVersion_Test5() {
+		assertEquals(nvr.trimVersion(" 3.0.0 "), "3.0");
+	}
+
+	@Test
+	public void hasSameSuperversion_Test1() {
+		assertTrue(nvr.hasSameSuperversion(new NameVersionRelation(softwareNameSnippet1, midVersion)));
+	}
+
+	@Test
+	public void hasSameSuperversion_Test2() {
+		nvr.setVersion(midCountVersionSnippetSmall);
+		assertTrue(nvr.hasSameSuperversion(new NameVersionRelation(softwareNameSnippet1, multiTokenVersionSnippet1)));
+	}
+
+	@Test
+	public void hasSameSuperversion_Test3() {
+		nvr.setVersion(smallVersion);
+		assertTrue(nvr.hasSameSuperversion(new NameVersionRelation(softwareNameSnippet1, midVersionZero)));
+	}
+	
+	@Test
+	public void hasSameSuperversion_Test4() {
+		nvr.setVersion(smallVersion1);
+		assertFalse(nvr.hasSameSuperversion(new NameVersionRelation(softwareNameSnippet1, midVersionZero)));
+	}
+	
 	@Test
 	public void crossCheckTest() {
 		assertTrue(leftIsSmaller(nvrSmallVersion, nvrMidVersion));
