@@ -58,7 +58,7 @@ import tud.cve.extractor.AnalyseCves;
 
 public class LuceneIndexCreator {
 
-	public static File index_file = new File("data/index");
+	private static final File index_file = new File("data/index");
 
 	public static void main(String[] args) throws IOException, ParseException, ParserConfigurationException,
 			XPathExpressionException, SAXException {
@@ -131,7 +131,7 @@ public class LuceneIndexCreator {
 	public static List<String> getAllCpesWithVersionPrefix(String versionPrefix, List<String> cpes) {
 		List<String> result = new ArrayList<String>();
 		for (String cpe : cpes) {
-			if (cpe.split(":")[4].startsWith(versionPrefix)) {
+			if (cpe.split(":").length > 4 && cpe.split(":")[4].startsWith(versionPrefix)) {
 				result.add(cpe);
 			}
 		}
@@ -139,6 +139,8 @@ public class LuceneIndexCreator {
 	}
 
 	public static String findTitle(String cpeName) throws IOException, ParseException {
+		if (cpeName.isEmpty())
+			return "";
 		StandardAnalyzer analyzer = new StandardAnalyzer();
 		Directory index = new SimpleFSDirectory(index_file);
 		String querystr = cpeDecoding(cpeName);
@@ -151,14 +153,14 @@ public class LuceneIndexCreator {
 		TopScoreDocCollector collector = TopScoreDocCollector.create(hitsPerPage, true);
 		searcher.search(q, collector);
 		ScoreDoc[] hits = collector.topDocs().scoreDocs;
+		Document doc = searcher.doc(hits[0].doc);
 		String title = "";
 		if (hits.length > 0)
-			title = searcher.doc(hits[0].doc).get("title");
-		reader.close();
+			title = doc.get("title");
 		if (!AnalyseCves.extractCPEProduct(cpeName).equalsIgnoreCase(
-				AnalyseCves.extractCPEProduct(searcher.doc(hits[0].doc).get("CPE-Name"))))
+				AnalyseCves.extractCPEProduct(cpeEncoding(doc.get("CPE-Name")))))
 			title = "";
-
+		reader.close();
 		return title;
 	}
 
@@ -189,6 +191,25 @@ public class LuceneIndexCreator {
 		}
 		String result = sb.toString();
 		return result.substring(0, result.length() - 1);
+	}
+
+	public static String cpeEncoding(String cpe_) {
+		if (cpe_ == null || cpe_.isEmpty())
+			return "";
+		String[] split = cpe_.split(" ");
+		StringBuilder sb = new StringBuilder();
+		sb.append(split[0]);
+		sb.append(":");
+		sb.append("/");
+		sb.append(split[1]);
+		sb.append(":");
+		for (int i = 2; i < split.length; i++) {
+			sb.append(split[i]);
+			if (i < split.length - 1) {
+				sb.append(":");
+			}
+		}
+		return sb.toString();
 	}
 
 	private static void addDoc(IndexWriter w, String cpename, String title) throws IOException {
