@@ -254,19 +254,22 @@ public class AnalyseCves {
 	 * @return XML output string
 	 */
 
-	protected String getOutputToXMLFile(Vector<VersionRange> results) {
+	public String getOutputToXMLFile(Vector<VersionRange> results) {
+
 		StringBuilder sb = new StringBuilder();
-		sb.append("\t<");
-		sb.append(Config.XML_EXTENSION_TAG);
-		sb.append(":");
-		sb.append("ranges>\n");
-		for (VersionRange vr : results) {
-			sb.append(vr.getXMLRange());
+		if (results != null && results.size() != 0) {
+			sb.append("\t<");
+			sb.append(Config.XML_EXTENSION_TAG);
+			sb.append(":");
+			sb.append("ranges>\n");
+			for (VersionRange vr : results) {
+				sb.append(vr.getXMLRange());
+			}
+			sb.append("\t</");
+			sb.append(Config.XML_EXTENSION_TAG);
+			sb.append(":");
+			sb.append("ranges>");
 		}
-		sb.append("\t</");
-		sb.append(Config.XML_EXTENSION_TAG);
-		sb.append(":");
-		sb.append("ranges>");
 		return sb.toString();
 	}
 
@@ -535,7 +538,7 @@ public class AnalyseCves {
 	 */
 	// Source: http://mrfoo.de/archiv/1176-Levenshtein-Distance-in-Java.html ,
 	// 20.08.2013
-	private static int getLevenshteinDistance(String first, String second) {
+	static int getLevenshteinDistance(String first, String second) {
 		if (first == null || second == null) {
 			throw new IllegalArgumentException("Strings must not be null");
 		}

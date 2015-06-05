@@ -122,7 +122,7 @@ public class SnippetTest {
 		versionSnippet.next.next.initialize();
 		versionSnippet.next.initialize();
 		versionSnippet.initialize();
-		assertEquals(versionSnippet.combinationLen(), 2);
+		assertEquals(versionSnippet.combinationLen(), 1);
 	}
 
 	@Test
@@ -144,13 +144,14 @@ public class SnippetTest {
 		versionSnippet.next = new Snippet("update 10");
 		versionSnippet.setLogicalUnit(new LogicalUnit("version"));
 		versionSnippet.next.setLogicalUnit(new LogicalUnit("version"));
-		versionSnippet.next.next = new Snippet("build 77");
+		Snippet b77 = new Snippet("build 77");
+		versionSnippet.next.next = b77;
 		versionSnippet.next.next.setLogicalUnit(new LogicalUnit("version"));
 		versionSnippet.next.next.initialize();
 		versionSnippet.next.initialize();
 		versionSnippet.initialize();
 		versionSnippet.combine();
-		assertNull(versionSnippet.next);
+		assertEquals(versionSnippet.next, b77);
 	}
 
 	@Test
@@ -167,28 +168,28 @@ public class SnippetTest {
 	public void condition_Test3() throws Exception {
 		assertFalse(versionSnippet.condition("-cuebegin"));
 	}
-	
+
 	@Test
 	public void condition_Test4() throws Exception {
 		versionSnippet.setText("before");
 		versionSnippet.initialize();
 		assertFalse(versionSnippet.condition("-cuebefore"));
 	}
-	
+
 	@Test
 	public void condition_Test5() throws Exception {
 		versionSnippet.setText("earlier");
 		versionSnippet.initialize();
 		assertFalse(versionSnippet.condition("!cuebefore"));
 	}
-	
+
 	@Test
 	public void condition_Test6() throws Exception {
 		versionSnippet.setText("earlier");
 		versionSnippet.initialize();
 		assertFalse(versionSnippet.condition("/cuebefore/comma"));
 	}
-	
+
 	@Test
 	public void condition_Test7() throws Exception {
 		versionSnippet.setText("before");
