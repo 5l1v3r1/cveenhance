@@ -43,7 +43,7 @@ public class Config {
 	// Path to downloaded CVE XML-Backup
 	public static final String XML_FOLDER = props.getProperty("xmlFolder");
 	// Path to splitted CVE item folder
-	public static final String CVE_FOLDER = props.getProperty("cveFolder");
+	public static String CVE_FOLDER = props.getProperty("cveFolder");
 	// Path to CVE splitted subset folder
 	public static final String CVE_SUBSET_FOLDER = props.getProperty("cveDump");
 	// Data type of CVE XML files
