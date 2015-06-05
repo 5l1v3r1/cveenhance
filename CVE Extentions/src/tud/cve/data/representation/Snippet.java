@@ -13,6 +13,7 @@ package tud.cve.data.representation;
  */
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -39,8 +40,6 @@ public class Snippet {
 	private HashMap<String, Boolean> features;
 	// handling vars:
 	private String text; // floating text part
-	private String lowerCaseText;
-	private int length = 0;
 	private int tokenValue = 1;
 	private LogicalUnit logicalUnit = null;
 
@@ -74,7 +73,7 @@ public class Snippet {
 	}
 
 	public int length() {
-		return length;
+		return text.length();
 	}
 
 	// Constructor:
@@ -89,25 +88,26 @@ public class Snippet {
 		for (Entry<String, Boolean> entry : defaultVector.entrySet()) {
 			features.put(entry.getKey(), entry.getValue());
 		}
+		String lowerCaseText = text.toLowerCase().replaceAll("\\p{Punct}", "");
 		try {
 			setFeature("comma", matchesLowerCase(".*,"));
 			setFeature("possibleversion", matchesLowerCase(".*\\d.*"));
 			setFeature("word", (text.length() >= 3));
 			setFeature("bigletter", matchesExpression("[A-Z]+.*"));
-			setFeature("versionext", keywordCheck(lowerCaseText, Config.VERION_KEYWORDS));
+			setFeature("versionext", Arrays.asList(Config.VERION_KEYWORDS).contains(lowerCaseText));
 			setFeature("version", (matchesLowerCase("[\\d]+[\\p{Punct}\\w]*") && !(matchesLowerCase(""))));
-			setFeature("os", keywordCheck(lowerCaseText, Config.OS_KEYWORDS));
-			setFeature("osext", keywordCheck(lowerCaseText, Config.OS_EXTENSIONS));
-			setFeature("stopword", keywordCheck(lowerCaseText, Config.STOP_WORDS));
-			setFeature("concatword", keywordCheck(lowerCaseText, Config.CONCAT_WORDS));
-			setFeature("comparingword", keywordCheck(lowerCaseText, Config.COMPARING_WORDS));
-			setFeature("seperator", keywordCheck(lowerCaseText, Config.SEPERATING_WORDS));
-			setFeature("namestart", keywordCheck(lowerCaseText, Config.SOFTWARE_NAME_START_WORDS));
-			setFeature("versionstart", keywordCheck(lowerCaseText, Config.SOFTWARE_NAME_STOP_WORDS));
-			setFeature("cuebefore", keywordCheck(lowerCaseText, Config.SOFTWARE_NAME_STOP_WORDS));
-			setFeature("cueearlier", keywordCheck(lowerCaseText, Config.SOFTWARE_VERSION_ENDS));
-			setFeature("cuebegin", keywordCheck(lowerCaseText, Config.SOFTWARE_BEGIN_IND));
-			setFeature("cuebetween", keywordCheck(lowerCaseText, Config.SOFTWARE_RANGE_IND));
+			setFeature("os", Arrays.asList(Config.OS_KEYWORDS).contains(lowerCaseText));
+			setFeature("osext", Arrays.asList(Config.OS_EXTENSIONS).contains(lowerCaseText));
+			setFeature("stopword", Arrays.asList(Config.STOP_WORDS).contains(lowerCaseText));
+			setFeature("concatword", Arrays.asList(Config.CONCAT_WORDS).contains(lowerCaseText));
+			setFeature("comparingword", Arrays.asList(Config.COMPARING_WORDS).contains(lowerCaseText));
+			setFeature("seperator", Arrays.asList(Config.SEPERATING_WORDS).contains(lowerCaseText));
+			setFeature("namestart", Arrays.asList(Config.SOFTWARE_NAME_START_WORDS).contains(lowerCaseText));
+			setFeature("versionstart", Arrays.asList(Config.SOFTWARE_NAME_STOP_WORDS).contains(lowerCaseText));
+			setFeature("cuebefore", Arrays.asList(Config.SOFTWARE_NAME_STOP_WORDS).contains(lowerCaseText));
+			setFeature("cueearlier", Arrays.asList(Config.SOFTWARE_VERSION_ENDS).contains(lowerCaseText));
+			setFeature("cuebegin", Arrays.asList(Config.SOFTWARE_BEGIN_IND).contains(lowerCaseText));
+			setFeature("cuebetween", Arrays.asList(Config.SOFTWARE_RANGE_IND).contains(lowerCaseText));
 
 			if ((getFeatureValue("comma") || matchesLowerCase(".+["
 					+ createRegexpFromStrings(Config.SEPERATING_CHARS, "") + "]"))) {
@@ -117,7 +117,7 @@ public class Snippet {
 			if (prev != null && matchesLowerCase("[" + createRegexpFromStrings(Config.SEPERATING_CHARS) + "]"))
 				prev.setFeature("logicalend", true);
 
-			if (hasPrev() == false)
+			if (!hasPrev())
 				setFeature("logicalstart", true);
 			else {
 				if (prev.islogicalEnd())
@@ -163,10 +163,7 @@ public class Snippet {
 	 * Checks, if the last character of the snippet content matches with the input character
 	 */
 	public boolean endsWith(char checkChar) {
-		char lastChar = lowerCaseText.charAt(lowerCaseText.length());
-		if (checkChar == lastChar)
-			return true;
-		return false;
+		return text.toLowerCase().endsWith("" + checkChar);
 	}
 
 	/**
@@ -174,7 +171,7 @@ public class Snippet {
 	 */
 	private boolean matchesLowerCase(String regex) {
 		// lower case regex check
-		return lowerCaseText.matches(regex);
+		return text.toLowerCase().matches(regex);
 	}
 
 	/**
@@ -183,19 +180,6 @@ public class Snippet {
 	private boolean matchesExpression(String regex) {
 		// regex check
 		return text.matches(regex);
-	}
-
-	/**
-	 * Checks, if the content of the Snippet matches with an entry of a keyword list
-	 */
-	private boolean keywordCheck(String checkword, String[] keywordList) {
-		// checks weather a Snippet matches a keyword, listed in keywordList
-		checkword = checkword.replaceAll("\\p{Punct}", "");
-		for (int i = 0; i < keywordList.length; i++) {
-			if (checkword.equalsIgnoreCase(keywordList[i]))
-				return true;
-		}
-		return false;
 	}
 
 	/**
@@ -278,9 +262,7 @@ public class Snippet {
 	public boolean isLogicalType(String type) {
 		if (logicalUnit == null || !logicalUnit.isValid())
 			return false;
-		else if (logicalUnit.type().equals(type))
-			return true;
-		return false;
+		return logicalUnit.type().equals(type);
 	}
 
 	/**
@@ -310,10 +292,7 @@ public class Snippet {
 	 * @return the end of the floating text subset
 	 */
 	public void setText(String newText) {
-		newText = newText.trim();
-		text = newText;
-		length = newText.length();
-		lowerCaseText = newText.toLowerCase();
+		text = newText.trim();
 	}
 
 	/**

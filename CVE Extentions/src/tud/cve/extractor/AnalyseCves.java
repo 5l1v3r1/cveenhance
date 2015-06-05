@@ -390,18 +390,21 @@ public class AnalyseCves {
 		Vector<VersionRange> relatedRelations = new Vector<VersionRange>();
 
 		while (interestingRelations.size() > 0) {
+
 			Iterator<NameVersionRelation> relationsIterator = interestingRelations.iterator();
 			NameVersionRelation shortestRelation = relationsIterator.next();
 			shortestRelations.add(shortestRelation);
 
 			while (relationsIterator.hasNext()) {
 				NameVersionRelation curRelation = relationsIterator.next();
-				if (shortestRelation.trimmedVersion().length() > curRelation.trimmedVersion().length()) {
+				int cmp = new Integer(shortestRelation.trimmedVersion().length()).compareTo(curRelation
+						.trimmedVersion().length());
+				if (cmp > 0) {
 					shortestRelation = curRelation;
 					remainingRelations.addAll(shortestRelations);
 					shortestRelations.clear();
 					shortestRelations.add(curRelation);
-				} else if (shortestRelation.trimmedVersion().length() == curRelation.trimmedVersion().length()) {
+				} else if (cmp == 0) {
 					shortestRelations.add(curRelation);
 				} else {
 					remainingRelations.add(curRelation);
@@ -411,23 +414,7 @@ public class AnalyseCves {
 			interestingRelations.removeAll(shortestRelations);
 
 			if (shortestRelations.size() == relations.size()) {
-
-				for (NameVersionRelation curShortestRel : shortestRelations) {
-					Iterator<VersionRange> versionRangeIterator = relatedRelations.iterator();
-					boolean alreadyAdded = false;
-					while (versionRangeIterator.hasNext()) {
-						VersionRange curRange = versionRangeIterator.next();
-						if (curShortestRel.refersSameSoftware(curRange.shortest())) {
-							if (curShortestRel.hasSameSuperversion(curRange.shortest())) {
-								curRange.add(curShortestRel);
-								alreadyAdded = true;
-							}
-						}
-					}
-					if (!alreadyAdded) {
-						relatedRelations.add(new VersionRange(curShortestRel));
-					}
-				}
+				addRelatedRelations(shortestRelations, relatedRelations);
 			} else {
 				for (NameVersionRelation curShortestRel : shortestRelations) {
 					HashSet<NameVersionRelation> curRelRelation = new HashSet<NameVersionRelation>();
@@ -445,6 +432,25 @@ public class AnalyseCves {
 		}
 
 		return relatedRelations;
+	}
+
+	private void addRelatedRelations(HashSet<NameVersionRelation> shortestRelations,
+			Vector<VersionRange> relatedRelations) {
+		for (NameVersionRelation curShortestRel : shortestRelations) {
+			boolean alreadyAdded = false;
+
+			for (VersionRange curRange : relatedRelations) {
+				if (curShortestRel.refersSameSoftware(curRange.shortest())
+						&& curShortestRel.hasSameSuperversion(curRange.shortest())) {
+
+					curRange.add(curShortestRel);
+					alreadyAdded = true;
+				}
+			}
+			if (!alreadyAdded) {
+				relatedRelations.add(new VersionRange(curShortestRel));
+			}
+		}
 	}
 
 	private void allocateRemainingRelations(HashSet<NameVersionRelation> interestingRelations,
