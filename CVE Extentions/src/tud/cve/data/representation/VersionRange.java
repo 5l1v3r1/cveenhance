@@ -64,7 +64,7 @@ public class VersionRange {
 		last = false;
 		first = false;
 	}
-	
+
 	public VersionRange(NameVersionRelation nvr) {
 		empty = true;
 		versions = new ArrayList<NameVersionRelation>();
@@ -73,7 +73,7 @@ public class VersionRange {
 		first = false;
 		add(nvr);
 	}
-	
+
 	public VersionRange(Set<NameVersionRelation> set) {
 		empty = true;
 		versions = new ArrayList<NameVersionRelation>();
@@ -170,6 +170,10 @@ public class VersionRange {
 			}
 
 		}
+	}
+
+	public boolean hasVersionData() {
+		return !firstDetectedVersion().isEmpty() || !lastDetectedVersion().isEmpty() || !fixedVersion().isEmpty();
 	}
 
 	/**
@@ -281,36 +285,42 @@ public class VersionRange {
 	 * @return The XML Code of the last version information
 	 */
 	public String lastXMLTag() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("\t\t\t<");
-		sb.append(Config.XML_EXTENSION_TAG);
-		sb.append(":");
-		sb.append("end>");
-		sb.append(generalCpeString);
-		sb.append(lastDetectedVersion().substring(generalCpeString.length()));
-		sb.append("</");
-		sb.append(Config.XML_EXTENSION_TAG);
-		sb.append(":");
-		sb.append("end>");
-		return sb.toString();
+		if (lastDetectedVersion().length() != 0) {
+			StringBuilder sb = new StringBuilder();
+			sb.append("\t\t\t<");
+			sb.append(Config.XML_EXTENSION_TAG);
+			sb.append(":");
+			sb.append("end>");
+			sb.append(generalCpeString);
+			sb.append(lastDetectedVersion().substring(generalCpeString.length()));
+			sb.append("</");
+			sb.append(Config.XML_EXTENSION_TAG);
+			sb.append(":");
+			sb.append("end>");
+			return sb.toString();
+		}
+		return "";
 	}
 
 	/**
 	 * @return The XML Code of the fixed version information
 	 */
 	public String fixedXMLTag() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("\t\t\t<");
-		sb.append(Config.XML_EXTENSION_TAG);
-		sb.append(":");
-		sb.append("fix>");
-		sb.append(generalCpeString);
-		sb.append(fixedVersion());
-		sb.append("</");
-		sb.append(Config.XML_EXTENSION_TAG);
-		sb.append(":");
-		sb.append("fix>");
-		return sb.toString();
+		if (fixedVersion().length() != 0) {
+			StringBuilder sb = new StringBuilder();
+			sb.append("\t\t\t<");
+			sb.append(Config.XML_EXTENSION_TAG);
+			sb.append(":");
+			sb.append("fix>");
+			sb.append(generalCpeString);
+			sb.append(fixedVersion());
+			sb.append("</");
+			sb.append(Config.XML_EXTENSION_TAG);
+			sb.append(":");
+			sb.append("fix>");
+			return sb.toString();
+		}
+		return "";
 	}
 
 	/**
@@ -323,7 +333,7 @@ public class VersionRange {
 		sb.append(":");
 		sb.append("range>\n");
 
-		if (!firstDetectedVersion().equals("")) {
+		if (firstDetectedVersion().length() != 0) {
 			sb.append(firstXMLTag());
 			sb.append("\n");
 		}
@@ -399,18 +409,18 @@ public class VersionRange {
 	}
 
 	public void findLast(String cpename, List<String> remaining, List<String> filteredRemainings) {
-	
+
 		if (!hasLast()) {
 			if (filteredRemainings.size() != 0)
 				remaining = filteredRemainings;
-	
+
 			String greatest = "";
 			String versionText = shortest().version().getText();
-	
+
 			if (!fixed() && hasFirst() && versionText.endsWith(".x"))
 				greatest = VersionComparator.getGreatestMatch(remaining, cpename,
 						versionText.substring(0, versionText.length() - 2));
-	
+
 			if (!greatest.isEmpty())
 				setLast(greatest);
 		}

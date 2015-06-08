@@ -259,19 +259,25 @@ public class AnalyseCves {
 
 	public String getOutputToXMLFile(Vector<VersionRange> results) {
 
+		boolean shouldPrint = false;
 		StringBuilder sb = new StringBuilder();
 		if (results != null && results.size() != 0) {
-			sb.append("\t<");
-			sb.append(Config.XML_EXTENSION_TAG);
-			sb.append(":");
-			sb.append("ranges>\n");
 			for (VersionRange vr : results) {
-				sb.append(vr.getXMLRange());
+				shouldPrint = vr.hasVersionData();
 			}
-			sb.append("\t</");
-			sb.append(Config.XML_EXTENSION_TAG);
-			sb.append(":");
-			sb.append("ranges>");
+			if (shouldPrint) {
+				sb.append("\t<");
+				sb.append(Config.XML_EXTENSION_TAG);
+				sb.append(":");
+				sb.append("ranges>\n");
+				for (VersionRange vr : results) {
+					sb.append(vr.getXMLRange());
+				}
+				sb.append("\t</");
+				sb.append(Config.XML_EXTENSION_TAG);
+				sb.append(":");
+				sb.append("ranges>");
+			}
 		}
 		return sb.toString();
 	}
