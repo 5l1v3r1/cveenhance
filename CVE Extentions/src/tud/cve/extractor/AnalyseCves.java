@@ -70,6 +70,7 @@ public class AnalyseCves {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		LuceneIndexCreator.close();
 	}
 
 	/**

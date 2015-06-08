@@ -60,6 +60,18 @@ public class LuceneIndexCreator {
 
 	private static final File index_file = new File("data/index");
 
+	private static IndexSearcher searcher;
+	private static IndexReader reader;
+
+	public static IndexSearcher getIndexSearcher() throws IOException {
+		if (searcher == null) {
+			Directory index = new SimpleFSDirectory(index_file);
+			reader = DirectoryReader.open(index);
+			searcher = new IndexSearcher(reader);
+		}
+		return searcher;
+	}
+
 	public static void main(String[] args) throws IOException, ParseException, ParserConfigurationException,
 			XPathExpressionException, SAXException {
 		// 0. Specify the analyzer for tokenizing text.
@@ -109,9 +121,9 @@ public class LuceneIndexCreator {
 
 		// 3. search
 		int hitsPerPage = 100;
-		IndexReader reader = DirectoryReader.open(index);
-		IndexSearcher searcher = new IndexSearcher(reader);
+
 		TopScoreDocCollector collector = TopScoreDocCollector.create(hitsPerPage, true);
+		IndexSearcher searcher = getIndexSearcher();
 		searcher.search(q, collector);
 		ScoreDoc[] hits = collector.topDocs().scoreDocs;
 
@@ -122,10 +134,6 @@ public class LuceneIndexCreator {
 			Document d = searcher.doc(docId);
 			System.out.println((i + 1) + ". " + d.get("title") + "\t" + d.get("CPE-Name"));
 		}
-
-		// reader can only be closed when there
-		// is no need to access the documents any more.
-		reader.close();
 	}
 
 	public static List<String> getAllCpesWithVersionPrefix(String versionPrefix, List<String> cpes) {
@@ -142,14 +150,12 @@ public class LuceneIndexCreator {
 		if (cpeName.isEmpty())
 			return "";
 		StandardAnalyzer analyzer = new StandardAnalyzer();
-		Directory index = new SimpleFSDirectory(index_file);
 		String querystr = cpeDecoding(cpeName);
 
 		Query q = new QueryParser("CPE-Name", analyzer).parse(querystr);
 
 		int hitsPerPage = 100;
-		IndexReader reader = DirectoryReader.open(index);
-		IndexSearcher searcher = new IndexSearcher(reader);
+		IndexSearcher searcher = getIndexSearcher();
 		TopScoreDocCollector collector = TopScoreDocCollector.create(hitsPerPage, true);
 		searcher.search(q, collector);
 		ScoreDoc[] hits = collector.topDocs().scoreDocs;
@@ -170,23 +176,23 @@ public class LuceneIndexCreator {
 		String[] split = cpe.split(":");
 		StringBuilder sb = new StringBuilder();
 		for (String s : split) {
-				switch (s) {
-				case "cpe":
-					sb.append("cpe ");
-					break;
-				case "/a":
-					sb.append("a ");
-					break;
-				case "/o":
-					sb.append("o ");
-					break;
-				case "/h":
-					sb.append("h ");
-					break;
-				default:
-					sb.append(s + " ");
-					break;
-				}
+			switch (s) {
+			case "cpe":
+				sb.append("cpe ");
+				break;
+			case "/a":
+				sb.append("a ");
+				break;
+			case "/o":
+				sb.append("o ");
+				break;
+			case "/h":
+				sb.append("h ");
+				break;
+			default:
+				sb.append(s + " ");
+				break;
+			}
 		}
 		String result = sb.toString();
 		return result.substring(0, result.length() - 1);
@@ -222,5 +228,15 @@ public class LuceneIndexCreator {
 		if (title == null)
 			return "";
 		return title.replaceAll("\\p{Punct}", " ");
+	}
+
+	public static void close() {
+		try {
+			if (reader != null)
+				reader.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 	}
 }
