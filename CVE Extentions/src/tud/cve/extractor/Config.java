@@ -70,7 +70,7 @@ public class Config {
 	public static final String XML_EXTENSION_TAG = props
 			.getProperty("xmlExtensionTag");
 
-	public static final String OUTPUT_FOLDER = props
+	public static String OUTPUT_FOLDER = props
 			.getProperty("outputFolder");
 
 	// keyword lists:

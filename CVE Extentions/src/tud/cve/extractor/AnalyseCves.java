@@ -48,7 +48,7 @@ public class AnalyseCves {
 
 	private static Vector<String> fileDirections = new Vector<String>();
 
-	private int[] resultCounter = new int[5];
+	public int[] resultCounter = new int[5];
 
 	public static void main(String[] args) {
 		AnalyseCves ana = new AnalyseCves();
@@ -93,21 +93,24 @@ public class AnalyseCves {
 						walk(f.getAbsolutePath(), pw);
 						System.out.println("Dir:" + f.getAbsoluteFile());
 					} else {
-						String fileYear = f.getName().substring(4, 8);
-						if (!year.equals(fileYear)) {
-							year = fileYear;
-							if (bw != null) {
-								bw.write(Config.END_TAG);
-								bw.close();
+						String fileName = f.getName();
+						if (fileName.length() > 8 && fileName.startsWith("CVE")) {
+							String fileYear = f.getName().substring(4, 8);
+							if (!year.equals(fileYear)) {
+								year = fileYear;
+								if (bw != null) {
+									bw.write(Config.END_TAG);
+									bw.close();
+								}
+								bw = writeNewFile(year);
 							}
-							bw = writeNewFile(year);
-						}
-						String parseName = f.getName();
-						if (parseName.toLowerCase().endsWith(Config.DATA_TYPE.toLowerCase())) {
-							analyzeCveItem(pw, bw, f);
+							String parseName = f.getName();
+							if (parseName.toLowerCase().endsWith(Config.DATA_TYPE.toLowerCase())) {
+								analyzeCveItem(pw, bw, f);
 
-						} else
-							System.out.println("No XML File:" + f.getAbsoluteFile());
+							} else
+								System.out.println("No XML File:" + f.getAbsoluteFile());
+						}
 					}
 				}
 			if (bw != null) {
@@ -121,13 +124,13 @@ public class AnalyseCves {
 		printResults();
 	}
 
-	private void printResults() {
+	public void printResults() {
 		System.out.println("\nCVE entries: " + resultCounter[0] + "\nCVE entries with information: " + resultCounter[4]
 				+ "\nCVE entries with first information: " + resultCounter[1] + "\nCVE entries with last information: "
 				+ resultCounter[2] + "\nCVE entries with fix information: " + resultCounter[3] + "\n");
 	}
 
-	private void analyzeCveItem(PrintWriter pw, BufferedWriter bw, File f) {
+	public void analyzeCveItem(PrintWriter pw, BufferedWriter bw, File f) {
 		fileDirections.add(f.getAbsolutePath());
 		CveItem curItem = new CveItem(getInnerText(f));
 		if (Config.LOGGING)
@@ -140,7 +143,7 @@ public class AnalyseCves {
 			System.out.println(resultCounter[0] + " files read");
 	}
 
-	private BufferedWriter writeNewFile(String year) throws IOException {
+	public BufferedWriter writeNewFile(String year) throws IOException {
 		BufferedWriter bw;
 		File folder = new File(Config.OUTPUT_FOLDER);
 		if (!folder.exists())

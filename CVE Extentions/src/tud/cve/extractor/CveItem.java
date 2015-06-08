@@ -79,18 +79,20 @@ public class CveItem {
 			XPathFactory xpathFactory = XPathFactory.newInstance();
 			xpath = xpathFactory.newXPath();
 			String summary = xpath.evaluate("//entry/summary/text()", xmlDocument);
+			if (summary.length() == 0)
+				throw new Exception("The summary is empty");
 			cveSummary = summary;
 
+			Vector<Snippet> description = getTokens();
+			tokenList = description;
+			Iterator<Snippet> tokenIterator = tokenList.iterator();
+			while (tokenIterator.hasNext())
+				tokenIterator.next().combine();
+			rebuildTokenVector();
+			searchSnippetcontext();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		Vector<Snippet> description = getTokens();
-		tokenList = description;
-		Iterator<Snippet> tokenIterator = tokenList.iterator();
-		while (tokenIterator.hasNext())
-			tokenIterator.next().combine();
-		rebuildTokenVector();
-		searchSnippetcontext();
 	}
 
 	/**
@@ -141,7 +143,6 @@ public class CveItem {
 			}
 		}
 	}
-
 
 	/**
 	 * @return XPath instance
@@ -243,7 +244,7 @@ public class CveItem {
 		return vec;
 	}
 
-	/** 
+	/**
 	 * Rebuilds connections between Snippets after a snippet combination
 	 */
 	public void rebuildTokenVector() {
@@ -279,7 +280,7 @@ public class CveItem {
 	 * 
 	 * @return software list
 	 */
-	
+
 	public List<String> getCpeList() {
 		List<String> products = new ArrayList<String>();
 		try {
