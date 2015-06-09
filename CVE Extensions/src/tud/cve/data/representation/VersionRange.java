@@ -97,10 +97,17 @@ public class VersionRange {
 
 	public void setLast(String newLast) {
 		lastDetectedVer = newLast;
+		last=true;
 	}
 
 	public void setFirst(String newFirst) {
 		firstDetectedVer = newFirst;
+		first=true;
+	}
+	
+	public void setFix(String newFix) {
+		firstDetectedVer = newFix;
+		fixed=true;
 	}
 
 	public String getSoftwareName() {
