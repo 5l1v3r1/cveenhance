@@ -185,6 +185,10 @@ public class Config {
 	
 	public static final String START_TAGS =props.getProperty("startTag").substring(0,props.getProperty("startTag").lastIndexOf("\"")).substring(1);
 	
-	static final String END_TAG = "</nvd>";
+	public static final String END_TAG = "</nvd>";
+	
+	public static final String ANNOTATED_FOLDER = props.getProperty("annotatedData");
+	
+	public static final String UNANNOTATED_FOLDER = props.getProperty("unannotatedData");
 
 }
