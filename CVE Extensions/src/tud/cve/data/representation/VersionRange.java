@@ -299,7 +299,7 @@ public class VersionRange {
 			sb.append(":");
 			sb.append("end>");
 			sb.append(generalCpeString);
-			sb.append(lastDetectedVersion().substring(generalCpeString.length()));
+			sb.append(lastDetectedVersion());
 			sb.append("</");
 			sb.append(Config.XML_EXTENSION_TAG);
 			sb.append(":");
@@ -345,7 +345,7 @@ public class VersionRange {
 			sb.append("\n");
 		}
 
-		if (!lastDetectedVersion().isEmpty() && lastDetectedVersion().length() > generalCpeString.length()) {
+		if (!lastDetectedVersion().isEmpty()) {
 			sb.append(lastXMLTag());
 			sb.append("\n");
 		}

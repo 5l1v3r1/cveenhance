@@ -5,6 +5,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.PrintWriter;
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -84,22 +86,24 @@ public class EvaluateAlgorithm {
 			e.printStackTrace();
 		}
 		System.out.println("evaluation results:\n\n");
-		System.out.println("Precision Range-Start: "+roundScale3(precision(0)));
-		System.out.println("Recall Range-Start: "+roundScale3(recall(0)));
-		System.out.println("F-Measure Range-Start"+roundScale3(fMeasure(0))+"\n");
+		System.out.println("Precision Range-Start: "+roundScale(precision(0)));
+		System.out.println("Recall Range-Start: "+roundScale(recall(0)));
+		System.out.println("F-Measure Range-Start"+roundScale(fMeasure(0))+"\n");
 		
-		System.out.println("Precision Range-End: "+roundScale3(precision(1)));
-		System.out.println("Recall Range-End: "+roundScale3(recall(1)));
-		System.out.println("F-Measure Range-End"+roundScale3(fMeasure(1))+"\n");
+		System.out.println("Precision Range-End: "+roundScale(precision(1)));
+		System.out.println("Recall Range-End: "+roundScale(recall(1)));
+		System.out.println("F-Measure Range-End"+roundScale(fMeasure(1))+"\n");
 		
-		System.out.println("Precision Range-Fix: "+roundScale3(precision(2)));
-		System.out.println("Recall Range-Fix: "+roundScale3(recall(2)));
-		System.out.println("F-Measure Range-Fix"+roundScale3(fMeasure(2))+"\n");
+		System.out.println("Precision Range-Fix: "+roundScale(precision(2)));
+		System.out.println("Recall Range-Fix: "+roundScale(recall(2)));
+		System.out.println("F-Measure Range-Fix"+roundScale(fMeasure(2))+"\n");
 
-		System.out.println("Overall Precision: "+roundScale3(generalPrecision()));
-		System.out.println("Overall Recall: "+roundScale3(generalRecall()));
-		System.out.println("Overall F-Measure"+roundScale3(generalFMeasure()));
+		System.out.println("Overall Precision: "+roundScale(generalPrecision()));
+		System.out.println("Overall Recall: "+roundScale(generalRecall()));
+		System.out.println("Overall F-Measure"+roundScale(generalFMeasure())+"\n");
 
+		
+		System.out.println(Arrays.toString(evalResult));
 	}
 
 	public static void analyzeResults(File resultFile, File annotatedFile) {
@@ -117,7 +121,8 @@ public class EvaluateAlgorithm {
 		
 		Vector<String> fixedTagsResultFile = extractTagContent(2, resultXMLString);
 		Vector<String> fixedTagsAnnotatedFile = extractTagContent(2, annotatedXMLString);
-		checkResults(2, fixedTagsResultFile, fixedTagsAnnotatedFile);	
+		checkResults(2, fixedTagsResultFile, fixedTagsAnnotatedFile);
+
 	}
 	
 	/**
@@ -274,9 +279,9 @@ public class EvaluateAlgorithm {
 		return f;
 	}
 	
-	private static double roundScale3( double d )
+	private static double roundScale( double d )
 	  {
-	    return Math.rint( d * 1000 ) / 1000.;
+	    return Math.rint( d * 10000 ) / 10000.;
 	  }
 
 }
