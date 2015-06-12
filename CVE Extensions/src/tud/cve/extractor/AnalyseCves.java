@@ -180,12 +180,9 @@ public class AnalyseCves {
 		try {
 			if (Config.TEST_MODE)
 				System.out.println("------- CVE-Item: " + item.getCVEID() + " -------");
-			Vector<Snippet> versions = item.getSnippetsWithLogicalUnits("version");
-			Vector<NameVersionRelation> relations = new Vector<NameVersionRelation>();
 
-			fillRelations(item, versions, relations);
+			Vector<VersionRange> results = extractItem(item);
 
-			Vector<VersionRange> results = createResult(relations, item.getCpeList());
 			String entry = item.xmlCode;
 
 			BufferedReader br = new BufferedReader(new StringReader(entry));
@@ -235,7 +232,17 @@ public class AnalyseCves {
 		}
 	}
 
-	protected void fillRelations(CveItem item, Vector<Snippet> versions, Vector<NameVersionRelation> relations) {
+	public Vector<VersionRange> extractItem(CveItem item) {
+		Vector<Snippet> versions = item.getSnippetsWithLogicalUnits("version");
+		Vector<NameVersionRelation> relations = new Vector<NameVersionRelation>();
+
+		fillRelations(item, versions, relations);
+
+		Vector<VersionRange> results = createResult(relations, item.getCpeList());
+		return results;
+	}
+
+	protected static void fillRelations(CveItem item, Vector<Snippet> versions, Vector<NameVersionRelation> relations) {
 		for (Snippet curSnip : versions) {
 
 			String snippetComment = "";
@@ -258,7 +265,7 @@ public class AnalyseCves {
 	 * @return XML output string
 	 */
 
-	public String getOutputToXMLFile(Vector<VersionRange> results) {
+	public static String getOutputToXMLFile(Vector<VersionRange> results) {
 
 		boolean shouldPrint = false;
 		StringBuilder sb = new StringBuilder();
@@ -587,5 +594,6 @@ public class AnalyseCves {
 
 		return previousCosts[firstLen];
 	}
+
 
 }
