@@ -105,9 +105,10 @@ public class Snippet {
 			setFeature("namestart", Arrays.asList(Config.SOFTWARE_NAME_START_WORDS).contains(lowerCaseText));
 			setFeature("versionstart", Arrays.asList(Config.SOFTWARE_NAME_STOP_WORDS).contains(lowerCaseText));
 			setFeature("cuebefore", Arrays.asList(Config.SOFTWARE_NAME_STOP_WORDS).contains(lowerCaseText));
-			setFeature("cueearlier", Arrays.asList(Config.SOFTWARE_VERSION_ENDS).contains(lowerCaseText));
+			setFeature("cueearlier", Arrays.asList(Config.SOFTWARE_VERSION_ENDS_AND).contains(lowerCaseText));
 			setFeature("cuebegin", Arrays.asList(Config.SOFTWARE_BEGIN_IND).contains(lowerCaseText));
-			setFeature("cuebetween", Arrays.asList(Config.SOFTWARE_RANGE_IND).contains(lowerCaseText));
+			setFeature("cuebetween", Arrays.asList(Config.SOFTWARE_RANGE_IND_BETW).contains(lowerCaseText));
+			setFeature("endsafter", Arrays.asList(Config.SOFTWARE_VERSION_ENDS_IND).contains(lowerCaseText));
 
 			if ((getFeatureValue("comma") || matchesLowerCase(".+["
 					+ createRegexpFromStrings(Config.SEPERATING_CHARS, "") + "]"))) {

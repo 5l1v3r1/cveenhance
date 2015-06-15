@@ -70,7 +70,7 @@ public class AnalyseTest2 {
 		ac.fillRelations(cve, versions, relations);
 		assertEquals(
 				ac.getOutputToXMLFile(ac.createResult(relations, cve.getCpeList())),
-				"\t<ext:ranges>\n\t\t<ext:range>\n\t\t\t<ext:start>cpe:/a:achal_dhir:dual_dhcp_dns_server:1.0</ext:start>\n\t\t</ext:range>\n\t</ext:ranges>");
+				"\t<ext:ranges>\n\t\t<ext:range>\n\t\t\t<ext:start>cpe:/a:achal_dhir:dual_dhcp_dns_server:1.0</ext:start>\n\t\t\t<ext:end>cpe:/a:achal_dhir:dual_dhcp_dns_server:1.0</ext:end>\n\t\t</ext:range>\n\t</ext:ranges>");
 	}
 
 	@Test

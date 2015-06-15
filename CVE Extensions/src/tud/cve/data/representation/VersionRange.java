@@ -15,8 +15,10 @@ package tud.cve.data.representation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.Vector;
 
 import tud.cve.extractor.Config;
 import tud.cve.extractor.VersionComparator;
@@ -96,17 +98,17 @@ public class VersionRange {
 	}
 
 	public void setLast(String newLast) {
-		lastDetectedVer = newLast;
+		lastDetectedVer = newLast.trim();
 		last=true;
 	}
 
 	public void setFirst(String newFirst) {
-		firstDetectedVer = newFirst;
+		firstDetectedVer = newFirst.trim();
 		first=true;
 	}
 	
 	public void setFix(String newFix) {
-		firstDetectedVer = newFix;
+		firstDetectedVer = newFix.trim();
 		fixed=true;
 	}
 
@@ -118,7 +120,11 @@ public class VersionRange {
 	 * @return The first version of the version range; Returns a string, if it is not set
 	 */
 	public String firstDetectedVersion() {
-		return firstDetectedVer;
+		String returnString="";
+		if(firstDetectedVer.contains(" "))returnString=firstDetectedVer.substring(0,firstDetectedVer.indexOf(" "))+":"+firstDetectedVer.substring(firstDetectedVer.indexOf(" ")+1).replaceAll(" ", "");
+		else return firstDetectedVer;
+		
+		return returnString;
 	}
 
 	/**
@@ -152,8 +158,10 @@ public class VersionRange {
 				firstDetectedVer = "";
 				lastDetectedVer = "";
 			} else if (versions.size() == 2) {
-				firstDetectedVer = shortest().getVersionWithoutX();
-				lastDetectedVer = "";
+				if(!shortest().version().logicalUnitComment().equals("last detected vulnerability")){				
+					firstDetectedVer = shortest().getVersionWithoutX();
+					lastDetectedVer = "";
+				}
 			} else {
 				firstDetectedVer = shortest().getVersionWithoutX();
 				lastDetectedVer = versions.get(versions.size() - 2).getVersionWithoutX();
@@ -268,6 +276,37 @@ public class VersionRange {
 			updateRelevantVersions();
 			isFixed();
 		}
+	}
+	
+	public Vector<VersionRange> splitToValidRanges(){
+		Vector<VersionRange> ranges = new Vector<VersionRange>();
+		Iterator<NameVersionRelation> versionIterator = versions.iterator();
+		VersionRange curRange = null;
+		while(versionIterator.hasNext()){
+			NameVersionRelation curVersion = versionIterator.next();
+			if(curRange==null){
+				curRange = new VersionRange(curVersion);				
+			}
+			else{
+				if(curVersion.version().logicalUnitComment().equals("")){
+					ranges.add(curRange);
+					curRange=new VersionRange(curVersion);					
+				}
+				else if(curVersion.version().logicalUnitComment().equals("first detected vulnerability")){
+					ranges.add(curRange);
+					curRange=new VersionRange(curVersion);
+				}
+				else if(curVersion.version().logicalUnitComment().equals("last detected vulnerability")||curVersion.version().logicalUnitComment().equals("fixed")){
+					curRange.add(curVersion);
+					ranges.add(curRange);
+					curRange=null;
+				}
+
+			}
+			
+		}
+		if(curRange!=null) ranges.add(curRange);
+		return ranges;
 	}
 
 	/**

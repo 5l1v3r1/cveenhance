@@ -146,13 +146,13 @@ public class Config {
 	public static final String[] SOFTWARE_NAME_STOP_WORDS = { "before" };
 	// cue words for software version (not fixed until indicator) -> indicator
 	// must be placed behind a software version (e.g. Java 7 and earlier )
-	public static final String[] SOFTWARE_VERSION_ENDS = { "earlier",
-			"through", "previous", "lower" };
+	public static final String[] SOFTWARE_VERSION_ENDS_AND = { "earlier", "previous", "lower" };
 	// cue words for software version (not fixed starting version)
-	public static final String[] SOFTWARE_BEGIN_IND = { "from", "later",
-			"after" };
-	// cue words for a software range
-	public static final String[] SOFTWARE_RANGE_IND = { "between" };
+	public static final String[] SOFTWARE_BEGIN_IND = { "from", "later", "after" };
+	// cue words for a software range placed between software
+	public static final String[] SOFTWARE_RANGE_IND_BETW = { "between", "through" };
+	// cue words for a software range placed in front of a software enumeration
+	public static final String[] SOFTWARE_VERSION_ENDS_IND = { "through" };
 	// string which will be inserted by connecting text snippets
 	public static final String SEPERATOR = " ";
 
@@ -162,7 +162,7 @@ public class Config {
 			"version", "versionext", "os", "osext", "stopword", "concatword",
 			"comparingword", "seperator", "namestart", "versionstart",
 			"cuebefore", "cueearlier", "cuebegin", "cuebetween", "logicalend",
-			"logicalstart" };
+			"logicalstart", "endsafter" };
 
 	// logical units which may appear in a text
 	public static final String[] lOGICAL_UNITS = { "version", "versionExtention", "softwarename",

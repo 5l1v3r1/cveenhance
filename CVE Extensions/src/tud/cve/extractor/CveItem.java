@@ -124,17 +124,35 @@ public class CveItem {
 								}
 							}
 						}
+						if(curSnip.prev.condition("!endsafter")){
+							curSnip.setLogicalUnitComment("last detected vulnerability");
+							if(curSnip.prev.hasPrev()){
+								if(curSnip.prev.condition("!concatword")){
+									if(curSnip.prev.hasPrev()&&curSnip.prev.prev.condition("version")){
+										curSnip.prev.prev.setLogicalUnitComment("first detected vulnerability");
+									}
+								}
+								else if(curSnip.prev.condition("version")){
+									curSnip.prev.setLogicalUnitComment("first detected vulnerability");
+								}
+							}
+						}
 						if (curSnip.prev.condition("!comparingword") && curSnip.prev.hasPrev()) {
 							if (curSnip.prev.prev.condition("!cueearlier"))
 								curSnip.setLogicalUnitComment("last detected vulnerability");
 							if (curSnip.prev.prev.condition("!cuebegin"))
 								curSnip.setLogicalUnitComment("first detected vulnerability");
 						}
+						
 
 					}
 					if (curSnip.hasNext() && curSnip.next.hasNext()) {
 						if (curSnip.next.condition("!concatword") && curSnip.next.next.condition("!cueearlier"))
 							curSnip.setLogicalUnitComment("last detected vulnerability");
+					}
+					
+					if (curSnip.condition("version")&&curSnip.getText().endsWith(".x")){
+						curSnip.setLogicalUnitComment("first detected vulnerability");
 					}
 
 				}

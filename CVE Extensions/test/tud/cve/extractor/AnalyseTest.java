@@ -223,7 +223,8 @@ public class AnalyseTest {
 							+ lastString);
 			addPartResult("Mozilla Software Testsuite", "3.2.1", "3.2.1", "", "cpe:/a:mozilla:softwaretestsuite:",
 					"CVE-2000-0006");
-			addPartResult("Mozilla Firefox", "3.2.2", "3.2.3", "", "cpe:/a:mozilla:firefox:", "CVE-2000-0006");
+			addPartResult("Mozilla Firefox", "3.2.2", "3.2.2", "", "cpe:/a:mozilla:firefox:", "CVE-2000-0006");
+			addPartResult("Mozilla Firefox", "3.2.3", "3.2.3", "", "cpe:/a:mozilla:firefox:", "CVE-2000-0006");
 			assertTrue(checkItemResult(testItems[7], "software name recognition check"));
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -260,8 +261,7 @@ public class AnalyseTest {
 		Vector<Snippet> versions = testItem.getSnippetsWithLogicalUnits("version");
 		Vector<NameVersionRelation> relations = new Vector<NameVersionRelation>();
 
-		analyseTestUnit.fillRelations(testItem, versions, relations);
-		//
+		AnalyseCves.fillRelations(testItem, versions, relations);
 		Vector<VersionRange> results = analyseTestUnit.createResult(relations, testItem.getCpeList());
 
 		System.out.println("===== Analyzing " + extractedCveID + " \"" + testTitle + "\" =====");

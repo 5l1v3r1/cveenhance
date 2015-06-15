@@ -352,8 +352,8 @@ public class AnalyseCves {
 
 				relatedResultRelations.add(curResultRange);
 			else {
-				new Exception("Final validity check failed: " + curResultRange.getSoftwareName() + " " + firstSoftware
-						+ ", " + lastSoftware + ", " + fixedSoftware).printStackTrace();
+				new Exception("Final validity check failed: " + curResultRange.getSoftwareName() + " first:" + firstSoftware
+						+ " last: " + lastSoftware + "  fix:" + fixedSoftware).printStackTrace();
 			}
 		}
 		return relatedResultRelations;
@@ -410,6 +410,7 @@ public class AnalyseCves {
 		HashSet<NameVersionRelation> remainingRelations = new HashSet<NameVersionRelation>();
 		HashSet<NameVersionRelation> shortestRelations = new HashSet<NameVersionRelation>();
 		Vector<VersionRange> relatedRelations = new Vector<VersionRange>();
+		Vector<VersionRange> ranges = new Vector<VersionRange>();
 
 		while (interestingRelations.size() > 0) {
 
@@ -452,8 +453,12 @@ public class AnalyseCves {
 				remainingRelations.clear();
 			}
 		}
-
-		return relatedRelations;
+		
+		
+		for(VersionRange range:relatedRelations){
+			ranges.addAll(range.splitToValidRanges());
+		}
+		return ranges;
 	}
 
 	private void addRelatedRelations(HashSet<NameVersionRelation> shortestRelations,
