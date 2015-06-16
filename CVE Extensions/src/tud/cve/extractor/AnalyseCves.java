@@ -303,11 +303,31 @@ public class AnalyseCves {
 
 		HashSet<NameVersionRelation> interestingRelations = new HashSet<NameVersionRelation>();
 		interestingRelations.addAll(relations);
-
+		
 		Vector<VersionRange> relatedRelations = new Vector<VersionRange>();
+		
+		for(NameVersionRelation relation:relations){
+			try {
+				if(relation.version().hasNext()&&relation.version().next.condition("!endsafter")&&relation.version().next.hasNext()&&relation.version().next.next.condition("version")){
+					NameVersionRelation otherNVR = findThroughRelation(relation,relation.version().next.next.getText(), interestingRelations);
+					if(otherNVR!=null){
+						VersionRange range = new VersionRange();
+						range.add(relation);
+						range.add(otherNVR);
+						relatedRelations.add(range);
+						interestingRelations.remove(relation);
+						interestingRelations.remove(otherNVR);
+					}
+					
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
 		if (interestingRelations.size() > 0 && cpes.size() > 0) {
 
-			relatedRelations = groupRelations(relations, interestingRelations);
+			relatedRelations.addAll(groupRelations(relations, interestingRelations));
 
 			for (VersionRange versionRange : relatedRelations) {
 				Set<String> products = new HashSet<String>();
@@ -327,13 +347,21 @@ public class AnalyseCves {
 						List<String> filteredRemainings = LuceneIndexCreator.getAllCpesWithVersionPrefix(versionRange
 								.shortest().version().getText(), remaining);
 
-						versionRange.findLast(cpename, remaining, filteredRemainings);
+						versionRange.findLast(cpename+versionRange.shortest().version(), remaining, filteredRemainings);
 					}
 				}
 			}
 		}
 		relatedRelations = checkValidity(relatedRelations);
 		return relatedRelations;
+	}
+
+	private NameVersionRelation findThroughRelation(NameVersionRelation relation, String throughVersion, HashSet<NameVersionRelation> relations) {
+		String name = relation.name().getText();
+		for(NameVersionRelation nvr:relations){
+			if(nvr.name().getText().equals(name)&&nvr.version().getText().equals(throughVersion)) return nvr;
+		}
+		return null;
 	}
 
 	private Vector<VersionRange> checkValidity(Vector<VersionRange> relatedRelations) {

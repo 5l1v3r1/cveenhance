@@ -122,7 +122,7 @@ public class VersionRange {
 	public String firstDetectedVersion() {
 		String returnString="";
 		if(firstDetectedVer.contains(" "))returnString=firstDetectedVer.substring(0,firstDetectedVer.indexOf(" "))+":"+firstDetectedVer.substring(firstDetectedVer.indexOf(" ")+1).replaceAll(" ", "");
-		else return firstDetectedVer;
+		else return createPointVersion(firstDetectedVer.toLowerCase());
 		
 		return returnString;
 	}
@@ -132,9 +132,14 @@ public class VersionRange {
 	 */
 	public String lastDetectedVersion() {
 		if (!fixed)
-			return lastDetectedVer;
+			return createPointVersion(lastDetectedVer.toLowerCase());
 		else
 			return "";
+	}
+
+	private String createPointVersion(String version) {
+		if(version.length()==1) version+=".0";
+		return version;
 	}
 
 	/**
@@ -142,7 +147,7 @@ public class VersionRange {
 	 */
 	public String fixedVersion() {
 		if (fixed)
-			return fixedSoftware().getText();
+			return createPointVersion(fixedSoftware().getText().toLowerCase());
 		else
 			return "";
 	}

@@ -231,7 +231,46 @@ public class AnalyseTest {
 			fail("AnalyseTest failed: thrown exception");
 		}
 	}
+	
+	@Test
+	public void throughTest() {
+		try {
+			testItems[8] = new CveItem(
+					intoString
+							+ "<vuln:product>cpe:/a:microsoft:ie:5.0.1</vuln:product><vuln:product>cpe:/a:microsoft:ie:6.0</vuln:product><vuln:product>cpe:/a:microsoft:ie:5.5:sp2</vuln:product><vuln:product>cpe:/a:microsoft:ie:5.5:sp1</vuln:product><vuln:product>cpe:/a:microsoft:ie:5.0.1:sp2</vuln:product><vuln:product>cpe:/a:microsoft:ie:6.0:sp1</vuln:product><vuln:product>cpe:/a:microsoft:ie:5.5</vuln:product><vuln:product>cpe:/a:microsoft:ie:5.0.1:sp1</vuln:product>"
+							+ secondString
+							+ "CVE-2000-0007"
+							+ thirdString
+							+ "Internet Explorer 5.01 through 6.0 does not properly perform security checks on certain encoded characters within a URL, which allows a remote attacker to steal potentially sensitive information from a user by redirecting the user to another site that has that information, aka Encoded Characters Information Disclosure."
+							+ lastString);
+			addPartResult("Internet Explorer", "5.01", "6.0", "", "cpe:/a:microsoft:ie:",
+					"CVE-2000-0007");
+			assertTrue(checkItemResult(testItems[8], "through recognition check"));
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("AnalyseTest failed: thrown exception");
+		}
+	}
 
+	@Test
+	public void throughTestOnlyEnd() {
+		try {
+			testItems[9] = new CveItem(
+					intoString
+							+ "<vuln:product>cpe:/a:microsoft:ie:5.0.1</vuln:product><vuln:product>cpe:/a:microsoft:ie:6.0</vuln:product><vuln:product>cpe:/a:microsoft:ie:5.5:sp2</vuln:product><vuln:product>cpe:/a:microsoft:ie:5.5:sp1</vuln:product><vuln:product>cpe:/a:microsoft:ie:5.0.1:sp2</vuln:product><vuln:product>cpe:/a:microsoft:ie:6.0:sp1</vuln:product><vuln:product>cpe:/a:microsoft:ie:5.5</vuln:product><vuln:product>cpe:/a:microsoft:ie:5.0.1:sp1</vuln:product>"
+							+ secondString
+							+ "CVE-2000-0007"
+							+ thirdString
+							+ "In Internet Explorer through 6.0 does not properly perform security checks on certain encoded characters within a URL, which allows a remote attacker to steal potentially sensitive information from a user by redirecting the user to another site that has that information, aka Encoded Characters Information Disclosure."
+							+ lastString);
+			addPartResult("Internet Explorer", "", "6.0", "", "cpe:/a:microsoft:ie:",
+					"CVE-2000-0007");
+			assertTrue(checkItemResult(testItems[9], "through recognition check for range end only"));
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("AnalyseTest failed: thrown exception");
+		}
+	}
 	// -----------------------------------------
 
 	private void addPartResult(String softwareName, String versionStart, String versionEnd, String versionFix,

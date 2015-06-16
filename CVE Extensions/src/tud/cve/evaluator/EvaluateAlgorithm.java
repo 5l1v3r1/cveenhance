@@ -41,6 +41,10 @@ public class EvaluateAlgorithm {
 	// 7=false pos end
 	// 8=false pos fix
 	private static int[] evalResult = new int[9];
+	
+	private static int[] entryResults = new int[2];
+	
+	private static String extractionError = "";
 
 	public static void main(String[] args) {
 		evalResult = new int[9];
@@ -62,6 +66,11 @@ public class EvaluateAlgorithm {
 						System.out.println("Dir:" + resultFile.getAbsoluteFile());
 					} else {
 						String fileName = resultFile.getName();
+						int correctCount=evalResult[0]+evalResult[1]+evalResult[2];
+						int falsePositives=evalResult[6]+evalResult[7]+evalResult[8];
+						int falseNegatives=evalResult[3]+evalResult[4]+evalResult[5];
+						
+						
 						if (fileName.length() > 8 && fileName.startsWith("CVE")) {
 							String parseName = resultFile.getName();
 							if (parseName.toLowerCase().endsWith(Config.DATA_TYPE.toLowerCase())) {
@@ -69,7 +78,22 @@ public class EvaluateAlgorithm {
 								if (annotatedFile.exists()) {
 									analyzeResults(resultFile, annotatedFile);
 									anzFiles++;
-									System.out.println(anzFiles+" Files evaluated. Precision:"+generalPrecision()+" Recall:"+generalRecall()+" F-Measure:"+generalFMeasure());
+									System.out.print(anzFiles+" Files evaluated. "+resultFile.getName());
+									correctCount=evalResult[0]+evalResult[1]+evalResult[2]-correctCount;
+									falsePositives=evalResult[6]+evalResult[7]+evalResult[8]-falsePositives;
+									falseNegatives=evalResult[3]+evalResult[4]+evalResult[5]-falseNegatives;
+									if(correctCount!=0) System.out.print(" C:"+correctCount);
+									if(falsePositives!=0) System.out.print(" FP:"+falsePositives);
+									if(falseNegatives!=0) System.out.print(" FN:"+falseNegatives);
+									if(correctCount+falseNegatives+falsePositives!=0){
+										if(falseNegatives+falsePositives==0){
+											entryResults[0]++;
+										}
+										else entryResults[1]++;
+									}
+									System.out.println(", Precision:"+generalPrecision()+" Recall:"+generalRecall()+" F-Measure:"+generalFMeasure());
+									if(!extractionError.equals("")) System.out.print(extractionError);
+									extractionError="";
 								}
 								else {
 									allFilesChecked=false;
@@ -85,24 +109,30 @@ public class EvaluateAlgorithm {
 		catch (Exception e){
 			e.printStackTrace();
 		}
-		System.out.println("evaluation results:\n\n");
-		System.out.println("Precision Range-Start: "+roundScale(precision(0)));
-		System.out.println("Recall Range-Start: "+roundScale(recall(0)));
-		System.out.println("F-Measure Range-Start"+roundScale(fMeasure(0))+"\n");
+		System.out.println("\n\nevaluation results:\n\n");
+		System.out.println("Precision Range-Start: "+roundScale(precision(0))+"%");
+		System.out.println("Recall Range-Start: "+roundScale(recall(0))+"%");
+		System.out.println("F-Measure Range-Start: "+roundScale(fMeasure(0))+"%"+"\n");
 		
-		System.out.println("Precision Range-End: "+roundScale(precision(1)));
-		System.out.println("Recall Range-End: "+roundScale(recall(1)));
-		System.out.println("F-Measure Range-End"+roundScale(fMeasure(1))+"\n");
+		System.out.println("Precision Range-End: "+roundScale(precision(1))+"%");
+		System.out.println("Recall Range-End: "+roundScale(recall(1))+"%");
+		System.out.println("F-Measure Range-End: "+roundScale(fMeasure(1))+"%"+"\n");
 		
-		System.out.println("Precision Range-Fix: "+roundScale(precision(2)));
-		System.out.println("Recall Range-Fix: "+roundScale(recall(2)));
-		System.out.println("F-Measure Range-Fix"+roundScale(fMeasure(2))+"\n");
+		System.out.println("Precision Range-Fix: "+roundScale(precision(2))+"%");
+		System.out.println("Recall Range-Fix: "+roundScale(recall(2))+"%");
+		System.out.println("F-Measure Range-Fix: "+roundScale(fMeasure(2))+"%"+"\n");
 
-		System.out.println("Overall Precision: "+roundScale(generalPrecision()));
-		System.out.println("Overall Recall: "+roundScale(generalRecall()));
-		System.out.println("Overall F-Measure"+roundScale(generalFMeasure())+"\n");
-
+		System.out.println("Overall Precision: "+roundScale(generalPrecision())+"%");
+		System.out.println("Overall Recall: "+roundScale(generalRecall())+"%");
+		System.out.println("Overall F-Measure: "+roundScale(generalFMeasure())+"%"+"\n");
 		
+		System.out.println("Files with version information: "+(entryResults[0]+entryResults[1]));
+		System.out.println("Correct completely correct extracted entries: "+entryResults[0]+" ("+roundScale((double)entryResults[0]/((double)entryResults[1]+(double)entryResults[0]))+"%)");
+		
+		System.out.println("\nNumber of annotated tags:");
+		System.out.println("First: "+(evalResult[0]+evalResult[6]));
+		System.out.println("Last: "+(evalResult[1]+evalResult[7]));
+		System.out.println("Fixed: "+(evalResult[2]+evalResult[8])+"\n");
 		System.out.println(Arrays.toString(evalResult));
 	}
 
@@ -148,7 +178,7 @@ public class EvaluateAlgorithm {
 			if (mo.find(ma.end())) {
 				innerNoTagText="";
 				innerNoTagText = StringEscapeUtils.unescapeXml(xmlCode.substring(ma.start(), mo.end()));
-				innerNoTagText = innerNoTagText.replaceAll("[\\t\\n\\f\\r]", "");
+				innerNoTagText = innerNoTagText.replaceAll("[\\t\\n\\f\\r]", "").toLowerCase();
 				vec.add(innerNoTagText);
 			} else {
 				System.out.println("FEHLER: Der Tag </" + tagname + "> konnte nicht gefunden werden!");
@@ -164,10 +194,11 @@ public class EvaluateAlgorithm {
 					BufferedReader br = new BufferedReader(new FileReader(xmlFile));
 					String line;
 					while ((line = br.readLine()) != null) {
-						if((addToString||line.contains("<"+Config.XML_EXTENSION_TAG+":ranges>"))&&(!line.contains("</"+Config.XML_EXTENSION_TAG+":ranges>"))){
+						if(addToString||line.contains("<"+Config.XML_EXTENSION_TAG+":ranges>")){
 							addToString=true;
 							data.append(line);
 							data.append("\n");
+							if(line.contains("</"+Config.XML_EXTENSION_TAG+":ranges>")) addToString=false;
 						}
 						else addToString=false;
 					}
@@ -201,11 +232,19 @@ public class EvaluateAlgorithm {
 			}
 		}
 		for(int k=0; k<resultsMatched.length;k++){
-			if(!resultsMatched[k]) falsePositiveResult(informationType);
+			if(!resultsMatched[k]) {
+				falsePositiveResult(informationType);
+				extractionError+="\t"+results[k]+" was not annotated "+"\n";
+			}
+			
 		}
 			
 		for(int l=0; l<annotationsMatched.length;l++){
-			if(!annotationsMatched[l]) falseNegativeResult(informationType); 
+			if(!annotationsMatched[l]){
+				falseNegativeResult(informationType);
+				extractionError+="\t"+annotations[l]+" not found "+"\n";
+			}
+			
 		}
 
 	}
@@ -281,7 +320,7 @@ public class EvaluateAlgorithm {
 	
 	private static double roundScale( double d )
 	  {
-	    return Math.rint( d * 10000 ) / 10000.;
+	    return Math.rint( d * 100000 ) / 1000.;
 	  }
 
 }

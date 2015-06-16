@@ -95,7 +95,7 @@ public class Snippet {
 			setFeature("word", (text.length() >= 3));
 			setFeature("bigletter", matchesExpression("[A-Z]+.*"));
 			setFeature("versionext", Arrays.asList(Config.VERION_KEYWORDS).contains(lowerCaseText));
-			setFeature("version", (matchesLowerCase("[\\d]+[\\p{Punct}\\w]*") && !(matchesLowerCase(""))));
+			setFeature("version", (matchesLowerCase("[\\d]+[\\p{Punct}\\w]*") && !(matchesLowerCase("") )));
 			setFeature("os", Arrays.asList(Config.OS_KEYWORDS).contains(lowerCaseText));
 			setFeature("osext", Arrays.asList(Config.OS_EXTENSIONS).contains(lowerCaseText));
 			setFeature("stopword", Arrays.asList(Config.STOP_WORDS).contains(lowerCaseText));

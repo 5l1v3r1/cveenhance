@@ -198,7 +198,7 @@ public class NameVersionRelation implements Comparable<NameVersionRelation> {
 	}
 
 	public String getVersionWithoutX() {
-		return version().getText().replaceFirst("\\.x", ".0");
+		return version().getText().replaceFirst("\\.x", ".0").toLowerCase();
 	}
 
 }
