@@ -1,0 +1,25 @@
+Precision Range-Start: 66.058%
+Recall Range-Start: 66.058%
+F-Measure Range-Start: 66.058%
+
+Precision Range-End: 64.045%
+Recall Range-End: 65.267%
+F-Measure Range-End: 64.65%
+
+Precision Range-Fix: 82.394%
+Recall Range-Fix: 73.585%
+F-Measure Range-Fix: 77.741%
+
+Overall Precision: 68.668%
+Overall Recall: 67.482%
+Overall F-Measure: 68.07%
+
+Files with version information: 264
+Correct completely correct extracted entries: 169 (64.015%)
+
+Number of annotated tags:
+First: 274
+Last: 267
+Fixed: 142
+
+[181, 171, 117, 93, 91, 42, 93, 96, 25]

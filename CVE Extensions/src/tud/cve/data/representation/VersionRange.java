@@ -49,6 +49,7 @@ public class VersionRange {
 	private boolean first;
 	private boolean last;
 	private boolean fixed;
+	private boolean withZero;
 
 	private ArrayList<NameVersionRelation> versions;
 
@@ -80,6 +81,7 @@ public class VersionRange {
 		fixed = false;
 		last = false;
 		first = false;
+		withZero = false;
 	}
 
 	public VersionRange(NameVersionRelation nvr) {
@@ -88,6 +90,7 @@ public class VersionRange {
 		fixed = false;
 		last = false;
 		first = false;
+		withZero = false;
 		add(nvr);
 	}
 
@@ -97,6 +100,7 @@ public class VersionRange {
 		fixed = false;
 		last = false;
 		first = false;
+		withZero = false;
 		addAll(set);
 	}
 
@@ -136,10 +140,7 @@ public class VersionRange {
 	 */
 	public String firstDetectedVersion() {
 		String returnString="";
-		if(firstDetectedVer.contains(" "))returnString=firstDetectedVer.substring(0,firstDetectedVer.indexOf(" "))+":"+firstDetectedVer.substring(firstDetectedVer.indexOf(" ")+1).replaceAll(" ", "");
-		else return createPointVersion(firstDetectedVer.toLowerCase());
-		
-		return returnString;
+		return createPointVersion(firstDetectedVer.toLowerCase());
 	}
 
 	/**
@@ -152,8 +153,20 @@ public class VersionRange {
 			return "";
 	}
 
+	public void setWithZero(boolean newWithZeroValue){
+		withZero=newWithZeroValue;
+	}
+	
 	private String createPointVersion(String version) {
-		if(version.length()==1) version+=".0";
+		String major=version;
+		String second="";
+		if(major.contains(" ")){
+			second=major.substring(major.indexOf(" ")).replaceAll(" ", "");
+			major=major.substring(0,major.indexOf(" ")).replaceAll(" ", "");		
+		}
+		if(major.matches("\\d{1,2}")) version+=".0";
+		version=major;
+		if(!second.equals(""))version+=":"+second;
 		return version;
 	}
 

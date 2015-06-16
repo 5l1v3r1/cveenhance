@@ -47,6 +47,8 @@ import java.util.Set;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
+import org.hamcrest.core.SubstringMatcher;
+
 import tud.cpe.preparation.LuceneIndexCreator;
 import tud.cve.data.representation.NameVersionRelation;
 import tud.cve.data.representation.Snippet;
@@ -335,21 +337,40 @@ public class AnalyseCves {
 					}
 					
 				}
+				else if(relation.version().hasPrev()&&relation.version().prev.condition("!cuebefore")&&relation.version().prev.hasPrev()&&relation.version().prev.prev.condition("version;-logicalend")){
+					NameVersionRelation otherNVR = findThroughRelation(relation,relation.version().prev.prev.getText(), interestingRelations);
+					if(otherNVR!=null){
+						VersionRange range = new VersionRange();
+						range.add(relation);
+						if(!otherNVR.version().logicalUnitComment().equals("")) otherNVR.version().setLogicalUnitComment("first detected vulnerability");
+						range.add(otherNVR);
+						relatedRelations.add(range);
+						interestingRelations.remove(relation);
+						interestingRelations.remove(otherNVR);
+					}
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 		
-		if (interestingRelations.size() > 0 && cpes.size() > 0) {
+		if (interestingRelations.size() > 0 || relatedRelations.size() > 0 && cpes.size() > 0) {
 
 			relatedRelations.addAll(groupRelations(relations, interestingRelations));
+			Vector<VersionRange> deleteRelations = new Vector<VersionRange>();
 
 			for (VersionRange versionRange : relatedRelations) {
 				Set<String> products = new HashSet<String>();
 				for (String cpe : cpes) {
-					products.add(extractCPEProduct(cpe));
+					if(cpe.length() > extractCPEProduct(cpe).length()){
+						products.add(extractCPEProduct(cpe));
+						if(getCPEMajorVersion(cpe).endsWith(".0")) versionRange.setWithZero(true);
+					}
 				}
-				String cpename = (String) products.toArray()[0];
+				String cpename="";
+				
+				if (products.size()!=0) cpename = (String) products.toArray()[0];
+				else deleteRelations.add(versionRange);
 				if (products.size() > 1)
 					cpename = extractCPE(versionRange.shortest().name().getText(), cpes);
 				if (!cpename.isEmpty()) {
@@ -366,6 +387,7 @@ public class AnalyseCves {
 					}
 				}
 			}
+			relatedRelations.removeAll(deleteRelations);
 		}
 		relatedRelations = checkValidity(relatedRelations);
 		return relatedRelations;
@@ -422,6 +444,15 @@ public class AnalyseCves {
 	 *            complete CPE string
 	 * @return vendor part of CPE
 	 */
+	
+	public static String getCPEMajorVersion(String cpename){
+		String returnString=cpename;
+		returnString=returnString.substring(extractCPEProduct(returnString).length());
+		if(returnString.contains(":")){
+			returnString=returnString.substring(0, returnString.indexOf(":"));
+		}
+		return returnString;
+	}
 	public static String extractCPEProduct(String cpename) {
 		String[] split = cpename.split(":");
 		cpename = "";

@@ -53,7 +53,7 @@ public class AnalyseTest {
 	private static Vector<VersionRange> desiredResults = new Vector<VersionRange>();
 	private static Vector<String> allFixes = new Vector<String>();
 	private static Vector<String> allCveIDs = new Vector<String>();
-	private static CveItem[] testItems = new CveItem[10];
+	private static CveItem[] testItems = new CveItem[11];
 
 	private static String intoString = "  <entry><vuln:vulnerable-configuration id=\"http://nvd.nist.gov/\"><cpe-lang:logical-test operator=\"OR\" negate=\"false\"></cpe-lang:logical-test></vuln:vulnerable-configuration><vuln:vulnerable-software-list>";
 	private static String secondString = " </vuln:vulnerable-software-list><vuln:cve-id>";
@@ -201,9 +201,9 @@ public class AnalyseTest {
 							+ thirdString
 							+ "This introducing sentence is very confusing for humans but should be handled by the PC. Maybe a second sentence my be even more confusing for us humans. In the Multimedia Center of the Mozilla Software Testsuite 3.2.x through 3.2.3 update 2 and 4.2.x before 4.2.5 build 2233 a cross CSS attack is possible. It is often used to gather you personal Backgammon Arcade game data. "
 							+ lastString);
-			addPartResult("Mozilla Software Testsuite", "3.2.0", "3.2.3 update 2", "",
+			addPartResult("Mozilla Software Testsuite", "3.2.0", "3.2.3:update2", "",
 					"cpe:/a:mozilla:softwaretestsuite:", "CVE-2000-0004");
-			addPartResult("Mozilla Software Testsuite", "4.2.0", "", "4.2.5 build 2233",
+			addPartResult("Mozilla Software Testsuite", "4.2.0", "", "4.2.5:build2233",
 					"cpe:/a:mozilla:softwaretestsuite:", "CVE-2000-0004");
 			assertTrue(checkItemResult(testItems[5], "special version check"));
 		} catch (Exception e) {
@@ -298,6 +298,8 @@ public class AnalyseTest {
 			fail("AnalyseTest failed: thrown exception");
 		}
 	}
+	
+	
 	// -----------------------------------------
 
 	private void addPartResult(String softwareName, String versionStart, String versionEnd, String versionFix,
