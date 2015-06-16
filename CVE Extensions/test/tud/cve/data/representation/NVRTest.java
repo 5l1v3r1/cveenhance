@@ -49,7 +49,6 @@ public class NVRTest {
 	private Snippet multiTokenVersionSnippet3 = new Snippet("3.2 rt 3");
 
 	private Snippet softwareNameSnippet1 = new Snippet("Macromedia Flash");
-	private Snippet softwareNameSnippet2 = new Snippet("Mozilla Firefox");
 
 	private NameVersionRelation nvrSmallVersion = new NameVersionRelation(softwareNameSnippet1, smallVersion);
 	private NameVersionRelation nvrMidVersion = new NameVersionRelation(softwareNameSnippet1, midVersion);

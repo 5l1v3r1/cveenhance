@@ -27,21 +27,13 @@ package tud.cve.extractor;
  *
  */
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringReader;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Vector;
 import java.util.Iterator;
+import java.util.Vector;
 
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import tud.cve.data.representation.NameVersionRelation;

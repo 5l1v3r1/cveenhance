@@ -80,12 +80,12 @@ public class AnalyseTest2 {
 
 	@Test
 	public void getOutputToXMLFile_Test1() {
-		assertEquals(ac.getOutputToXMLFile(new Vector<VersionRange>()), "");
+		assertEquals(AnalyseCves.getOutputToXMLFile(new Vector<VersionRange>()), "");
 	}
 
 	@Test
 	public void getOutputToXMLFile_Test2() {
-		assertEquals(ac.getOutputToXMLFile(null), "");
+		assertEquals(AnalyseCves.getOutputToXMLFile(null), "");
 	}
 
 	@Test
@@ -94,9 +94,9 @@ public class AnalyseTest2 {
 		Vector<Snippet> versions = cve.getSnippetsWithLogicalUnits("version");
 		Vector<NameVersionRelation> relations = new Vector<NameVersionRelation>();
 
-		ac.fillRelations(cve, versions, relations);
+		AnalyseCves.fillRelations(cve, versions, relations);
 		assertEquals(
-				ac.getOutputToXMLFile(ac.createResult(relations, cve.getCpeList())),
+				AnalyseCves.getOutputToXMLFile(ac.createResult(relations, cve.getCpeList())),
 				"\t<ext:ranges>\n\t\t<ext:range>\n\t\t\t<ext:start>cpe:/a:achal_dhir:dual_dhcp_dns_server:1.0</ext:start>\n\t\t\t<ext:end>cpe:/a:achal_dhir:dual_dhcp_dns_server:1.0</ext:end>\n\t\t</ext:range>\n\t</ext:ranges>");
 	}
 

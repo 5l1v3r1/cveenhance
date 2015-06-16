@@ -1,21 +1,12 @@
 package tud.cve.evaluator;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
-import java.io.PrintWriter;
-import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.swing.plaf.basic.BasicInternalFrameTitlePane.RestoreAction;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 
@@ -83,8 +74,6 @@ public class EvaluateAlgorithm {
 		File root = new File(path);
 		File[] list = root.listFiles();
 		int anzFiles=0;
-		boolean allFilesChecked=true;
-		
 		try{	
 			if (list != null)
 				for (File resultFile : list) {
@@ -123,7 +112,6 @@ public class EvaluateAlgorithm {
 									extractionError="";
 								}
 								else {
-									allFilesChecked=false;
 									throw new Exception("File "+parseName+" does not exist in annotated Folder!");
 								}
 														
