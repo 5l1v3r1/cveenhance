@@ -118,17 +118,17 @@ public class VersionRange {
 
 	public void setLast(String newLast) {
 		lastDetectedVer = newLast.trim();
-		last=true;
+		last = true;
 	}
 
 	public void setFirst(String newFirst) {
 		firstDetectedVer = newFirst.trim();
-		first=true;
+		first = true;
 	}
-	
+
 	public void setFix(String newFix) {
 		firstDetectedVer = newFix.trim();
-		fixed=true;
+		fixed = true;
 	}
 
 	public String getSoftwareName() {
@@ -191,7 +191,7 @@ public class VersionRange {
 				firstDetectedVer = "";
 				lastDetectedVer = "";
 			} else if (versions.size() == 2) {
-				if(!shortest().version().logicalUnitComment().equals("last detected vulnerability")){				
+				if (!shortest().version().logicalUnitComment().equals("last detected vulnerability")) {
 					firstDetectedVer = shortest().getVersionWithoutX();
 					lastDetectedVer = "";
 				}
@@ -310,35 +310,34 @@ public class VersionRange {
 			isFixed();
 		}
 	}
-	
-	public Vector<VersionRange> splitToValidRanges(){
+
+	public Vector<VersionRange> splitToValidRanges() {
 		Vector<VersionRange> ranges = new Vector<VersionRange>();
 		Iterator<NameVersionRelation> versionIterator = versions.iterator();
 		VersionRange curRange = null;
-		while(versionIterator.hasNext()){
+		while (versionIterator.hasNext()) {
 			NameVersionRelation curVersion = versionIterator.next();
-			if(curRange==null){
-				curRange = new VersionRange(curVersion);				
-			}
-			else{
-				if(curVersion.version().logicalUnitComment().equals("")){
+			if (curRange == null) {
+				curRange = new VersionRange(curVersion);
+			} else {
+				if (curVersion.version().logicalUnitComment().equals("")) {
 					ranges.add(curRange);
-					curRange=new VersionRange(curVersion);					
-				}
-				else if(curVersion.version().logicalUnitComment().equals("first detected vulnerability")){
+					curRange = new VersionRange(curVersion);
+				} else if (curVersion.version().logicalUnitComment().equals("first detected vulnerability")) {
 					ranges.add(curRange);
-					curRange=new VersionRange(curVersion);
-				}
-				else if(curVersion.version().logicalUnitComment().equals("last detected vulnerability")||curVersion.version().logicalUnitComment().equals("fixed")){
+					curRange = new VersionRange(curVersion);
+				} else if (curVersion.version().logicalUnitComment().equals("last detected vulnerability")
+						|| curVersion.version().logicalUnitComment().equals("fixed")) {
 					curRange.add(curVersion);
 					ranges.add(curRange);
-					curRange=null;
+					curRange = null;
 				}
 
 			}
-			
+
 		}
-		if(curRange!=null) ranges.add(curRange);
+		if (curRange != null)
+			ranges.add(curRange);
 		return ranges;
 	}
 
@@ -499,9 +498,16 @@ public class VersionRange {
 			if (!fixed() && hasFirst() && versionText.endsWith(".x"))
 				greatest = VersionComparator.getGreatestMatch(remaining, cpename,
 						versionText.substring(0, versionText.length() - 2));
+			if (!greatest.isEmpty()) {
+				String[] split = greatest.split(":");
+				for (int i = 4; i < split.length; i++)
+					greatest += split[i] + " ";
+				greatest=greatest.substring(0,greatest.length()-1);
+			}
 
-			if (!greatest.isEmpty())
+			if (!greatest.isEmpty()) {
 				setLast(greatest);
+			}
 		}
 	}
 

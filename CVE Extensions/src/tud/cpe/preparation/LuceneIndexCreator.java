@@ -181,7 +181,6 @@ public class LuceneIndexCreator {
 		if (!AnalyseCves.extractCPEProduct(cpeName).equalsIgnoreCase(
 				AnalyseCves.extractCPEProduct(cpeEncoding(doc.get("CPE-Name")))))
 			title = "";
-		reader.close();
 		return title;
 	}
 

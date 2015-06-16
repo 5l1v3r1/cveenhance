@@ -383,7 +383,7 @@ public class AnalyseCves {
 						List<String> filteredRemainings = LuceneIndexCreator.getAllCpesWithVersionPrefix(versionRange
 								.shortest().version().getText(), remaining);
 
-						versionRange.findLast(cpename+versionRange.shortest().version(), remaining, filteredRemainings);
+						versionRange.findLast(cpename, remaining, filteredRemainings);
 					}
 				}
 			}
