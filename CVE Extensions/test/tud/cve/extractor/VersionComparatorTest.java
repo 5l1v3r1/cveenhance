@@ -167,4 +167,16 @@ public class VersionComparatorTest {
 		cpeList.add("cpe:/a:oracle:jre:5.0.16.1:build_2");
 		assertEquals(VersionComparator.getGreatestMatch(cpeList, "cpe:/a:oracle:jre", "5.0"),"cpe:/a:oracle:jre:5.0.16.1:build_2");
 	}
+	
+	@Test
+	public void getGreatestMatch_Test8(){
+		
+		List<String> cpeList=new ArrayList<String>();
+		for(String cpe:cpes){
+			cpeList.add(cpe);
+		}
+		cpeList.add("cpe:/a:oracle:jre:5.0.16.1:build_1:sdfs");
+		cpeList.add("cpe:/a:oracle:jre:5.0.16.1:build_2:sdf");
+		assertEquals(VersionComparator.getGreatestMatch(cpeList, "cpe:/a:oracle:jre", "5.0"),"cpe:/a:oracle:jre:5.0.16.1:build_2:sdf");
+	}
 }

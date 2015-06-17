@@ -71,7 +71,8 @@ public class VersionComparator {
 					String[] gre = convertExtToNumbers(greatest.substring(len)).split(" ");
 					int minLen = Math.min(version.length, gre.length);
 					for (int j = 0; j < minLen; j++)
-						if (new Integer(gre[j]).compareTo(new Integer(version[j])) <= -1) {
+						if (version[j].length() > 0 && gre[j].length() > 0
+								&& new Integer(gre[j]).compareTo(new Integer(version[j])) <= -1) {
 							greatest = greaterThanGreat.get(i);
 						}
 				}
