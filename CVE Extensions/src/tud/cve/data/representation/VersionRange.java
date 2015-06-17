@@ -139,7 +139,7 @@ public class VersionRange {
 	 * @return The first version of the version range; Returns a string, if it is not set
 	 */
 	public String firstDetectedVersion() {
-		String returnString="";
+		String returnString = "";
 		return createPointVersion(firstDetectedVer.toLowerCase());
 	}
 
@@ -153,20 +153,22 @@ public class VersionRange {
 			return "";
 	}
 
-	public void setWithZero(boolean newWithZeroValue){
-		withZero=newWithZeroValue;
+	public void setWithZero(boolean newWithZeroValue) {
+		withZero = newWithZeroValue;
 	}
-	
+
 	private String createPointVersion(String version) {
-		String major=version;
-		String second="";
-		if(major.contains(" ")){
-			second=major.substring(major.indexOf(" ")).replaceAll(" ", "");
-			major=major.substring(0,major.indexOf(" ")).replaceAll(" ", "");		
+		String major = version;
+		String second = "";
+		if (major.contains(" ")) {
+			second = major.substring(major.indexOf(" ")).replaceAll(" ", "");
+			major = major.substring(0, major.indexOf(" ")).replaceAll(" ", "");
 		}
-		if(major.matches("\\d{1,2}")) version+=".0";
-		version=major;
-		if(!second.equals(""))version+=":"+second;
+		if (major.matches("\\d{1,2}"))
+			version += ".0";
+		version = major;
+		if (!second.equals(""))
+			version += ":" + second;
 		return version;
 	}
 
@@ -500,9 +502,10 @@ public class VersionRange {
 						versionText.substring(0, versionText.length() - 2));
 			if (!greatest.isEmpty()) {
 				String[] split = greatest.split(":");
-				for (int i = 4; i < split.length; i++)
+				greatest = split[4];
+				for (int i = 5; i < split.length; i++)
 					greatest += split[i] + " ";
-				greatest=greatest.substring(0,greatest.length()-1);
+				greatest = greatest.substring(0, greatest.length() - 1);
 			}
 
 			if (!greatest.isEmpty()) {
