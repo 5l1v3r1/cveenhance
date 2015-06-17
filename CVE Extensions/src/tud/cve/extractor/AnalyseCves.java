@@ -362,7 +362,6 @@ public class AnalyseCves {
 				for (String cpe : cpes) {
 					if(cpe.length() > extractCPEProduct(cpe).length()){
 						products.add(extractCPEProduct(cpe));
-						if(getCPEMajorVersion(cpe).endsWith(".0")) versionRange.setWithZero(true);
 					}
 				}
 				String cpename="";

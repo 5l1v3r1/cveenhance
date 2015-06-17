@@ -1,25 +1,29 @@
-Precision Range-Start: 66.058%
-Recall Range-Start: 66.058%
-F-Measure Range-Start: 66.058%
+Precision Range-Start: 67.518%
+Recall Range-Start: 67.518%
+F-Measure Range-Start: 67.518%
 
-Precision Range-End: 64.045%
-Recall Range-End: 65.267%
-F-Measure Range-End: 64.65%
+Precision Range-End: 62.593%
+Recall Range-End: 64.504%
+F-Measure Range-End: 63.534%
 
-Precision Range-Fix: 82.394%
-Recall Range-Fix: 73.585%
-F-Measure Range-Fix: 77.741%
+Precision Range-Fix: 83.803%
+Recall Range-Fix: 74.843%
+F-Measure Range-Fix: 79.07%
 
-Overall Precision: 68.668%
-Overall Recall: 67.482%
-Overall F-Measure: 68.07%
+Avg Precision: 71.305%
+Avg Recall: 68.955%
+Avg F-Measure: 70.041%
+
+Overall Precision: 68.95%
+Overall Recall: 68.058%
+Overall F-Measure: 68.501%
 
 Files with version information: 264
-Correct completely correct extracted entries: 169 (64.015%)
+Correct completely correct extracted entries: 168 (63.636%)
 
 Number of annotated tags:
 First: 274
-Last: 267
+Last: 270
 Fixed: 142
 
 [181, 171, 117, 93, 91, 42, 93, 96, 25]

@@ -49,7 +49,6 @@ public class VersionRange {
 	private boolean first;
 	private boolean last;
 	private boolean fixed;
-	private boolean withZero;
 
 	private ArrayList<NameVersionRelation> versions;
 
@@ -81,7 +80,6 @@ public class VersionRange {
 		fixed = false;
 		last = false;
 		first = false;
-		withZero = false;
 	}
 
 	public VersionRange(NameVersionRelation nvr) {
@@ -90,7 +88,6 @@ public class VersionRange {
 		fixed = false;
 		last = false;
 		first = false;
-		withZero = false;
 		add(nvr);
 	}
 
@@ -100,7 +97,6 @@ public class VersionRange {
 		fixed = false;
 		last = false;
 		first = false;
-		withZero = false;
 		addAll(set);
 	}
 
@@ -139,7 +135,6 @@ public class VersionRange {
 	 * @return The first version of the version range; Returns a string, if it is not set
 	 */
 	public String firstDetectedVersion() {
-		String returnString = "";
 		return createPointVersion(firstDetectedVer.toLowerCase());
 	}
 
@@ -151,10 +146,6 @@ public class VersionRange {
 			return createPointVersion(lastDetectedVer.toLowerCase());
 		else
 			return "";
-	}
-
-	public void setWithZero(boolean newWithZeroValue) {
-		withZero = newWithZeroValue;
 	}
 
 	private String createPointVersion(String version) {
