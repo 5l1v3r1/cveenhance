@@ -47,8 +47,6 @@ import java.util.Set;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
-import org.hamcrest.core.SubstringMatcher;
-
 import tud.cpe.preparation.LuceneIndexCreator;
 import tud.cve.data.representation.NameVersionRelation;
 import tud.cve.data.representation.Snippet;

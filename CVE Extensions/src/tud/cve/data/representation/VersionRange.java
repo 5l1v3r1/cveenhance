@@ -502,8 +502,8 @@ public class VersionRange {
 						versionText.substring(0, versionText.length() - 2));
 			if (!greatest.isEmpty()) {
 				String[] split = greatest.split(":");
-				greatest = split[4];
-				for (int i = 5; i < split.length; i++)
+				greatest = "";
+				for (int i = 4; i < split.length; i++)
 					greatest += split[i] + " ";
 				greatest = greatest.substring(0, greatest.length() - 1);
 			}
