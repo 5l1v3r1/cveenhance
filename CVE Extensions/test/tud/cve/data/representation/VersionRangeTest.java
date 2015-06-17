@@ -126,4 +126,21 @@ public class VersionRangeTest {
 				new ArrayList<String>());
 		assertEquals("3.10.12:beta2", vr.lastDetectedVersion());
 	}
+	
+	@Test
+	public void findLast_Test2() {
+		VersionRange vr = new VersionRange();
+		Snippet name = new Snippet("Microsoft Internet Explorer");
+		name.setLogicalUnit(new LogicalUnit("softwarename"));
+		Snippet version = new Snippet("3.x");
+		LogicalUnit lu = new LogicalUnit("version");
+		lu.comment = "first detected vulnerability";
+		version.setLogicalUnit(lu);
+		NameVersionRelation nvr = new NameVersionRelation(name, version);
+		vr.add(nvr);
+		vr.findLast("cpe:/a:microsoft:ie:",
+				Arrays.asList(new String[] { "cpe:/a:microsoft:ie:3.10.11", "cpe:/a:microsoft:ie:3.10.12" }),
+				new ArrayList<String>());
+		assertEquals("3.10.12", vr.lastDetectedVersion());
+	}
 }
