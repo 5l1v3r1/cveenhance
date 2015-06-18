@@ -367,7 +367,7 @@ public class AnalyseCves {
 			for (VersionRange versionRange : relatedRelations) {
 				Set<String> products = new HashSet<String>();
 				for (String cpe : cpes) {
-					if (cpe.length() > extractCPEProduct(cpe).length()) {
+					if (cpe.split(":").length > 4 && cpe.length() > extractCPEProduct(cpe).length()) {
 						products.add(extractCPEProduct(cpe));
 					}
 				}
@@ -377,8 +377,10 @@ public class AnalyseCves {
 					cpename = (String) products.toArray()[0];
 				else
 					deleteRelations.add(versionRange);
-				if (products.size() > 1)
-					cpename = extractCPE(versionRange.shortest().name().getText(), cpes);
+				if (products.size() > 1) {
+					NameVersionRelation nvr = versionRange.shortest();
+					cpename = extractCPE(nvr.name().getText() + " " + nvr.version().getText(), cpes);
+				}
 				if (!cpename.isEmpty()) {
 					cpename = extractCPEProduct(cpename);
 					versionRange.setCPE(cpename);
@@ -594,10 +596,12 @@ public class AnalyseCves {
 				if (resolution.length() > 0) {
 					cpeResolutions.put(resolution, cpe);
 				} else {
-					cpeResolutions.put(convertCpeToText(cpe), cpe);
+					if (cpe.split(":").length > 4)
+						cpeResolutions.put(convertCpeToText(cpe), cpe);
 				}
 			} catch (Exception e) {
-				cpeResolutions.put(convertCpeToText(cpe), cpe);
+				if (cpe.split(":").length > 4)
+					cpeResolutions.put(convertCpeToText(cpe), cpe);
 			}
 		}
 		double jaroWinklerDistance = Double.MAX_VALUE;
