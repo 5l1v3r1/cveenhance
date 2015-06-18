@@ -204,7 +204,9 @@ public class AnalyseCves {
 			String line;
 			while ((line = br.readLine()) != null) {
 				if (line.contains("</entry>")) {
-					bw.write(getOutputToXMLFile(results) + "\n");
+					String output = getOutputToXMLFile(results);
+					if (output.length() > 0)
+						bw.write(output + "\n");
 				}
 				bw.write(line + "\n");
 			}
