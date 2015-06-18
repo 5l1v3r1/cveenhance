@@ -318,14 +318,16 @@ public class AnalyseCves {
 
 		HashSet<NameVersionRelation> interestingRelations = new HashSet<NameVersionRelation>();
 		interestingRelations.addAll(relations);
-		
+
 		Vector<VersionRange> relatedRelations = new Vector<VersionRange>();
-		
-		for(NameVersionRelation relation:relations){
+
+		for (NameVersionRelation relation : relations) {
 			try {
-				if(relation.version().hasNext()&&relation.version().next.condition("!endsafter")&&relation.version().next.hasNext()&&relation.version().next.next.condition("version")){
-					NameVersionRelation otherNVR = findThroughRelation(relation,relation.version().next.next.getText(), interestingRelations);
-					if(otherNVR!=null){
+				if (relation.version().hasNext() && relation.version().next.condition("!endsafter")
+						&& relation.version().next.hasNext() && relation.version().next.next.condition("version")) {
+					NameVersionRelation otherNVR = findThroughRelation(relation,
+							relation.version().next.next.getText(), interestingRelations);
+					if (otherNVR != null) {
 						VersionRange range = new VersionRange();
 						range.add(relation);
 						range.add(otherNVR);
@@ -333,14 +335,17 @@ public class AnalyseCves {
 						interestingRelations.remove(relation);
 						interestingRelations.remove(otherNVR);
 					}
-					
-				}
-				else if(relation.version().hasPrev()&&relation.version().prev.condition("!cuebefore")&&relation.version().prev.hasPrev()&&relation.version().prev.prev.condition("version;-logicalend")){
-					NameVersionRelation otherNVR = findThroughRelation(relation,relation.version().prev.prev.getText(), interestingRelations);
-					if(otherNVR!=null){
+
+				} else if (relation.version().hasPrev() && relation.version().prev.condition("!cuebefore")
+						&& relation.version().prev.hasPrev()
+						&& relation.version().prev.prev.condition("version;-logicalend")) {
+					NameVersionRelation otherNVR = findThroughRelation(relation,
+							relation.version().prev.prev.getText(), interestingRelations);
+					if (otherNVR != null) {
 						VersionRange range = new VersionRange();
 						range.add(relation);
-						if(!otherNVR.version().logicalUnitComment().equals("")) otherNVR.version().setLogicalUnitComment("first detected vulnerability");
+						if (!otherNVR.version().logicalUnitComment().equals(""))
+							otherNVR.version().setLogicalUnitComment("first detected vulnerability");
 						range.add(otherNVR);
 						relatedRelations.add(range);
 						interestingRelations.remove(relation);
@@ -351,7 +356,7 @@ public class AnalyseCves {
 				e.printStackTrace();
 			}
 		}
-		
+
 		if (interestingRelations.size() > 0 || relatedRelations.size() > 0 && cpes.size() > 0) {
 
 			relatedRelations.addAll(groupRelations(relations, interestingRelations));
@@ -360,14 +365,16 @@ public class AnalyseCves {
 			for (VersionRange versionRange : relatedRelations) {
 				Set<String> products = new HashSet<String>();
 				for (String cpe : cpes) {
-					if(cpe.length() > extractCPEProduct(cpe).length()){
+					if (cpe.length() > extractCPEProduct(cpe).length()) {
 						products.add(extractCPEProduct(cpe));
 					}
 				}
-				String cpename="";
-				
-				if (products.size()!=0) cpename = (String) products.toArray()[0];
-				else deleteRelations.add(versionRange);
+				String cpename = "";
+
+				if (products.size() != 0)
+					cpename = (String) products.toArray()[0];
+				else
+					deleteRelations.add(versionRange);
 				if (products.size() > 1)
 					cpename = extractCPE(versionRange.shortest().name().getText(), cpes);
 				if (!cpename.isEmpty()) {
@@ -390,10 +397,12 @@ public class AnalyseCves {
 		return relatedRelations;
 	}
 
-	private NameVersionRelation findThroughRelation(NameVersionRelation relation, String throughVersion, HashSet<NameVersionRelation> relations) {
+	private NameVersionRelation findThroughRelation(NameVersionRelation relation, String throughVersion,
+			HashSet<NameVersionRelation> relations) {
 		String name = relation.name().getText();
-		for(NameVersionRelation nvr:relations){
-			if(nvr.name().getText().equals(name)&&nvr.version().getText().equals(throughVersion)) return nvr;
+		for (NameVersionRelation nvr : relations) {
+			if (nvr.name().getText().equals(name) && nvr.version().getText().equals(throughVersion))
+				return nvr;
 		}
 		return null;
 	}
@@ -414,8 +423,8 @@ public class AnalyseCves {
 
 				relatedResultRelations.add(curResultRange);
 			else {
-				new Exception("Final validity check failed: " + curResultRange.getSoftwareName() + " first:" + firstSoftware
-						+ " last: " + lastSoftware + "  fix:" + fixedSoftware).printStackTrace();
+				new Exception("Final validity check failed: " + curResultRange.getSoftwareName() + " first:"
+						+ firstSoftware + " last: " + lastSoftware + "  fix:" + fixedSoftware).printStackTrace();
 			}
 		}
 		return relatedResultRelations;
@@ -441,15 +450,16 @@ public class AnalyseCves {
 	 *            complete CPE string
 	 * @return vendor part of CPE
 	 */
-	
-	public static String getCPEMajorVersion(String cpename){
-		String returnString=cpename;
-		returnString=returnString.substring(extractCPEProduct(returnString).length());
-		if(returnString.contains(":")){
-			returnString=returnString.substring(0, returnString.indexOf(":"));
+
+	public static String getCPEMajorVersion(String cpename) {
+		String returnString = cpename;
+		returnString = returnString.substring(extractCPEProduct(returnString).length());
+		if (returnString.contains(":")) {
+			returnString = returnString.substring(0, returnString.indexOf(":"));
 		}
 		return returnString;
 	}
+
 	public static String extractCPEProduct(String cpename) {
 		String[] split = cpename.split(":");
 		cpename = "";
@@ -524,9 +534,8 @@ public class AnalyseCves {
 				remainingRelations.clear();
 			}
 		}
-		
-		
-		for(VersionRange range:relatedRelations){
+
+		for (VersionRange range : relatedRelations) {
 			ranges.addAll(range.splitToValidRanges());
 		}
 		return ranges;
@@ -589,14 +598,14 @@ public class AnalyseCves {
 				cpeResolutions.put(convertCpeToText(cpe), cpe);
 			}
 		}
-		int levenshteinDistance = Integer.MAX_VALUE;
+		double jaroWinklerDistance = Double.MAX_VALUE;
 		String cpe = "";
-		int currentdistance;
+		double currentdistance;
 		for (Entry<String, String> entry : cpeResolutions.entrySet()) {
-			currentdistance = getLevenshteinDistance(entry.getKey(), softwareName);
-			if (currentdistance < levenshteinDistance) {
+			currentdistance = 1.0d - JaroWinkler.compare(entry.getKey(), softwareName);
+			if (currentdistance < jaroWinklerDistance) {
 				cpe = entry.getValue();
-				levenshteinDistance = currentdistance;
+				jaroWinklerDistance = currentdistance;
 			}
 		}
 		return cpe;
@@ -670,6 +679,5 @@ public class AnalyseCves {
 
 		return previousCosts[firstLen];
 	}
-
 
 }
