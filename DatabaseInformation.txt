@@ -1,0 +1,8 @@
+CVE entries: 70716
+CVE entries with information: 57126
+CVE entries with first information: 39696
+CVE entries with last information: 40880
+CVE entries with fix information: 20011
+
+
+70716 CVE entries analyzed
